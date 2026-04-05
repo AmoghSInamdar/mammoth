@@ -3,16 +3,15 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from argparse import Namespace
+import os
+import pickle
 from typing import Tuple
 
 import torch.nn.functional as F
-import torch.optim
 import torchvision.transforms as transforms
 from PIL import Image
 from torchvision.datasets import CIFAR100
 
-from backbone.ResNetBlock import resnet18
 from datasets.transforms.denormalization import DeNormalize
 from datasets.utils.continual_dataset import (ContinualDataset, fix_class_names_order,
                                               store_masked_loaders)
@@ -39,6 +38,10 @@ class MyCIFAR100(CIFAR100):
         self.not_aug_transform = transforms.Compose([transforms.ToTensor()])
         self.root = root
         super(MyCIFAR100, self).__init__(root, train, transform, target_transform, not self._check_integrity())
+        meta_path = os.path.join(self.root, 'cifar-100-python', 'meta')
+        with open(meta_path, 'rb') as f:
+            meta = pickle.load(f, encoding='latin1')
+        self.superclass = meta['coarse_label_names']
 
     def __getitem__(self, index: int) -> Tuple[Image.Image, int, Image.Image]:
         """

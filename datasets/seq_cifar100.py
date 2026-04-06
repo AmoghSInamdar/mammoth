@@ -7,6 +7,7 @@ import os
 import pickle
 from typing import Tuple
 
+import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image

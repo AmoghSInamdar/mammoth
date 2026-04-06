@@ -219,11 +219,14 @@ class ContinualDataset(object):
             self.args.class_order = task_class
             logging.info('Will use the custom task order: {}'.format(self.args.custom_task_order))
             self.args.permute_classes = True  # will exploit class permutation
-        elif self.args.custom_class_order:
+        elif self.args.custom_class_order or hasattr(self.args, 'class_order'):
             assert self.args.custom_task_order is None, 'You cannot set both custom task order and custom class order at the same time.'
-            class_order = self.args.custom_class_order.split(',') if ',' in self.args.custom_class_order else self.args.custom_class_order.split('-')
-            assert len(class_order) == self.N_CLASSES, 'The custom class order must have the same number of classes as the dataset but got {} for {} classes'.format(len(class_order), self.N_CLASSES)
-            self.args.class_order = list(map(int, class_order))
+            if not hasattr(self.args, 'class_order'):
+                class_order = self.args.custom_class_order.split(',') if ',' in self.args.custom_class_order else self.args.custom_class_order.split('-')
+                assert len(class_order) == self.N_CLASSES, 'The custom class order must have the same number of classes as the dataset but got {} for {} classes'.format(len(class_order), self.N_CLASSES)
+                self.args.class_order = list(map(int, class_order))
+            else:
+                class_order = self.args.class_order
             logging.info('Will use the custom class order: {}'.format(self.args.custom_class_order))
         elif self.args.permute_classes:
             if not hasattr(self.args, 'class_order'):  # set only once
@@ -454,7 +457,7 @@ def store_masked_loaders(train_dataset: Dataset, test_dataset: Dataset,
         test_dataset.targets = np.array(test_dataset.targets)
 
     # Permute classes
-    if setting.args.permute_classes:
+    if setting.args.permute_classes or hasattr(setting.args, 'class_order'):
         train_dataset.targets = setting.args.class_order[train_dataset.targets]
         test_dataset.targets = setting.args.class_order[test_dataset.targets]
 
@@ -550,6 +553,6 @@ def fix_class_names_order(class_names: List[str], args: Namespace) -> List[str]:
     Returns:
         List[str]: the class names in the correct order
     """
-    if args.permute_classes:
+    if args.permute_classes or hasattr(args, 'class_order'):
         class_names = [class_names[np.where(args.class_order == i)[0][0]] for i in range(len(class_names))]
     return class_names

@@ -45,6 +45,8 @@ class StructuredTinyImagenet(ContinualDataset):
          transforms.RandomHorizontalFlip(),
          transforms.ToTensor(),
          transforms.Normalize(MEAN, STD)])
+    ASSETS_DIR = os.path.join('./', 'assets')
+
     
     def __init__(self, args: Namespace) -> None:
         args.class_order = StructuredTinyImagenet._build_class_order()
@@ -52,11 +54,11 @@ class StructuredTinyImagenet(ContinualDataset):
 
     @staticmethod
     def _get_words_path():
-        return os.path.join(base_path(), 'TINYIMG', 'words.txt')
+        return os.path.join(StructuredTinyImagenet.ASSETS_DIR, 'words.txt')
 
     @staticmethod
     def _get_order_path():
-        return os.path.join(base_path(), 'TINYIMG', 't200_structured_order.pkl')
+        return os.path.join(StructuredTinyImagenet.ASSETS_DIR, 't200_structured_order.pkl')
 
     @staticmethod
     def _ensure_mapping_files():

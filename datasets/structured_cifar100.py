@@ -2,11 +2,9 @@ from argparse import Namespace
 import os
 import pickle
 
-from PIL import Image
 import torch
 from torchvision.datasets import CIFAR100
 
-from datasets.seq_cifar100 import TCIFAR100, MyCIFAR100
 from datasets.utils.continual_dataset import ContinualDataset
 from typing import Tuple
 
@@ -38,10 +36,10 @@ class SuperclassSplitCIFAR100(CIFAR100):
         self.superclass = meta['coarse_label_names']
         self.targets = data['coarse_labels']
 
-class SructuredCIFAR100(ContinualDataset):
+class StructuredCIFAR100(ContinualDataset):
     """Structured Split CIFAR100 Dataset. 
     (Based on Integrating Present and Past in Unsupervised Continual Learning https://arxiv.org/pdf/2404.19132)
-    10 tasks total, one task = one superclass label
+    20 tasks total, one task = one superclass label
 
     Args:
         NAME (str): name of the dataset.
@@ -93,7 +91,7 @@ class SructuredCIFAR100(ContinualDataset):
     @staticmethod
     def get_transform():
         transform = transforms.Compose(
-            [transforms.ToPILImage(), SructuredCIFAR100.TRANSFORM])
+            [transforms.ToPILImage(), StructuredCIFAR100.TRANSFORM])
         return transform
 
     @set_default_from_args("backbone")
@@ -106,12 +104,12 @@ class SructuredCIFAR100(ContinualDataset):
 
     @staticmethod
     def get_normalization_transform():
-        transform = transforms.Normalize(SructuredCIFAR100.MEAN, SructuredCIFAR100.STD)
+        transform = transforms.Normalize(StructuredCIFAR100.MEAN, StructuredCIFAR100.STD)
         return transform
 
     @staticmethod
     def get_denormalization_transform():
-        transform = DeNormalize(SructuredCIFAR100.MEAN, SructuredCIFAR100.STD)
+        transform = DeNormalize(StructuredCIFAR100.MEAN, StructuredCIFAR100.STD)
         return transform
 
     @set_default_from_args('n_epochs')
@@ -121,10 +119,6 @@ class SructuredCIFAR100(ContinualDataset):
     @set_default_from_args('batch_size')
     def get_batch_size(self):
         return 32
-
-    @set_default_from_args('lr_scheduler')
-    def get_scheduler_name(self):
-        return 'multisteplr'
 
     @set_default_from_args('lr_milestones')
     def get_scheduler_name(self):

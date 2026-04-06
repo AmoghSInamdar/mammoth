@@ -103,10 +103,6 @@ class StandardSplitCIFAR100(ContinualDataset):
     def get_batch_size(self):
         return 32
 
-    @set_default_from_args('lr_scheduler')
-    def get_scheduler_name(self):
-        return 'multisteplr'
-
     @set_default_from_args('lr_milestones')
     def get_scheduler_name(self):
         return [35, 45]

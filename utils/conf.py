@@ -192,7 +192,7 @@ def worker_init_fn(worker_id, num_workers, seed, rank=1):
     random.seed(worker_seed)
 
 
-def create_seeded_dataloader(args, dataset, non_verbose=False, **dataloader_args) -> DataLoader:
+def create_seeded_dataloader(args, dataset, non_verbose=True, **dataloader_args) -> DataLoader:
     """
     Creates a dataloader object from a dataset, setting the seeds for the workers (if `--seed` is set).
 

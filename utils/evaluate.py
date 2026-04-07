@@ -33,7 +33,7 @@ EvalFn = Callable[
 
 
 @torch.no_grad()
-def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, return_loss=False) -> Tuple[list, list]:
+def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, return_loss=False, return_per_task_loss=False) -> Tuple[list, list]:
     """
     Evaluates the single-class top-1 accuracy of the model for each past task.
 
@@ -44,6 +44,7 @@ def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, r
         dataset: the continual dataset at hand
         last: a boolean indicating whether to evaluate only the last task
         return_loss: a boolean indicating whether to return the loss in addition to the accuracy
+        return_per_task_loss: a boolean indicating whether to return the loss for each task separately
 
     Returns:
         a tuple of lists, containing the class-il and task-il accuracy for each task. If return_loss is True, the loss is also returned as a third element.
@@ -54,6 +55,7 @@ def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, r
     n_classes = dataset.get_offsets()[1]
     loss_fn = dataset.get_loss()
     avg_loss = 0
+    avg_loss_per_task = [0] * len(dataset.test_loaders)
     tot_seen_samples = 0
     total_len = sum(len(x) for x in dataset.test_loaders) if hasattr(dataset.test_loaders[0], '__len__') else None
 
@@ -81,9 +83,10 @@ def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, r
                 else:
                     outputs = model(inputs)
 
-            if return_loss:
+            if return_loss or return_per_task_loss:
                 loss = loss_fn(outputs, labels)
                 avg_loss += loss.item()
+                avg_loss_per_task[k] += loss.item()
 
             _, pred = torch.max(outputs[:, :n_classes].data, 1)
             correct += torch.sum(pred == labels).item()
@@ -99,6 +102,8 @@ def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, r
                 correct_mask_classes += torch.sum(pred == labels).item()
 
         tot_seen_samples += total
+        if return_per_task_loss:
+            avg_loss_per_task[k] /= total
 
         if correct > correct_mask_classes and dataset.SETTING == 'class-il':
             logging.warning("Task-IL accuracy is LOWER than Class-IL accuracy. "
@@ -112,4 +117,6 @@ def evaluate(model: 'ContinualModel', dataset: 'ContinualDataset', last=False, r
     model.net.train(status)
     if return_loss:
         return accs, accs_mask_classes, avg_loss / tot_seen_samples
+    if return_per_task_loss:
+        return accs, accs_mask_classes, avg_loss_per_task
     return accs, accs_mask_classes

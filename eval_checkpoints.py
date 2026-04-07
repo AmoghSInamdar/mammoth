@@ -385,7 +385,7 @@ def main():
     json_path = output_dir / f"evaluation_results_{args.model}_{args.eval_dataset}.json"
 
     all_results.save_to_csv(csv_path)
-    all_results.save_to_json(json_path)
+    # all_results.save_to_json(json_path)
 
     logging.info(f"Evaluation complete. Results saved to {output_dir}")
 

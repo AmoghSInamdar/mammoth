@@ -384,10 +384,9 @@ def parse_args(
         if not os.path.isdir('checkpoints'):
             create_if_not_exists("checkpoints")
 
-        now = time.strftime("%Y%m%d-%H%M%S")
-        uid = args.conf_jobnum.split('-')[0]
-        extra_ckpt_name = "" if args.ckpt_name is None else f"{args.ckpt_name}_"
-        args.ckpt_name = f"{extra_ckpt_name}{args.model}_{args.dataset}_{args.dataset_config}_{args.buffer_size if hasattr(args, 'buffer_size') else 0}_{args.n_epochs}_{str(now)}_{uid}"
+        # Use simple naming scheme: model_dataset
+        # Task number will be appended by save_mammoth_checkpoint
+        args.ckpt_name = f"{args.model}_{args.dataset}"
         if verbose:
             logging.info(f"Saving checkpoint into: {args.ckpt_name}")
 

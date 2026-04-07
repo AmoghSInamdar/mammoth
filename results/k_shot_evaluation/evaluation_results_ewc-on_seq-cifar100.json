@@ -1,0 +1,5722 @@
+{
+  "ewc-on_seq-cifar100_0": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 82.6,
+        "loss": 0.034774096027016636,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 84.5,
+        "loss": 0.02642601451277733,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 84.5,
+        "loss": 0.02416709543019533,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 85.2,
+        "loss": 0.021576700184494257,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 85.1,
+        "loss": 0.02075799847394228,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.2134759330749512,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.998105791091919,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9431973094940186,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.8183569812774658,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6752239742279053,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1878171043395995,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.954253101348877,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9478957862854004,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.7855129547119141,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6789810218811035,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1278825531005858,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.9266746788024902,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9227494049072266,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.8016908073425293,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6438300800323487,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1492045097351073,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.964721040725708,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9009744281768799,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.7839875659942627,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6646980762481689,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1511450099945069,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.9617305088043213,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9163799934387207,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.7210394058227539,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6482765426635743,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1146123657226563,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.8468698215484619,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9023215961456299,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.8026500568389893,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6593666172027588,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1096329479217528,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.9279237442016601,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.891085527420044,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.7260673904418945,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.65124289894104,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1951805229187011,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.993983253479004,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9702169551849366,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.7786748790740967,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6362297077178956,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.1714350204467774,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 0.92729594039917,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 0.9308582229614257,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.8058415832519531,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_0",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.6527577056884766,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_1": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 32.6,
+        "loss": 0.7992192859649658,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 39.900000000000006,
+        "loss": 0.6427792129516602,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 38.2,
+        "loss": 0.638934268951416,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 43.9,
+        "loss": 0.5520434513092041,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 48.5,
+        "loss": 0.49112255477905276,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 78.4,
+        "loss": 0.047543801516294476,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 83.7,
+        "loss": 0.028291728526353838,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 83.7,
+        "loss": 0.02782603195309639,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 84.39999999999999,
+        "loss": 0.02458917072415352,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 84.2,
+        "loss": 0.02386590552330017,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.463004192352295,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2462884635925293,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2869191360473633,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1591867713928223,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.076179121017456,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.5178184585571288,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.328500072479248,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2889831695556642,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.2230795402526855,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.1277175121307372,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4799436302185058,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.30936865234375,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2754165382385254,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1741422042846679,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.089059597015381,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4739270668029785,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2865886039733887,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.254717601776123,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1726990127563477,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.1100315933227538,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4126799621582031,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2605859031677247,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2767581558227539,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1728058128356933,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.032125286102295,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4408756217956542,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2161384086608886,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2262398071289062,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1631551856994629,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0751621131896973,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4834079475402833,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.313013801574707,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.320660400390625,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.2288966522216798,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0831935234069825,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4996153068542482,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3672828025817871,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2771475944519044,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1937869834899901,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_1",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.1011034507751465,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_2": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 30.7,
+        "loss": 1.0304268016815186,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 35.3,
+        "loss": 0.8683775310516357,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 34.9,
+        "loss": 0.8587901000976562,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 36.5,
+        "loss": 0.7776928596496582,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 38.3,
+        "loss": 0.7195139923095704,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 55.2,
+        "loss": 0.49726793384552004,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 59.5,
+        "loss": 0.406488489151001,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 58.599999999999994,
+        "loss": 0.37470609664916993,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 60.9,
+        "loss": 0.3383738737106323,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 61.5,
+        "loss": 0.30006713581085204,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 85.8,
+        "loss": 0.038965896718204024,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 86.9,
+        "loss": 0.026217278815805913,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 87.7,
+        "loss": 0.025934183195233346,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 87.9,
+        "loss": 0.021976585321128367,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 87.5,
+        "loss": 0.021421506997197866,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8258531723022462,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.5416674461364746,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.4864042053222657,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.3773340492248536,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2195862579345702,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8458529357910156,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.582483585357666,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.5195018882751465,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.3425694122314453,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2368335037231446,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8214825172424316,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.4977425270080567,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.5367130661010742,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.3854311943054198,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2189723205566407,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8781911888122558,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.6037885818481445,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.5839088287353515,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.401353759765625,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2447390937805176,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8750171546936034,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.5455571250915527,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.5286578788757323,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.3533510665893556,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2649318733215331,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.7227625007629395,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.4824138374328613,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.4490639419555664,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.3130214385986327,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.2119979858398438,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.7918100700378419,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.5775710868835449,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.526178882598877,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.317238525390625,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_2",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.1828674812316895,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_3": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 16.7,
+        "loss": 0.9991873435974121,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 18.8,
+        "loss": 0.8466194972991944,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 18.4,
+        "loss": 0.7982486381530761,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 20.3,
+        "loss": 0.721890453338623,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 21.3,
+        "loss": 0.6669851932525634,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 32.9,
+        "loss": 0.6585841960906983,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 35.4,
+        "loss": 0.5026520261764527,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 34.300000000000004,
+        "loss": 0.5008917331695557,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 36.199999999999996,
+        "loss": 0.4380649948120117,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 37.8,
+        "loss": 0.385342098236084,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 33.900000000000006,
+        "loss": 0.43300555992126466,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 39.1,
+        "loss": 0.3185097827911377,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 38.7,
+        "loss": 0.30713553380966185,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 41.5,
+        "loss": 0.2652347812652588,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 43.4,
+        "loss": 0.24168835496902466,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 80.10000000000001,
+        "loss": 0.05244169211154804,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 87.3,
+        "loss": 0.025723015485185897,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 86.2,
+        "loss": 0.026179184301247004,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 88.4,
+        "loss": 0.02000399155811465,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 88.9,
+        "loss": 0.01778130002762191,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.778217960357666,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3918590545654297,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.3537865753173828,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1264020881652832,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0303058586120606,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.7947508506774903,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3610981788635255,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.4116472969055176,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.2017636795043944,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0352264003753662,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.651150634765625,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3546889610290527,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2920375022888184,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1940127830505372,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0196810092926025,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.5840738029479982,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3098213081359864,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.232856414794922,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.124072124481201,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.9646433887481689,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.8720395317077636,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.4130263862609864,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.4303486404418946,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.2596792678833009,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0632864360809327,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.7529078178405761,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.3773345985412597,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.3326354179382325,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1491697731018067,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_3",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0544773063659667,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_4": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 18.4,
+        "loss": 0.9914228534698486,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 19.900000000000002,
+        "loss": 0.774746280670166,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 19.3,
+        "loss": 0.7622638549804688,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 23.3,
+        "loss": 0.6686766586303711,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 23.400000000000002,
+        "loss": 0.630155725479126,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 22.900000000000002,
+        "loss": 0.6353089981079102,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 26.5,
+        "loss": 0.4702003116607666,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 27.200000000000003,
+        "loss": 0.4839603500366211,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 28.999999999999996,
+        "loss": 0.421285792350769,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 31.5,
+        "loss": 0.38408651256561277,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 20.4,
+        "loss": 0.522437707901001,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 27.1,
+        "loss": 0.39445493698120115,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 26.200000000000003,
+        "loss": 0.40039485931396485,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 31.8,
+        "loss": 0.3430242185592651,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 36.5,
+        "loss": 0.2912941470146179,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 31.8,
+        "loss": 0.39306169319152834,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 40.6,
+        "loss": 0.3101775579452515,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 45.2,
+        "loss": 0.29859876918792727,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 45.6,
+        "loss": 0.2597369709014893,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 52.300000000000004,
+        "loss": 0.21324752855300905,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 83.3,
+        "loss": 0.046463120605796576,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 87.8,
+        "loss": 0.023871863437816502,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 87.7,
+        "loss": 0.024057141229510307,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 89.0,
+        "loss": 0.01894131258316338,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 88.8,
+        "loss": 0.016834017757326365,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.6868886604309081,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.30461283493042,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2722465438842774,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1334755687713622,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0146289043426513,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.5189869613647462,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1634571266174316,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1496230087280273,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.0572316417694092,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.9592817344665527,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.5073004531860352,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2266371994018554,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1978494529724122,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.057539457321167,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.9694045124053955,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.66222163772583,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.265206169128418,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2849159774780274,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.0844200286865235,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.981974645614624,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.6293259963989257,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2214006652832032,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.2676352119445802,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.1087041625976561,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_4",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 1.0028030891418458,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_5": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 8.4,
+        "loss": 0.9342958450317382,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 9.9,
+        "loss": 0.7138903026580811,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 9.2,
+        "loss": 0.7239292125701904,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 10.8,
+        "loss": 0.6416442794799805,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 11.5,
+        "loss": 0.6037023277282715,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 11.4,
+        "loss": 0.5754392013549805,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 11.700000000000001,
+        "loss": 0.48318491554260257,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 10.9,
+        "loss": 0.4717602949142456,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 12.0,
+        "loss": 0.41886272716522216,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 13.100000000000001,
+        "loss": 0.3812586841583252,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 16.2,
+        "loss": 0.40967090797424316,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 17.0,
+        "loss": 0.33791629600524903,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 18.9,
+        "loss": 0.3477038850784302,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 19.5,
+        "loss": 0.30678607034683225,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 24.2,
+        "loss": 0.2762804341316223,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 8.9,
+        "loss": 0.4797221326828003,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 15.7,
+        "loss": 0.3689444284439087,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 15.4,
+        "loss": 0.37028095531463623,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 22.0,
+        "loss": 0.3354462890625,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 28.999999999999996,
+        "loss": 0.27300595808029177,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 20.8,
+        "loss": 0.38272948265075685,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 36.199999999999996,
+        "loss": 0.2908091702461243,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 37.9,
+        "loss": 0.29854540395736695,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 45.4,
+        "loss": 0.24674772834777833,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 53.400000000000006,
+        "loss": 0.2109010238647461,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 85.9,
+        "loss": 0.030929499186575414,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 89.0,
+        "loss": 0.02116305872052908,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 89.4,
+        "loss": 0.017867718942463397,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 89.5,
+        "loss": 0.015960492335259913,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 90.0,
+        "loss": 0.014282554665580392,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4606941452026367,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1092720718383788,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.150268211364746,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9673510341644287,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.8609599189758301,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4554532394409179,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1082073669433594,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.134066619873047,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9879760570526123,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.855865556716919,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.6190830307006836,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.2294475364685058,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1671181297302247,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.0675620136260986,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.9192958488464356,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4827753868103026,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1905436935424805,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.156444076538086,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9913078708648682,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_5",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.9016864395141602,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_6": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 15.8,
+        "loss": 0.8466111431121827,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 16.900000000000002,
+        "loss": 0.6654221858978272,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 17.7,
+        "loss": 0.6767685527801514,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 17.4,
+        "loss": 0.60311936378479,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 18.2,
+        "loss": 0.5612966928482056,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 10.9,
+        "loss": 0.5291325960159302,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 11.3,
+        "loss": 0.4481469993591309,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 12.1,
+        "loss": 0.4486493835449219,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 13.600000000000001,
+        "loss": 0.41775103950500486,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 13.700000000000001,
+        "loss": 0.3802896299362183,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 8.3,
+        "loss": 0.4434067897796631,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 9.700000000000001,
+        "loss": 0.3795753908157349,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 11.0,
+        "loss": 0.3781035032272339,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 12.0,
+        "loss": 0.3555823488235474,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 14.499999999999998,
+        "loss": 0.32475500202178953,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 2.5,
+        "loss": 0.507231629371643,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 4.6,
+        "loss": 0.41708851623535154,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 5.2,
+        "loss": 0.40988271045684815,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 7.5,
+        "loss": 0.37058761024475095,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 9.9,
+        "loss": 0.3347136402130127,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 2.0,
+        "loss": 0.5108170671463013,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 9.2,
+        "loss": 0.3886722688674927,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 8.4,
+        "loss": 0.3852288837432861,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 14.2,
+        "loss": 0.340821683883667,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 18.7,
+        "loss": 0.3012311544418335,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 14.299999999999999,
+        "loss": 0.4683580455780029,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 28.9,
+        "loss": 0.3228051824569702,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 29.599999999999998,
+        "loss": 0.3088536720275879,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 39.0,
+        "loss": 0.26173259210586547,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 47.699999999999996,
+        "loss": 0.22384826040267944,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 81.89999999999999,
+        "loss": 0.05966802117228508,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 86.0,
+        "loss": 0.0294741642922163,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 87.8,
+        "loss": 0.024199848756194114,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 88.8,
+        "loss": 0.019283619947731496,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 89.7,
+        "loss": 0.015441152684390546,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.430134563446045,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.096765266418457,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.138528060913086,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9995646991729736,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.8987893695831299,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.53143798828125,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1778792533874511,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1376509437561035,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.0114722728729248,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.8614904727935792,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4818224258422852,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.12946382522583,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1172721920013429,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9712491188049316,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_6",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.914280439376831,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_7": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 6.7,
+        "loss": 0.8858902091979981,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 6.800000000000001,
+        "loss": 0.7128054447174073,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 6.7,
+        "loss": 0.6859968395233155,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 8.3,
+        "loss": 0.6352892570495605,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 8.200000000000001,
+        "loss": 0.5867863864898681,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 7.9,
+        "loss": 0.5998161392211914,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 7.5,
+        "loss": 0.47716272258758546,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 7.8,
+        "loss": 0.4651568689346314,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 7.3,
+        "loss": 0.42366920280456544,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 8.7,
+        "loss": 0.3870357313156128,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 9.5,
+        "loss": 0.5629039793014526,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 11.600000000000001,
+        "loss": 0.4180921220779419,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 10.9,
+        "loss": 0.4254879922866821,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 13.5,
+        "loss": 0.373641263961792,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 15.0,
+        "loss": 0.33111860942840576,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 2.8000000000000003,
+        "loss": 0.580374309539795,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 2.7,
+        "loss": 0.45684691619873047,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 3.9,
+        "loss": 0.43827272319793703,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 5.5,
+        "loss": 0.3981598720550537,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 5.8999999999999995,
+        "loss": 0.3535011215209961,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 5.7,
+        "loss": 0.6368059768676758,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 6.3,
+        "loss": 0.4642944927215576,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 7.3,
+        "loss": 0.44437939453125,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 9.5,
+        "loss": 0.3868754501342773,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 12.6,
+        "loss": 0.33857489109039307,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 11.5,
+        "loss": 0.5944065799713135,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 13.200000000000001,
+        "loss": 0.4313750400543213,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 14.799999999999999,
+        "loss": 0.42581867599487305,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 20.9,
+        "loss": 0.36393267345428465,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 24.3,
+        "loss": 0.31614324474334715,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 24.3,
+        "loss": 0.4665317945480347,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 37.5,
+        "loss": 0.34188503074646,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 42.6,
+        "loss": 0.34565823173522947,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 47.599999999999994,
+        "loss": 0.29383887004852294,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 53.1,
+        "loss": 0.24717252254486083,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 81.5,
+        "loss": 0.05878572905715555,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 86.0,
+        "loss": 0.02996459377463907,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 85.39999999999999,
+        "loss": 0.031794716375879946,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 86.9,
+        "loss": 0.025533089599572123,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 87.1,
+        "loss": 0.021731101669371127,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4645022659301759,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.1255556182861328,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1013059883117675,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9991639137268067,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.8906321392059326,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.4340895080566407,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.154622341156006,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1046122970581054,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 0.9339721069335938,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_7",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.8624330406188965,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_8": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 8.3,
+        "loss": 0.9304045524597168,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 10.7,
+        "loss": 0.7493928966522216,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 9.4,
+        "loss": 0.7309301834106445,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 10.4,
+        "loss": 0.6670152015686035,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 10.9,
+        "loss": 0.5942907333374023,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 7.1,
+        "loss": 0.5541676120758057,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 8.5,
+        "loss": 0.4782259855270386,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 9.9,
+        "loss": 0.4620303382873535,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 11.200000000000001,
+        "loss": 0.44418814849853516,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 12.4,
+        "loss": 0.4140167417526245,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 8.7,
+        "loss": 0.4720355625152588,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 11.3,
+        "loss": 0.39624768352508544,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 11.799999999999999,
+        "loss": 0.39081809520721433,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 12.9,
+        "loss": 0.3496971473693848,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 15.9,
+        "loss": 0.3261826505661011,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 3.5000000000000004,
+        "loss": 0.5799191389083862,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 5.3,
+        "loss": 0.47207653617858886,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 5.5,
+        "loss": 0.4726333475112915,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 5.0,
+        "loss": 0.4223242082595825,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 8.799999999999999,
+        "loss": 0.38375790691375733,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 3.6999999999999997,
+        "loss": 0.5883693981170655,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 5.4,
+        "loss": 0.46571117210388185,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 4.8,
+        "loss": 0.4830547027587891,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 5.7,
+        "loss": 0.43729391384124755,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 8.6,
+        "loss": 0.38557231998443603,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 2.8000000000000003,
+        "loss": 0.681753662109375,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 5.3,
+        "loss": 0.5110231981277465,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 5.0,
+        "loss": 0.5140717277526855,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 7.6,
+        "loss": 0.4683965482711792,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 14.299999999999999,
+        "loss": 0.40115774250030517,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 4.7,
+        "loss": 0.5453236961364746,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 8.200000000000001,
+        "loss": 0.45414664936065674,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 10.9,
+        "loss": 0.4236293706893921,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 15.9,
+        "loss": 0.38444277763366697,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 27.400000000000002,
+        "loss": 0.31379037857055664,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 9.2,
+        "loss": 0.5009399948120117,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 22.3,
+        "loss": 0.3804270057678223,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 22.1,
+        "loss": 0.36549864292144774,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 33.0,
+        "loss": 0.308560998916626,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 42.9,
+        "loss": 0.2463782000541687,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 86.2,
+        "loss": 0.04447063142061233,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 89.60000000000001,
+        "loss": 0.024177168902009726,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 90.0,
+        "loss": 0.02206077816290781,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 90.7,
+        "loss": 0.017868242311291395,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 90.7,
+        "loss": 0.016915485145524146,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 0.0,
+        "loss": 1.5303899421691896,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 0.0,
+        "loss": 1.197686336517334,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 0.0,
+        "loss": 1.1593085975646973,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 0.0,
+        "loss": 1.010728572845459,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_8",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 0.0,
+        "loss": 0.899868200302124,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  },
+  "ewc-on_seq-cifar100_9": {
+    "0": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 0,
+        "k_value": 0,
+        "accuracy": 15.7,
+        "loss": 0.7994466705322265,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 0,
+        "k_value": 1,
+        "accuracy": 15.4,
+        "loss": 0.6594422950744628,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 0,
+        "k_value": 2,
+        "accuracy": 16.7,
+        "loss": 0.6573773593902588,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 0,
+        "k_value": 5,
+        "accuracy": 16.900000000000002,
+        "loss": 0.5965385551452637,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 0,
+        "k_value": 10,
+        "accuracy": 17.8,
+        "loss": 0.5592529411315919,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "1": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 1,
+        "k_value": 0,
+        "accuracy": 14.7,
+        "loss": 0.5545269918441772,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 1,
+        "k_value": 1,
+        "accuracy": 17.4,
+        "loss": 0.4657526922225952,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 1,
+        "k_value": 2,
+        "accuracy": 17.8,
+        "loss": 0.4580905246734619,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 1,
+        "k_value": 5,
+        "accuracy": 18.6,
+        "loss": 0.41546102523803713,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 1,
+        "k_value": 10,
+        "accuracy": 20.3,
+        "loss": 0.38027979373931886,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "2": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 2,
+        "k_value": 0,
+        "accuracy": 12.4,
+        "loss": 0.431115086555481,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 2,
+        "k_value": 1,
+        "accuracy": 14.6,
+        "loss": 0.34685703468322754,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 2,
+        "k_value": 2,
+        "accuracy": 15.0,
+        "loss": 0.3545573358535767,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 2,
+        "k_value": 5,
+        "accuracy": 16.400000000000002,
+        "loss": 0.34078761291503906,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 2,
+        "k_value": 10,
+        "accuracy": 18.8,
+        "loss": 0.30929955959320066,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "3": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 3,
+        "k_value": 0,
+        "accuracy": 3.3000000000000003,
+        "loss": 0.5952806053161621,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 3,
+        "k_value": 1,
+        "accuracy": 4.6,
+        "loss": 0.4856820487976074,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 3,
+        "k_value": 2,
+        "accuracy": 5.4,
+        "loss": 0.4906565132141113,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 3,
+        "k_value": 5,
+        "accuracy": 6.7,
+        "loss": 0.4305191602706909,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 3,
+        "k_value": 10,
+        "accuracy": 7.5,
+        "loss": 0.40165539741516115,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "4": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 4,
+        "k_value": 0,
+        "accuracy": 10.5,
+        "loss": 0.543216248512268,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 4,
+        "k_value": 1,
+        "accuracy": 10.6,
+        "loss": 0.45557019805908205,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 4,
+        "k_value": 2,
+        "accuracy": 11.3,
+        "loss": 0.43479052352905273,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 4,
+        "k_value": 5,
+        "accuracy": 11.200000000000001,
+        "loss": 0.3992190494537354,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 4,
+        "k_value": 10,
+        "accuracy": 12.8,
+        "loss": 0.3698189058303833,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "5": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 5,
+        "k_value": 0,
+        "accuracy": 0.3,
+        "loss": 0.8282845344543457,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 5,
+        "k_value": 1,
+        "accuracy": 3.4000000000000004,
+        "loss": 0.5762644138336181,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 5,
+        "k_value": 2,
+        "accuracy": 3.0,
+        "loss": 0.590673583984375,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 5,
+        "k_value": 5,
+        "accuracy": 5.7,
+        "loss": 0.48736795043945313,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 5,
+        "k_value": 10,
+        "accuracy": 10.8,
+        "loss": 0.3981646184921265,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "6": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 6,
+        "k_value": 0,
+        "accuracy": 0.4,
+        "loss": 0.6378442573547364,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 6,
+        "k_value": 1,
+        "accuracy": 1.5,
+        "loss": 0.4710888433456421,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 6,
+        "k_value": 2,
+        "accuracy": 1.4000000000000001,
+        "loss": 0.47655320358276365,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 6,
+        "k_value": 5,
+        "accuracy": 3.5000000000000004,
+        "loss": 0.43161090660095214,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 6,
+        "k_value": 10,
+        "accuracy": 7.000000000000001,
+        "loss": 0.3617911520004272,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "7": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 7,
+        "k_value": 0,
+        "accuracy": 5.3,
+        "loss": 0.5341640014648438,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 7,
+        "k_value": 1,
+        "accuracy": 14.899999999999999,
+        "loss": 0.3897352561950684,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 7,
+        "k_value": 2,
+        "accuracy": 16.0,
+        "loss": 0.3914115161895752,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 7,
+        "k_value": 5,
+        "accuracy": 24.2,
+        "loss": 0.3433389558792114,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 7,
+        "k_value": 10,
+        "accuracy": 38.7,
+        "loss": 0.27802759170532226,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "8": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 8,
+        "k_value": 0,
+        "accuracy": 38.4,
+        "loss": 0.3557578554153442,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 8,
+        "k_value": 1,
+        "accuracy": 47.3,
+        "loss": 0.27218808364868163,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 8,
+        "k_value": 2,
+        "accuracy": 47.8,
+        "loss": 0.267741087436676,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 8,
+        "k_value": 5,
+        "accuracy": 53.300000000000004,
+        "loss": 0.24459070444107056,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 8,
+        "k_value": 10,
+        "accuracy": 58.599999999999994,
+        "loss": 0.20672907257080078,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    },
+    "9": {
+      "0": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 9,
+        "k_value": 0,
+        "accuracy": 86.9,
+        "loss": 0.029456867054570467,
+        "num_adapt_steps": 0,
+        "adapt_lr": null,
+        "num_examples_used": 0,
+        "metadata": null
+      },
+      "1": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 9,
+        "k_value": 1,
+        "accuracy": 91.2,
+        "loss": 0.014812437972985208,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 10,
+        "metadata": null
+      },
+      "2": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 9,
+        "k_value": 2,
+        "accuracy": 91.7,
+        "loss": 0.013758401334285736,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 20,
+        "metadata": null
+      },
+      "5": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 9,
+        "k_value": 5,
+        "accuracy": 93.30000000000001,
+        "loss": 0.011174256008118392,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 64,
+        "metadata": null
+      },
+      "10": {
+        "checkpoint_id": "ewc-on_seq-cifar100_9",
+        "eval_task_id": 9,
+        "k_value": 10,
+        "accuracy": 93.7,
+        "loss": 0.010657593408599496,
+        "num_adapt_steps": 5,
+        "adapt_lr": 0.001,
+        "num_examples_used": 128,
+        "metadata": null
+      }
+    }
+  }
+}

@@ -213,7 +213,7 @@ def train(model: ContinualModel, dataset: ContinualDataset,
                     # will try after the begin_task in case the model needs to setup something
                     can_compute_fwd_beforetask = False
 
-            model.meta_begin_task(dataset)
+            model.meta_begin_task(dataset, cur_task)
 
             if not can_compute_fwd_beforetask and is_fwd_enabled and args.enable_other_metrics:
                 if train_loader.dataset.num_times_iterated == 0:  # compute only if the model has not been trained yet

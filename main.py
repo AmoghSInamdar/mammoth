@@ -163,6 +163,11 @@ def load_configs(parser: argparse.ArgumentParser, cmd: Optional[List[str]] = Non
         except ValueError:
             raise ValueError(f'--buffer_size must be an integer but found {buffer_size}')
 
+    parser.add_argument_group('Dataset-related arguments').add_argument('--n_classes_per_task', type=int, required=False,
+                                                                        help='number of classes per task')
+    parser.add_argument_group('Dataset-related arguments').add_argument('--n_tasks', type=int, required=False,
+                                                                        help='number of tasks')
+
     # - get the defaults that were set with `set_defaults` in the parser
     base_config = parser._defaults.copy()
 
@@ -171,6 +176,8 @@ def load_configs(parser: argparse.ArgumentParser, cmd: Optional[List[str]] = Non
 
     # update the dataset class with the configuration
     dataset_class = get_dataset_class(args)
+
+    
 
     # load the dataset configuration. If the model specified a dataset config, use it. Otherwise, use the dataset configuration
     base_dataset_config = get_default_args_for_dataset(args.dataset)

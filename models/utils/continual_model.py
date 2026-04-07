@@ -73,6 +73,7 @@ class ContinualModel(nn.Module):
     dataset: 'ContinualDataset'  # The instance of the dataset. Used to update the number of classes in the current task
     num_classes: int  # Total number of classes in the dataset
     n_tasks: int  # Total number of tasks in the dataset
+    class_names: dict
 
     @staticmethod
     def get_parser(parser: ArgumentParser) -> ArgumentParser:
@@ -201,6 +202,7 @@ class ContinualModel(nn.Module):
         self.SETTING = self.dataset.SETTING
         self._cpt = self.dataset.N_CLASSES_PER_TASK
         self._current_task = 0
+        self.class_names = self.dataset.get_class_names()
 
         try:
             if transform is not None:
@@ -440,7 +442,7 @@ class ContinualModel(nn.Module):
         self._epoch_iteration += 1
         return ret
 
-    def meta_begin_task(self, dataset):
+    def meta_begin_task(self, dataset, cur_task=0):
         """
         Wrapper for `begin_task` method.
 
@@ -456,6 +458,10 @@ class ContinualModel(nn.Module):
         self._n_classes_current_task = self._cpt if isinstance(self._cpt, int) else self._cpt[self._current_task]
         self._n_past_classes, self._n_seen_classes = self.get_offsets(self._current_task)
         self._n_remaining_classes = self.N_CLASSES - self._n_seen_classes
+        self.class_names[self._current_task] = self.dataset.class_names[self._n_past_classes:self._n_seen_classes]
+
+        logging.info(f"[ContinualDataset.meta_begin_task] Starting Task {cur_task}: ")
+        logging.info(f"[ContinualDataset.meta_begin_task] {self._n_classes_current_task} classes included: {self.class_names[self._current_task]}")
 
         # reload optimizer if the model has no scheduler
         if not hasattr(self, 'scheduler') or self.custom_scheduler is None:

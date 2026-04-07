@@ -37,7 +37,7 @@ class TinyImagenet(Dataset):
         self.download = download
 
         if download:
-            if os.path.isdir(root) and len(os.listdir(root)) > 0:
+            if os.path.isdir(root) and os.path.exists(smart_joint(root, 'processed/x_train_01.npy')):
                 logging.info('Download not needed, files already on disk.')
             else:
                 from onedrivedownloader import download

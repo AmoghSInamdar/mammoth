@@ -1,0 +1,22 @@
+{
+  "default": {
+    "adapt_lr": 0.1,
+    "num_adapt_steps": 5
+  },
+  "der": {
+    "adapt_lr": 0.1,
+    "num_adapt_steps": 5
+  },
+  "er": {
+    "adapt_lr": 0.05,
+    "num_adapt_steps": 5
+  },
+  "agem": {
+    "adapt_lr": 0.1,
+    "num_adapt_steps": 5
+  },
+  "gem": {
+    "adapt_lr": 0.05,
+    "num_adapt_steps": 5
+  }
+}

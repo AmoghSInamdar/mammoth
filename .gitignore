@@ -105,3 +105,6 @@ docs/model_args
 cache
 
 uv.lock
+
+# k-shot eval outputs
+outputs/

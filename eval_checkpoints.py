@@ -13,7 +13,7 @@ Usage:
                                --output_dir results/
 """
 
-# Copyright 2022-present, Lorenzo Bonicelli, Pietro Buzzega, Matteo Boschini, Angelo Porrello, Simone Calderara.
+# Copyright 2026-present, Amogh Inamdar, Vici Milenia, Richard Zemel.
 # All rights reserved.
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -303,7 +303,8 @@ def evaluate_checkpoint(checkpoint_path: str,
             # Create k-shot loader (if k > 0)
             k_shot_loader, adapted_model = None, copy.deepcopy(model)
             if k > 0:
-                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k)
+                batch_size = 32 if model.NAME != 'mer' else 1  # MER only supports a batch size of 1
+                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size)
                 if k_shot_loader is None:
                     logging.warning(f"Could not create {k}-shot loader for task {eval_task_id}, skipping")
                     continue
@@ -339,6 +340,19 @@ def evaluate_checkpoint(checkpoint_path: str,
             logging.info(f"    Task {eval_task_id}, k={k}: {accuracy:.2f}% accuracy")
 
     return results
+
+
+def get_results_group_name(checkpoint_paths: List[str]) -> str:
+    """Derive a representative group name from checkpoint stems."""
+    checkpoint_ids = [Path(path).stem for path in checkpoint_paths]
+    if len(checkpoint_ids) == 1:
+        return checkpoint_ids[0]
+
+    common_prefix = os.path.commonprefix(checkpoint_ids)
+    common_prefix = common_prefix.rstrip('_-')
+    if not common_prefix:
+        return checkpoint_ids[0]
+    return common_prefix
 
 
 def main():
@@ -381,8 +395,9 @@ def main():
             continue
 
     # Save results
-    csv_path = output_dir / f"evaluation_results_{args.model}_{args.eval_dataset}.csv"
-    json_path = output_dir / f"evaluation_results_{args.model}_{args.eval_dataset}.json"
+    checkpoint_group_name = get_results_group_name(args.checkpoint_paths)
+    csv_path = output_dir / f"evaluation_results_{checkpoint_group_name}.csv"
+    json_path = output_dir / f"evaluation_results_{checkpoint_group_name}.json"
 
     all_results.save_to_csv(csv_path)
     # all_results.save_to_json(json_path)

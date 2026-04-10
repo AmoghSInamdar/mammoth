@@ -89,7 +89,7 @@ def train_single_epoch(model: ContinualModel,
         try:
             data = next(train_iter)
         except StopIteration:
-            print("STOP ITERATION")
+            logging.debug("STOP ITERATION")
             break
         if args.debug_mode and i > model.get_debug_iters():
             break

@@ -1,4 +1,4 @@
-# Copyright 2022-present, Lorenzo Bonicelli, Pietro Buzzega, Matteo Boschini, Angelo Porrello, Simone Calderara.
+# Copyright 2026-present, Amogh Inamdar, Vici Milenia, Richard Zemel.
 # All rights reserved.
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
@@ -68,7 +68,9 @@ def create_k_shot_eval_dataset(dataset: ContinualDataset, task_id: int) -> Conti
 def create_k_shot_loader(dataset: ContinualDataset,
                         task_id: int,
                         k: int,
-                        num_samples_per_class: Optional[int] = None) -> DataLoader:
+                        num_samples_per_class: Optional[int] = None,
+                        batch_size: int = 32,
+                        sampling_seed: int = 42) -> DataLoader:
     """
     Create a k-shot data loader for a specific task by sampling k examples per class.
 
@@ -77,6 +79,8 @@ def create_k_shot_loader(dataset: ContinualDataset,
         task_id: The task index to sample from
         k: Number of examples per class (if num_samples_per_class is None)
         num_samples_per_class: Override for number of samples per class (defaults to k)
+        batch_size: Batch size for the returned DataLoader
+        sampling_seed: Random seed for reproducibility of sampling
 
     Returns:
         DataLoader with k-shot examples from the specified task
@@ -106,6 +110,7 @@ def create_k_shot_loader(dataset: ContinualDataset,
 
         num_to_sample = min(num_samples_per_class, len(class_indices))
         if num_to_sample > 0:
+            np.random.seed(sampling_seed)
             sampled_class_indices = np.random.choice(class_indices, size=num_to_sample, replace=False)
             sampled_indices.extend(sampled_class_indices)
 
@@ -146,7 +151,7 @@ def create_k_shot_loader(dataset: ContinualDataset,
     sampled_dataset = SimpleDataset(sampled_data, sampled_targets, transform=transform)
 
     loader = DataLoader(sampled_dataset,
-                       batch_size=min(len(sampled_indices), 32),
+                       batch_size=min(len(sampled_indices), batch_size),
                        shuffle=True,
                        num_workers=0,
                        drop_last=False)

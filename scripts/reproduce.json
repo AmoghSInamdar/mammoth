@@ -97,7 +97,7 @@
     "model": "er",
     "setting": "class-il",
     "result": 63.39,
-    "cmd": "--dataset=seq-cifar10 --model=er --buffer_size=z500 --lr=0.1"
+    "cmd": "--dataset=seq-cifar10 --model=er --buffer_size=500 --lr=0.1"
   },
   {
     "model": "ewc_on",

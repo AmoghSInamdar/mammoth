@@ -12,24 +12,34 @@ This script defines:
 """
 
 import argparse
+import csv
 import json
+import multiprocessing as mp
+import os
+import shutil
 import sys
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 CONTINUAL_MODELS: List[str] = [
-    'sgd',
-    'er',
+    # 'meta-sgd',
+    # 'meta-er',
+    # 'meta-ewc',
+    # 'sgd',
+    # 'er',
     'der',
     'derpp',
     # 'agem',
     # 'mer',
-    'ewc-on',
+    # 'ewc-on',
     # 'moe_adapters',
     # 'lwf',
     # 'gdumb'
 ]
+
+META_CL_METHODS = ['maml', 'reptile']
+META_CL_STRATEGIES = ['sequential', 'parallel']
 
 CONTINUAL_DATASETS: List[str] = [
     # 'seq-mnist',
@@ -45,6 +55,7 @@ K_VALUES: List[int] = [0, 1, 2, 5, 10]
 
 CHECKPOINT_DIR = Path('checkpoints')
 OUTPUT_DIR = Path('results/k_shot_evaluation')
+TEMP_OUTPUT_DIR = Path('results/temp_csvs')
 ADAPT_SETTINGS_FILE = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
 
 
@@ -63,7 +74,7 @@ def get_adapt_settings(
     num_adapt_steps: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Return adaptation settings for a specific model, with CLI overrides."""
-    default_settings = settings.get('default', {'adapt_lr': 0.001, 'num_adapt_steps': 5})
+    default_settings = settings.get('default', {'adapt_lr': 0.01, 'num_adapt_steps': 5})
     model_settings = settings.get(model, default_settings)
 
     if adapt_lr is not None:
@@ -82,9 +93,94 @@ def get_checkpoint_names(model: str, dataset: str, checkpoint_dir: Path = CHECKP
     if not checkpoint_dir.exists():
         raise FileNotFoundError(f"Checkpoint directory does not exist: {checkpoint_dir}")
 
-    pattern = f"{model}_{dataset}_*.pt"
-    checkpoint_paths = sorted(checkpoint_dir.glob(pattern))
+    checkpoint_paths = []
+    if model.startswith('meta'):
+        for method in META_CL_METHODS:
+            for strategy in META_CL_STRATEGIES:
+                pattern = f"{model}_{dataset}_{method}_{strategy}_*.pt"
+                checkpoint_paths.extend(sorted(checkpoint_dir.glob(pattern)))
+        print(f"Searching for meta-CL checkpoints with pattern: {pattern}")
+    else:
+        pattern = f"{model}_{dataset}_*.pt"
+        checkpoint_paths = sorted(checkpoint_dir.glob(pattern))
     return [str(path) for path in checkpoint_paths]
+
+
+def get_available_gpus() -> List[str]:
+    """Return the list of GPUs from CUDA_VISIBLE_DEVICES, or default to ['0']."""
+    raw_visible = os.environ.get('CUDA_VISIBLE_DEVICES', '').strip()
+    if raw_visible:
+        gpus = [gpu.strip() for gpu in raw_visible.split(',') if gpu.strip()]
+        if gpus:
+            return gpus
+    return ['0']
+
+
+def run_checkpoint_evaluation(
+    checkpoint_path: str,
+    model: str,
+    dataset: str,
+    k_values_csv: str,
+    adapt_lr: Optional[float],
+    num_adapt_steps: Optional[int],
+    output_dir: Path,
+    gpu_id: str,
+) -> Path:
+    """Run eval_checkpoints.py for a single checkpoint on a specific GPU."""
+    env = os.environ.copy()
+    env['CUDA_VISIBLE_DEVICES'] = gpu_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    command = [
+        sys.executable,
+        'eval_checkpoints.py',
+        '--checkpoint_paths',
+        checkpoint_path,
+        '--model',
+        model,
+        '--eval_dataset',
+        dataset,
+        '--lr',
+        '0.0',
+        '--k_values',
+        k_values_csv,
+        '--adapt_lr',
+        str(adapt_lr),
+        '--num_adapt_steps',
+        str(num_adapt_steps),
+        '--output_dir',
+        str(output_dir),
+    ]
+
+    checkpoint_name = Path(checkpoint_path).stem
+    print(
+        f"Evaluating checkpoint={checkpoint_name}, model={model}, dataset={dataset}, "
+        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}"
+    )
+    subprocess.run(command, check=True, env=env)
+    return output_dir / f"evaluation_results_{checkpoint_name}.csv"
+
+
+def _merge_temp_csvs(final_csv_path: Path, temp_csv_paths: List[Path]) -> None:
+    """Merge temporary CSV files into a single aggregate CSV."""
+    if not temp_csv_paths:
+        raise ValueError("No temporary CSV files found to merge.")
+
+    final_csv_path.parent.mkdir(parents=True, exist_ok=True)
+    header_written = False
+    with final_csv_path.open('w', newline='', encoding='utf-8') as out_file:
+        writer = csv.writer(out_file)
+        for temp_csv_path in temp_csv_paths:
+            with temp_csv_path.open('r', newline='', encoding='utf-8') as in_file:
+                reader = csv.reader(in_file)
+                header = next(reader, None)
+                if header is None:
+                    continue
+                if not header_written:
+                    writer.writerow(header)
+                    header_written = True
+                for row in reader:
+                    writer.writerow(row)
 
 
 def evaluate_checkpoints_for_k(
@@ -97,49 +193,58 @@ def evaluate_checkpoints_for_k(
     max_subprocesses: int = 10,
 ) -> None:
     """Evaluate the matching checkpoints for a model/dataset over all requested k values.
-    
-    Runs evaluation in chunks to limit concurrent subprocesses.
+
+    Runs evaluation in parallel across GPUs using multiprocessing pools.
     """
     if not checkpoint_paths:
         print(f"No checkpoints found for model={model}, dataset={dataset}")
         return
 
+    gpus = get_available_gpus()
     output_dir.mkdir(parents=True, exist_ok=True)
     k_values_csv = ','.join(str(k) for k in k_values)
     adapt_lr = adapt_settings.get('adapt_lr')
     num_adapt_steps = adapt_settings.get('num_adapt_steps')
 
-    # Process checkpoints in chunks
-    for i in range(0, len(checkpoint_paths), max_subprocesses):
-        chunk = checkpoint_paths[i:i + max_subprocesses]
-        chunk_str = f"{i//max_subprocesses + 1}/{(len(checkpoint_paths) + max_subprocesses - 1) // max_subprocesses}"
+    tasks = []
+    for idx, checkpoint_path in enumerate(checkpoint_paths):
+        gpu_id = gpus[idx % len(gpus)]
+        temp_dir = TEMP_OUTPUT_DIR / model / dataset / Path(checkpoint_path).stem
+        tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id))
 
-        command = [
-            sys.executable,
-            'eval_checkpoints.py',
-            '--checkpoint_paths',
-            *chunk,
-            '--model',
-            model,
-            '--eval_dataset',
-            dataset,
-            '--lr',
-            '0.0',  # No learning during evaluation, adaptation is separate
-            '--k_values',
-            k_values_csv,
-            '--adapt_lr',
-            str(adapt_lr),
-            '--num_adapt_steps',
-            str(num_adapt_steps),
-            '--output_dir',
-            str(output_dir),
-        ]
+    pool_map = []
+    pools = {gpu: mp.Pool(processes=max_subprocesses) for gpu in gpus}
+    try:
+        for task in tasks:
+            checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id = task
+            pool_map.append(pools[gpu_id].apply_async(
+                run_checkpoint_evaluation,
+                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id)
+            ))
 
-        print(
-            f"Evaluating model={model}, dataset={dataset}, chunk {chunk_str}, "
-            f"k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}"
-        )
-        subprocess.run(command, check=True)
+        for pool in pools.values():
+            pool.close()
+        for pool in pools.values():
+            pool.join()
+
+        temp_csv_paths = [result.get() for result in pool_map]
+    finally:
+        for pool in pools.values():
+            try:
+                pool.terminate()
+            except Exception:
+                pass
+
+    final_csv_path = output_dir / f"evaluation_results_{model}_{dataset}.csv"
+    _merge_temp_csvs(final_csv_path, temp_csv_paths)
+
+    # Clean up temporary directories after merging results
+    for temp_csv_path in temp_csv_paths:
+        temp_dir = temp_csv_path.parent
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    print(f"Merged checkpoint evaluations into {final_csv_path}")
 
 
 
@@ -151,9 +256,9 @@ def parse_args() -> argparse.Namespace:
                         help='Comma-separated list of datasets to evaluate (defaults to internal CONTINUAL_DATASETS)')
     parser.add_argument('--k_values', type=str, default=','.join(str(k) for k in K_VALUES),
                         help='Comma-separated list of k values for few-shot adaptation')
-    parser.add_argument('--adapt_lr', type=float, default=None,
+    parser.add_argument('--adapt_lr', type=float, default=0.01,
                         help='Override adaptation learning rate from the command line')
-    parser.add_argument('--num_adapt_steps', type=int, default=None,
+    parser.add_argument('--num_adapt_steps', type=int, default=5,
                         help='Override number of adaptation steps from the command line')
     parser.add_argument('--max_subprocesses', type=int, default=10,
                         help='Maximum number of checkpoints to evaluate per subprocess chunk')

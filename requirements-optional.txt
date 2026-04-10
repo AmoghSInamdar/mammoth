@@ -17,3 +17,5 @@ kmeans_pytorch
 bitsandbytes
 xitorch
 dotenv
+matplotlib
+higher

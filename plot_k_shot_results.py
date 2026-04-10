@@ -195,7 +195,79 @@ def plot_plasticity_scores(model: str) -> None:
         print(f"No backward plasticity data for {model}")
 
 
-def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR) -> None:
+def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR) -> None:
+    """Plot forward/backward plasticity comparisons for each metric across all models."""
+    if not results_dir.exists():
+        print(f"Error: Results directory {results_dir} does not exist.")
+        return
+
+    csv_files = sorted(results_dir.glob('*.csv'))
+    if not csv_files:
+        print(f"No CSV files found in {results_dir}")
+        return
+
+    PLOTS_DIR.mkdir(exist_ok=True)
+    metric_names = ['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']
+    direction_labels = {
+        'forward': 'Forward',
+        'backward': 'Backward',
+        'overall': 'Overall'
+    }
+
+    def extract_checkpoint_num(ckpt_id: str) -> int:
+        parts = ckpt_id.rsplit('_', 1)
+        return int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 0
+
+    # Load all model results and compute checkpoint numbers.
+    models_data = {}
+    for csv_path in csv_files:
+        model = csv_path.stem.replace('evaluation_results_', '')
+        results = load_evaluation_results(csv_path)
+        if results.empty:
+            print(f"Skipping empty CSV for model {model}")
+            continue
+        results = results.copy()
+        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
+        models_data[model] = results
+
+    for direction in ['forward', 'backward', 'overall']:
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10), squeeze=False)
+        for idx, metric in enumerate(metric_names):
+            ax = axes[idx // 2][idx % 2]
+            for model, results in models_data.items():
+                if direction == 'forward':
+                    subset = results[results['eval_task_id'] > results['checkpoint_num']]
+                elif direction == 'backward':
+                    subset = results[results['eval_task_id'] < results['checkpoint_num']]
+                else:  # overall
+                    subset = results
+
+                if subset.empty:
+                    continue
+
+                plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
+                if plot_data.empty:
+                    continue
+
+                ax.plot(plot_data['checkpoint_num'], plot_data[metric], marker='o', label=model)
+
+            ax.set_title(f'{metric} ({direction_labels[direction]})')
+            ax.set_xlabel('Checkpoint Number')
+            ax.set_ylabel('Average Plasticity Score')
+            ax.grid(True)
+            ax.legend(fontsize='small')
+
+        plt.tight_layout()
+        if direction == 'overall':
+            output_path = PLOTS_DIR / 'plasticity_comparison.png'
+        else:
+            output_path = PLOTS_DIR / f'{direction}_plasticity_comparison.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        print(f"Saved aggregate {direction} plasticity comparison to {output_path}")
+
+
+def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False) -> None:
     """Plot all CSV files in RESULTS_DIR, skipping any with errors."""
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -211,9 +283,10 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR) -> None:
         try:
             print(f"Plotting {csv_path.name}...", end=' ')
             plot_k_shot_results(csv_path, metric)
-            # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
-            model = csv_path.stem.replace('evaluation_results_', '')
-            plot_plasticity_scores(model)
+            if plot_plasticity:
+                # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
+                model = csv_path.stem.replace('evaluation_results_', '')
+                plot_plasticity_scores(model)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 
@@ -226,9 +299,13 @@ def main() -> None:
                         help='Metric to plot (default: accuracy)')
     parser.add_argument('--plot-all', action='store_true',
                         help='Plot all CSV files in RESULTS_DIR instead of a single file')
+    parser.add_argument('--plot-plasticity-comparisons', action='store_true',
+                        help='Plot aggregate forward/backward plasticity comparisons across models')
     args = parser.parse_args()
 
-    if args.plot_all:
+    if args.plot_plasticity_comparisons:
+        plot_plasticity_comparisons()
+    elif args.plot_all:
         plot_all(args.metric)
     elif args.csv_file:
         csv_path = Path(os.path.join(RESULTS_DIR, args.csv_file))
@@ -237,7 +314,7 @@ def main() -> None:
             return
         plot_k_shot_results(csv_path, args.metric)
     else:
-        parser.error("Either provide a CSV file or use --plot-all")
+        parser.error("Either provide a CSV file, use --plot-all, or use --plot-plasticity-comparisons")
 
 
 if __name__ == '__main__':

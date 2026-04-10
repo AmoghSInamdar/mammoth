@@ -297,7 +297,7 @@ def to_parsable_obj(r: Union[Dict, Namespace, list, torch.Tensor, np.ndarray]) -
         if isinstance(r, (torch.device)):
             return str(r)
         if r is not None:
-            logging.warning(f"Object {r} is not parsable, returning it as str.")
+            logging.debug(f"Object {r} is not parsable, returning it as str.")
             return str(r)  # return as str if not parsable
         
         return None

@@ -393,7 +393,8 @@ def parse_args(
 
         # Use simple naming scheme: model_dataset
         # Task number will be appended by save_mammoth_checkpoint
-        args.ckpt_name = f"{args.model}_{args.dataset}"
+        if not args.ckpt_name:
+            args.ckpt_name = f"{args.model}_{args.dataset}"
 
         # meta-cl: add the meta method and strategy to the checkpoint name
         if args.model.startswith('meta'):

@@ -161,7 +161,7 @@ def create_k_shot_loader(dataset: ContinualDataset,
     return loader
 
 
-def simple_observe(model: ContinualModel, inputs, labels, not_aug_inputs, epoch=None):
+def simple_observe(model: ContinualModel, inputs, labels, not_aug_inputs, epoch=None) -> float:
     """
     Simple observe function for few-shot adaptation that just computes the loss and updates the model.
 
@@ -169,7 +169,7 @@ def simple_observe(model: ContinualModel, inputs, labels, not_aug_inputs, epoch=
     """
     model.opt.zero_grad()
     outputs = model.net(inputs)
-    loss_fn = model.loss if hasattr(model, 'loss') else torch.nn.CrossEntropyLoss()
+    loss_fn = model.loss if hasattr(model, 'loss') else torch.nn.functional.cross_entropy
     loss = loss_fn(outputs, labels)
     loss.backward()
     model.opt.step()
@@ -182,7 +182,8 @@ def adapt_model(model: ContinualModel,
                learning_rate: float = 0.1,
                task_id: Optional[int] = None,
                use_model_opt: bool = True,
-               use_model_observe: bool = True) -> ContinualModel:
+               use_model_observe: bool = True,
+               use_model_loss: bool = False) -> ContinualModel:
     """
     Temporarily adapt a model on k-shot examples via gradient descent.
 
@@ -197,6 +198,7 @@ def adapt_model(model: ContinualModel,
         task_id: Task ID for adaptation (passed to model.observe if needed)
         use_model_opt: Whether to use the model's existing optimizer (if available) or create a new one
         use_model_observe: Whether to call model.observe() for adaptation steps instead of manual optimization
+        use_model_loss: Whether to use the model's loss function (if available) instead of default CrossEntropyLoss
 
     Returns:
         Adapted model (original model is unchanged)
@@ -225,6 +227,11 @@ def adapt_model(model: ContinualModel,
             lr=learning_rate,
             weight_decay=0.0
         )
+
+    # Use simple CE loss for models such as DER++
+    model_loss = copy.deepcopy(adapted_model.loss) if hasattr(adapted_model, 'loss') else None
+    if not use_model_loss:
+        adapted_model.loss = torch.nn.functional.cross_entropy 
 
     # Set model to training mode for adaptation
     adapted_model.net.train()
@@ -257,6 +264,9 @@ def adapt_model(model: ContinualModel,
 
     # Set model back to eval mode
     adapted_model.net.eval()
+
+    # Restore model's original loss function
+    adapted_model.loss = model_loss
 
     logging.info(f"Model adaptation completed. Final avg loss: {avg_loss:.4f}")
     return adapted_model

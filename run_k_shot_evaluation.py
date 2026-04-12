@@ -24,12 +24,13 @@ from typing import Any, Dict, List, Optional, Sequence
 
 CONTINUAL_MODELS: List[str] = [
     # 'meta-sgd',
-    # 'meta-er',
+    'meta-er',
     # 'meta-ewc',
+    # 'meta-derpp',
     # 'sgd',
     # 'er',
-    'der',
-    'derpp',
+    # 'der',
+    # 'derpp',
     # 'agem',
     # 'mer',
     # 'ewc-on',
@@ -38,8 +39,8 @@ CONTINUAL_MODELS: List[str] = [
     # 'gdumb'
 ]
 
-META_CL_METHODS = ['maml', 'reptile']
-META_CL_STRATEGIES = ['sequential', 'parallel']
+META_CL_METHODS = ['reptile'] #, 'maml']
+META_CL_STRATEGIES = ['parallel'] #, 'sequential']
 
 CONTINUAL_DATASETS: List[str] = [
     # 'seq-mnist',

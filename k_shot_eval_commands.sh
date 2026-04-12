@@ -1,21 +1,23 @@
 # Get checkpoints, copy first line from from scripts/reproduce.json
 
-CUDA_VISIBLE_DEVICES=5 python main.py --dataset=seq-cifar100 --model=lwf --lr=0.03  \
+CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100  --model=derpp --buffer_size=500 --model_config=best  \
     --savecheck=task \
     >outputs/train_model.out 2>outputs/train_model.err &
 
 
 # Train meta-cl methods
 
-CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_strategy=sequential \
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_strategy=parallel \
+    --adapt_lr=0.3 --num_adapt_steps=10 \
     --savecheck=task \
     >outputs/meta_sgd.out 2>outputs/meta_sgd.err &
 
-CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=maml --meta_strategy=sequential \
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=maml --meta_strategy=parallel --adapt_lr=0.01 --num_adapt_steps=2 \
     --savecheck=task \
     >outputs/meta_sgd_maml.out 2>outputs/meta_sgd_maml.err &
 
 CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100 --model=meta_er --buffer_size=500 --lr=0.1 \
+    --adapt_lr=0.3 --num_adapt_steps=10 \
     --savecheck=task \
     >outputs/meta_er.out 2>outputs/meta_er.err &
 
@@ -23,6 +25,10 @@ CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100 --model=meta_ewc --
     --savecheck=task \
     >outputs/meta_ewc.out 2>outputs/meta_ewc.err &
 
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_derpp --buffer_size=500 --lr=0.03 --alpha=0.3 --beta=0.5 \
+    --adapt_lr=0.3 --num_adapt_steps=10 \
+    --savecheck=task \
+    >outputs/meta_derpp.out 2>outputs/meta_derpp.err &
 
 
 # Smoke test
@@ -50,7 +56,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 python run_k_shot_evaluation.py \
 
 python plot_k_shot_results.py \
     --plot-all \
-    --metric accuracy \
     > outputs/plot_results.out 2> outputs/plot_results.err &
 
 python plot_k_shot_results.py \

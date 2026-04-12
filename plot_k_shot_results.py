@@ -306,7 +306,8 @@ def main() -> None:
     if args.plot_plasticity_comparisons:
         plot_plasticity_comparisons()
     elif args.plot_all:
-        plot_all(args.metric)
+        plot_all('accuracy')
+        plot_all('loss')
     elif args.csv_file:
         csv_path = Path(os.path.join(RESULTS_DIR, args.csv_file))
         if not csv_path.exists():

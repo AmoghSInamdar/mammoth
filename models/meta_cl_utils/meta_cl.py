@@ -50,7 +50,7 @@ class MetaCL(ContinualModel):
 
     def get_meta_learning_dataloaders(self):
         forward_task_ids = list(
-            range(self._task_iteration, min(self._task_iteration + self.args.num_lookahead_tasks, self.n_tasks)))
+            range(self.global_task_counter+1, min(self.global_task_counter+1+self.args.num_lookahead_tasks, self.n_tasks)))
         train_k = self.args.num_foresight_examples_per_task // self.classes_per_task
 
         meta_train_dataloaders = [create_k_shot_loader(
@@ -71,11 +71,11 @@ class MetaCL(ContinualModel):
         logging.info("Initializing meta-learning with Reptile strategy.")
         if self.args.meta_strategy == 'parallel':
             adapted_net_list = [adapt_model(
-                self, dataloader, self.args.num_adapt_steps, self.args.lr).net for dataloader in meta_learning_dataloaders]
+                self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr).net for dataloader in meta_learning_dataloaders]
         elif self.args.meta_strategy == 'sequential':
             adapted_model = copy.deepcopy(self)
             for dataloader in meta_learning_dataloaders:
-                adapted_model = adapt_model(adapted_model, dataloader, self.args.num_adapt_steps, self.args.lr)
+                adapted_model = adapt_model(adapted_model, dataloader, self.args.num_adapt_steps, self.args.adapt_lr)
             adapted_net_list = [adapted_model.net]
         else:
             raise ValueError(f"Unknown meta strategy: {self.args.meta_strategy}")
@@ -104,10 +104,17 @@ class MetaCL(ContinualModel):
 
     def begin_task(self, dataset):
         meta_train_dataloaders, meta_val_dataloaders = self.get_meta_learning_dataloaders()
-        if self.args.meta_method == 'reptile':
-            self.meta_initialize_reptile(meta_train_dataloaders)
-        elif self.args.meta_method == 'maml':
-            self.meta_initialize_maml(meta_train_dataloaders, meta_val_dataloaders)
+        if len(meta_train_dataloaders) == 0:
+            logging.info("No future tasks available for meta-learning. Skipping meta-initialization.")
+        else:
+            if self.args.meta_method == 'reptile':
+                self.meta_initialize_reptile(meta_train_dataloaders)
+            elif self.args.meta_method == 'maml':
+                self.meta_initialize_maml(meta_train_dataloaders, meta_val_dataloaders)
 
         return super().begin_task(dataset)
+    
+    def end_task(self, dataset):
+        self.global_task_counter += 1
+        return super().end_task(dataset)
 

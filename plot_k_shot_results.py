@@ -41,7 +41,7 @@ def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: s
 
     plt.xlabel('Evaluation Task ID')
     plt.ylabel(metric.capitalize())
-    plt.title(f'Checkpoint: {checkpoint_id}')
+    plt.title(f'Checkpoint: {int(checkpoint_id.split("_")[-1])+1}')
     plt.legend()
     plt.grid(True)
 
@@ -63,8 +63,9 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     axes_flat = axes.flatten()
 
     for i, (checkpoint_id, ckpt_results) in enumerate(grouped_results.items()):
-        plt.sca(axes_flat[i])
+        plt.sca(axes_flat[int(checkpoint_id.split('_')[-1])])  # Use checkpoint number for subplot index
         plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
+        plt.xticks(ticks=range(num_checkpoints), labels=range(1, num_checkpoints+1))
 
     # Hide unused subplots
     for ax in axes_flat[num_checkpoints:]:
@@ -72,7 +73,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
 
     plt.tight_layout()
     PLOTS_DIR.mkdir(exist_ok=True)
-    output_path = PLOTS_DIR / f'{csv_path.stem}_{metric}.png'
+    output_path = PLOTS_DIR / f'{metric}_{csv_path.stem.replace("evaluation_results_", "")}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"Plot saved to {output_path}")
 
@@ -195,15 +196,26 @@ def plot_plasticity_scores(model: str) -> None:
         print(f"No backward plasticity data for {model}")
 
 
-def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR) -> None:
-    """Plot forward/backward plasticity comparisons for each metric across all models."""
+def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Optional[str] = None) -> None:
+    """Plot forward/backward plasticity comparisons for each metric across all models.
+    
+    Args:
+        results_dir: Directory containing evaluation result CSVs
+        dataset: If specified, only plot results for this dataset
+    """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
         return
 
     csv_files = sorted(results_dir.glob('*.csv'))
+    if dataset:
+        csv_files = [f for f in csv_files if dataset in f.name]
+    
     if not csv_files:
-        print(f"No CSV files found in {results_dir}")
+        if dataset:
+            print(f"No CSV files found in {results_dir} for dataset '{dataset}'")
+        else:
+            print(f"No CSV files found in {results_dir}")
         return
 
     PLOTS_DIR.mkdir(exist_ok=True)
@@ -221,14 +233,14 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR) -> None:
     # Load all model results and compute checkpoint numbers.
     models_data = {}
     for csv_path in csv_files:
-        model = csv_path.stem.replace('evaluation_results_', '')
+        model_dataset = csv_path.stem.replace('evaluation_results_', '')
         results = load_evaluation_results(csv_path)
         if results.empty:
-            print(f"Skipping empty CSV for model {model}")
+            print(f"Skipping empty CSV for {model_dataset}")
             continue
         results = results.copy()
         results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
-        models_data[model] = results
+        models_data[model_dataset] = results
 
     for direction in ['forward', 'backward', 'overall']:
         fig, axes = plt.subplots(2, 2, figsize=(14, 10), squeeze=False)
@@ -259,12 +271,13 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR) -> None:
 
         plt.tight_layout()
         if direction == 'overall':
-            output_path = PLOTS_DIR / 'plasticity_comparison.png'
+            output_path = PLOTS_DIR / f'plasticity_{dataset}.png'
         else:
-            output_path = PLOTS_DIR / f'{direction}_plasticity_comparison.png'
+            output_path = PLOTS_DIR / f'plasticity_{direction}_{dataset}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
-        print(f"Saved aggregate {direction} plasticity comparison to {output_path}")
+        dataset_suffix = f" ({dataset})" if dataset else ""
+        print(f"Saved aggregate {direction} plasticity comparison {dataset_suffix} to {output_path}")
 
 
 def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False) -> None:
@@ -297,6 +310,8 @@ def main() -> None:
     parser.add_argument('csv_file', type=str, nargs='?', help='Path to the evaluation results CSV file')
     parser.add_argument('--metric', type=str, choices=['accuracy', 'loss'], default='accuracy',
                         help='Metric to plot (default: accuracy)')
+    parser.add_argument('--dataset', type=str, default=None,
+                        help='Dataset name to filter results (e.g., seq-cifar100)')
     parser.add_argument('--plot-all', action='store_true',
                         help='Plot all CSV files in RESULTS_DIR instead of a single file')
     parser.add_argument('--plot-plasticity-comparisons', action='store_true',
@@ -304,7 +319,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.plot_plasticity_comparisons:
-        plot_plasticity_comparisons()
+        plot_plasticity_comparisons(dataset=args.dataset)
     elif args.plot_all:
         plot_all('accuracy')
         plot_all('loss')

@@ -22,7 +22,7 @@ class MetaCL(ContinualModel):
 
     @staticmethod
     def get_parser(parser) -> ArgumentParser:
-        parser.add_argument('--meta_method', choices=['reptile', 'maml'], default='reptile',
+        parser.add_argument('--meta_method', choices=['reptile', 'maml', 'no_meta'], default='reptile',
                             help='Meta-learning method.')
         parser.add_argument('--meta_strategy', choices=['parallel', 'sequential'], default='parallel',
                             help='Meta-learning strategy.')
@@ -36,8 +36,8 @@ class MetaCL(ContinualModel):
                             help='Learning rate for meta-updates.')
         parser.add_argument('--use_fast_weights', action='store_true',
                             help='Whether to use a forward model with fast weights.')
-        parser.add_argument('--num_foresight_examples_per_task', type=int, default=32,
-                            help='Number of foresight examples per task.')
+        parser.add_argument('--num_meta_examples', type=int, default=32,
+                            help='Number of foresight examples for meta-learningper task.')
         parser.add_argument('--sampling_seed', type=int, default=42,
                             help='Seed for sampling foresight examples.')
         return parser
@@ -51,7 +51,7 @@ class MetaCL(ContinualModel):
     def get_meta_learning_dataloaders(self):
         forward_task_ids = list(
             range(self.global_task_counter+1, min(self.global_task_counter+1+self.args.num_lookahead_tasks, self.n_tasks)))
-        train_k = self.args.num_foresight_examples_per_task // self.classes_per_task
+        train_k = self.args.num_meta_examples // self.classes_per_task
 
         meta_train_dataloaders = [create_k_shot_loader(
             self.dataset, id, train_k, num_samples_per_class=train_k, sampling_seed=self.args.sampling_seed
@@ -102,6 +102,13 @@ class MetaCL(ContinualModel):
         self.net.set_params(adapted_model.net.get_params())
         logging.info("Completed MAML meta-update.")
 
+    def initialize_no_meta(self, train_dataloaders):
+        logging.info('Initializing by directly training on lookahead task examples.')
+        for dataloader in train_dataloaders:
+            adapted_model = adapt_model(self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr)
+            self.net.set_params(adapted_model.net.get_params())
+        logging.info("Completed initialization without meta-learning.")
+
     def begin_task(self, dataset):
         meta_train_dataloaders, meta_val_dataloaders = self.get_meta_learning_dataloaders()
         if len(meta_train_dataloaders) == 0:
@@ -111,6 +118,8 @@ class MetaCL(ContinualModel):
                 self.meta_initialize_reptile(meta_train_dataloaders)
             elif self.args.meta_method == 'maml':
                 self.meta_initialize_maml(meta_train_dataloaders, meta_val_dataloaders)
+            elif self.args.meta_method == 'no_meta':
+                self.initialize_no_meta(meta_train_dataloaders)
 
         return super().begin_task(dataset)
     

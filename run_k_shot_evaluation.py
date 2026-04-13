@@ -23,8 +23,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 CONTINUAL_MODELS: List[str] = [
-    # 'meta-sgd',
-    'meta-er',
+    'meta-sgd',
+    # 'meta-er',
     # 'meta-ewc',
     # 'meta-derpp',
     # 'sgd',
@@ -39,13 +39,14 @@ CONTINUAL_MODELS: List[str] = [
     # 'gdumb'
 ]
 
-META_CL_METHODS = ['reptile'] #, 'maml']
+META_CL_METHODS = ['no_meta', 'reptile'] #, 'maml']
 META_CL_STRATEGIES = ['parallel'] #, 'sequential']
 
 CONTINUAL_DATASETS: List[str] = [
     # 'seq-mnist',
     # 'seq-cifar10',
-    'seq-cifar100',
+    # 'seq-cifar100',
+    'seq-cifar100-20task',
     # 'seq-tinyimg',
     # 'std-split-cifar100',
     # 'structured-cifar100',
@@ -89,17 +90,15 @@ def get_adapt_settings(
     }
 
 
-def get_checkpoint_names(model: str, dataset: str, checkpoint_dir: Path = CHECKPOINT_DIR) -> List[str]:
+def get_checkpoint_names(model: str, dataset: str, method=None, strategy=None, checkpoint_dir: Path = CHECKPOINT_DIR) -> List[str]:
     """Return sorted checkpoint paths for a model/dataset pair."""
     if not checkpoint_dir.exists():
         raise FileNotFoundError(f"Checkpoint directory does not exist: {checkpoint_dir}")
 
     checkpoint_paths = []
     if model.startswith('meta'):
-        for method in META_CL_METHODS:
-            for strategy in META_CL_STRATEGIES:
-                pattern = f"{model}_{dataset}_{method}_{strategy}_*.pt"
-                checkpoint_paths.extend(sorted(checkpoint_dir.glob(pattern)))
+        pattern = f"{model}_{dataset}_{method}_{strategy}_*.pt"
+        checkpoint_paths.extend(sorted(checkpoint_dir.glob(pattern)))
         print(f"Searching for meta-CL checkpoints with pattern: {pattern}")
     else:
         pattern = f"{model}_{dataset}_*.pt"
@@ -236,7 +235,8 @@ def evaluate_checkpoints_for_k(
             except Exception:
                 pass
 
-    final_csv_path = output_dir / f"evaluation_results_{model}_{dataset}.csv"
+    out_filename = "_".join(Path(checkpoint_paths[0]).stem.split('_')[:-1])
+    final_csv_path = output_dir / f"evaluation_results_{out_filename}.csv"
     _merge_temp_csvs(final_csv_path, temp_csv_paths)
 
     # Clean up temporary directories after merging results
@@ -294,16 +294,31 @@ def run_all(args: argparse.Namespace) -> None:
     for model in args.models:
         model_settings = get_adapt_settings(model, adapt_settings, args.adapt_lr, args.num_adapt_steps)
         for dataset in args.datasets:
-            checkpoint_paths = get_checkpoint_names(model, dataset, args.checkpoint_dir)
-            evaluate_checkpoints_for_k(
-                checkpoint_paths,
-                model,
-                dataset,
-                args.k_values,
-                model_settings,
-                output_dir=args.output_dir,
-                max_subprocesses=args.max_subprocesses,
-            )
+            if model.startswith('meta'):
+                for method in META_CL_METHODS:
+                    for strategy in META_CL_STRATEGIES:
+                        checkpoint_paths = get_checkpoint_names(
+                            model, dataset, method=method, strategy=strategy, checkpoint_dir=args.checkpoint_dir)
+                        evaluate_checkpoints_for_k(
+                            checkpoint_paths,
+                            model,
+                            dataset,
+                            args.k_values,
+                            model_settings,
+                            output_dir=args.output_dir,
+                            max_subprocesses=args.max_subprocesses,
+                        )
+            else:
+                checkpoint_paths = get_checkpoint_names(model, dataset, checkpoint_dir=args.checkpoint_dir)
+                evaluate_checkpoints_for_k(
+                    checkpoint_paths,
+                    model,
+                    dataset,
+                    args.k_values,
+                    model_settings,
+                    output_dir=args.output_dir,
+                    max_subprocesses=args.max_subprocesses,
+                )
 
 
 if __name__ == '__main__':

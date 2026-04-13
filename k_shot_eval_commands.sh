@@ -5,12 +5,23 @@ CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100  --model=derpp --bu
     >outputs/train_model.out 2>outputs/train_model.err &
 
 
+CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100-20task  --model=sgd --lr=0.1  \
+    --savecheck=task \
+    >outputs/train_sgd_20task.out 2>outputs/train_sgd_20task.err &
+
+
 # Train meta-cl methods
 
-CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_strategy=parallel \
-    --adapt_lr=0.3 --num_adapt_steps=10 \
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=no_meta \
+    --adapt_lr=0.2 --num_adapt_steps=15 \
     --savecheck=task \
     >outputs/meta_sgd.out 2>outputs/meta_sgd.err &
+
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100-20task --model=meta_sgd --lr=0.1 --meta_strategy=parallel \
+    --adapt_lr=0.01 --num_adapt_steps=10 --num_meta_examples=15 \
+    --savecheck=task \
+    >outputs/meta_sgd_20task.out 2>outputs/meta_sgd_20task.err &
+
 
 CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=maml --meta_strategy=parallel --adapt_lr=0.01 --num_adapt_steps=2 \
     --savecheck=task \
@@ -60,6 +71,7 @@ python plot_k_shot_results.py \
 
 python plot_k_shot_results.py \
     --plot-plasticity-comparisons \
+    --dataset=seq-cifar100-20task \
     > outputs/plot_results.out 2> outputs/plot_results.err &
 
 # Compute plasticity scores

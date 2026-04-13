@@ -19,3 +19,4 @@ xitorch
 dotenv
 matplotlib
 higher
+natsort

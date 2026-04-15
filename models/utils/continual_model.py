@@ -458,7 +458,14 @@ class ContinualModel(nn.Module):
         self._n_classes_current_task = self._cpt if isinstance(self._cpt, int) else self._cpt[self._current_task]
         self._n_past_classes, self._n_seen_classes = self.get_offsets(self._current_task)
         self._n_remaining_classes = self.N_CLASSES - self._n_seen_classes
-        self.class_names[self._current_task] = self.dataset.class_names[self._n_past_classes:self._n_seen_classes]
+        if self.dataset.SETTING != 'general-continual':
+            next_class_names = self.dataset.class_names[self._n_past_classes:self._n_seen_classes]
+            if self._current_task >= len(self.class_names):
+                self.class_names.append(next_class_names)
+            else:
+                self.class_names[self._current_task] = next_class_names
+        else:
+            self.class_names = {self._current_task: self.dataset.class_names}
 
         logging.info(f"[ContinualDataset.meta_begin_task] Starting Task {cur_task}: ")
         logging.info(f"[ContinualDataset.meta_begin_task] {self._n_classes_current_task} classes included: {self.class_names[self._current_task]}")

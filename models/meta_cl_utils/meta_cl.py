@@ -37,7 +37,7 @@ class MetaCL(ContinualModel):
         parser.add_argument('--use_fast_weights', action='store_true',
                             help='Whether to use a forward model with fast weights.')
         parser.add_argument('--num_meta_examples', type=int, default=32,
-                            help='Number of foresight examples for meta-learningper task.')
+                            help='Number of foresight examples for meta-learning per task.')
         parser.add_argument('--sampling_seed', type=int, default=42,
                             help='Seed for sampling foresight examples.')
         return parser
@@ -45,6 +45,7 @@ class MetaCL(ContinualModel):
     def __init__(self, backbone, loss, args, transform, dataset=None):
         super(MetaCL, self).__init__(backbone, loss, args, transform, dataset=dataset)
         self.global_task_counter = 0
+        self.fast_task_counter = 0
         if self.args.adapt_lr is None:
             self.args.adapt_lr = self.args.lr
 

@@ -30,6 +30,25 @@ def group_results_by_checkpoint(results: pd.DataFrame) -> Dict[str, pd.DataFrame
     return {name: group for name, group in results.groupby('checkpoint_id')}
 
 
+def get_dataset_name_from_csv_path(csv_path: Path) -> str:
+    """Extract the dataset name from a results CSV filename."""
+    base_name = csv_path.stem.replace('evaluation_results_', '')
+    tokens = base_name.split('_')
+    for token in tokens:
+        if token.startswith(('seq-', 'std-', 'structured-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
+            return token
+    return tokens[-1]
+
+
+def get_dataset_name_from_model(model: str) -> str:
+    """Extract the dataset portion from a model_dataset string."""
+    tokens = model.split('_')
+    for token in tokens:
+        if token.startswith(('seq-', 'std-', 'structured-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
+            return token
+    return tokens[-1]
+
+
 def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
     """Plot results for a single checkpoint."""
     # Get unique k_values and sort
@@ -66,15 +85,19 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
         plt.sca(axes_flat[int(checkpoint_id.split('_')[-1])])  # Use checkpoint number for subplot index
         plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
         plt.xticks(ticks=range(num_checkpoints), labels=range(1, num_checkpoints+1))
+        plt.axvline(x=int(checkpoint_id.split('_')[-1]), color='green', linestyle='--', alpha=0.5)
 
     # Hide unused subplots
     for ax in axes_flat[num_checkpoints:]:
         ax.set_visible(False)
 
     plt.tight_layout()
-    PLOTS_DIR.mkdir(exist_ok=True)
-    output_path = PLOTS_DIR / f'{metric}_{csv_path.stem.replace("evaluation_results_", "")}.png'
+    dataset_name = get_dataset_name_from_csv_path(csv_path)
+    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir.mkdir(exist_ok=True, parents=True)
+    output_path = plot_dir / f'{metric}_{csv_path.stem.replace("evaluation_results_", "")}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
     print(f"Plot saved to {output_path}")
 
 
@@ -121,7 +144,9 @@ def plot_plasticity_scores(model: str) -> None:
     else:
         avg_plasticity_backward = None
 
-    PLOTS_DIR.mkdir(exist_ok=True)
+    dataset_name = get_dataset_name_from_model(model)
+    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir.mkdir(exist_ok=True, parents=True)
 
     # Plot overall
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
@@ -140,7 +165,7 @@ def plot_plasticity_scores(model: str) -> None:
     ax2.legend()
     ax2.grid(True)
     plt.tight_layout()
-    output_path = PLOTS_DIR / f'plasticity_{model}.png'
+    output_path = plot_dir / f'plasticity_{model}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Overall plasticity plot saved to {output_path}")
@@ -163,7 +188,7 @@ def plot_plasticity_scores(model: str) -> None:
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = PLOTS_DIR / f'forward_plasticity_{model}.png'
+        output_path = plot_dir / f'forward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Forward plasticity plot saved to {output_path}")
@@ -188,7 +213,7 @@ def plot_plasticity_scores(model: str) -> None:
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = PLOTS_DIR / f'backward_plasticity_{model}.png'
+        output_path = plot_dir / f'backward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Backward plasticity plot saved to {output_path}")
@@ -218,7 +243,6 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
             print(f"No CSV files found in {results_dir}")
         return
 
-    PLOTS_DIR.mkdir(exist_ok=True)
     metric_names = ['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']
     direction_labels = {
         'forward': 'Forward',
@@ -232,7 +256,9 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
 
     # Load all model results and compute checkpoint numbers.
     models_data = {}
+    datasets = {}
     for csv_path in csv_files:
+        dataset_name = get_dataset_name_from_csv_path(csv_path)
         model_dataset = csv_path.stem.replace('evaluation_results_', '')
         results = load_evaluation_results(csv_path)
         if results.empty:
@@ -240,44 +266,47 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
             continue
         results = results.copy()
         results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
-        models_data[model_dataset] = results
+        datasets.setdefault(dataset_name, []).append((model_dataset, results))
 
-    for direction in ['forward', 'backward', 'overall']:
-        fig, axes = plt.subplots(2, 2, figsize=(14, 10), squeeze=False)
-        for idx, metric in enumerate(metric_names):
-            ax = axes[idx // 2][idx % 2]
-            for model, results in models_data.items():
-                if direction == 'forward':
-                    subset = results[results['eval_task_id'] > results['checkpoint_num']]
-                elif direction == 'backward':
-                    subset = results[results['eval_task_id'] < results['checkpoint_num']]
-                else:  # overall
-                    subset = results
+    for dataset_name, model_results in datasets.items():
+        fig_base = PLOTS_DIR / dataset_name
+        fig_base.mkdir(exist_ok=True, parents=True)
 
-                if subset.empty:
-                    continue
+        for direction in ['forward', 'backward', 'overall']:
+            fig, axes = plt.subplots(2, 2, figsize=(14, 10), squeeze=False)
+            for idx, metric in enumerate(metric_names):
+                ax = axes[idx // 2][idx % 2]
+                for model, results in model_results:
+                    if direction == 'forward':
+                        subset = results[results['eval_task_id'] > results['checkpoint_num']]
+                    elif direction == 'backward':
+                        subset = results[results['eval_task_id'] < results['checkpoint_num']]
+                    else:  # overall
+                        subset = results
 
-                plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
-                if plot_data.empty:
-                    continue
+                    if subset.empty:
+                        continue
 
-                ax.plot(plot_data['checkpoint_num'], plot_data[metric], marker='o', label=model)
+                    plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
+                    if plot_data.empty:
+                        continue
 
-            ax.set_title(f'{metric} ({direction_labels[direction]})')
-            ax.set_xlabel('Checkpoint Number')
-            ax.set_ylabel('Average Plasticity Score')
-            ax.grid(True)
-            ax.legend(fontsize='small')
+                    ax.plot(plot_data['checkpoint_num'], plot_data[metric], marker='o', label=model)
 
-        plt.tight_layout()
-        if direction == 'overall':
-            output_path = PLOTS_DIR / f'plasticity_{dataset}.png'
-        else:
-            output_path = PLOTS_DIR / f'plasticity_{direction}_{dataset}.png'
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        plt.close(fig)
-        dataset_suffix = f" ({dataset})" if dataset else ""
-        print(f"Saved aggregate {direction} plasticity comparison {dataset_suffix} to {output_path}")
+                ax.set_title(f'{metric} ({direction_labels[direction]})')
+                ax.set_xlabel('Checkpoint Number')
+                ax.set_ylabel('Average Plasticity Score')
+                ax.grid(True)
+                ax.legend(fontsize='small')
+
+            plt.tight_layout()
+            if direction == 'overall':
+                output_path = fig_base / f'plasticity_{dataset_name}.png'
+            else:
+                output_path = fig_base / f'plasticity_{direction}_{dataset_name}.png'
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close(fig)
+            print(f"Saved aggregate {direction} plasticity comparison for {dataset_name} to {output_path}")
 
 
 def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False) -> None:

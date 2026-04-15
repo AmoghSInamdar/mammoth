@@ -2,6 +2,7 @@ from argparse import Namespace
 import os
 import pickle
 
+from PIL import Image
 import torch
 from torchvision.datasets import CIFAR100
 
@@ -36,6 +37,35 @@ class SuperclassSplitCIFAR100(CIFAR100):
         self.superclass = meta['coarse_label_names']
         self.targets = data['coarse_labels']
 
+    def __getitem__(self, index: int) -> Tuple[Image.Image, int, Image.Image]:
+        """
+        Gets the requested element from the dataset.
+
+        Args:
+            index: index of the element to be returned
+
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img, target = self.data[index], self.targets[index]
+
+        # to return a PIL Image
+        img = Image.fromarray(img, mode='RGB')
+        original_img = img.copy()
+
+        not_aug_img = self.not_aug_transform(original_img)
+
+        if self.transform is not None:
+            img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        if hasattr(self, 'logits'):
+            return img, target, not_aug_img, self.logits[index]
+
+        return img, target, not_aug_img
+
 class StructuredCIFAR100(ContinualDataset):
     """Structured Split CIFAR100 Dataset. 
     (Based on Integrating Present and Past in Unsupervised Continual Learning https://arxiv.org/pdf/2404.19132)
@@ -52,7 +82,7 @@ class StructuredCIFAR100(ContinualDataset):
         STD (tuple): standard deviation of the dataset.
         TRANSFORM (torchvision.transforms): transformation to apply to the data."""
     
-    NAME = 'structured-cifar100'
+    NAME = 'structured-cifar100-bug'
     SETTING = 'class-il'
     N_CLASSES_PER_TASK = 5
     N_TASKS = 20

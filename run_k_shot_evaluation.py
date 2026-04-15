@@ -23,8 +23,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 CONTINUAL_MODELS: List[str] = [
-    'meta-sgd',
-    # 'meta-er',
+    # 'meta-sgd',
+    'meta-er',
     # 'meta-ewc',
     # 'meta-derpp',
     # 'sgd',
@@ -44,9 +44,10 @@ META_CL_STRATEGIES = ['parallel'] #, 'sequential']
 
 CONTINUAL_DATASETS: List[str] = [
     # 'seq-mnist',
+    'rot-mnist'
     # 'seq-cifar10',
     # 'seq-cifar100',
-    'seq-cifar100-20task',
+    # 'seq-cifar100-20task',
     # 'seq-tinyimg',
     # 'std-split-cifar100',
     # 'structured-cifar100',

@@ -10,6 +10,15 @@ CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100-20task  --model=sgd
     >outputs/train_sgd_20task.out 2>outputs/train_sgd_20task.err &
 
 
+CUDA_VISIBLE_DEVICES=7 python main.py --dataset=rot-mnist  --model=sgd --lr=0.1  \
+    --savecheck=task \
+    >outputs/train_sgd_mnist.out 2>outputs/train_sgd_mnist.err &
+
+CUDA_VISIBLE_DEVICES=5 python main.py --dataset=rot-mnist --model=er --buffer_size=500 --lr=0.1  \
+    --savecheck=task \
+    >outputs/train_er_mnist.out 2>outputs/train_er_mnist.err &
+
+
 # Train meta-cl methods
 
 CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=no_meta \
@@ -18,9 +27,14 @@ CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --
     >outputs/meta_sgd.out 2>outputs/meta_sgd.err &
 
 CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100-20task --model=meta_sgd --lr=0.1 --meta_strategy=parallel \
-    --adapt_lr=0.01 --num_adapt_steps=10 --num_meta_examples=15 \
+    --adapt_lr=0.1 --num_adapt_steps=10 --num_meta_examples=25 \
     --savecheck=task \
     >outputs/meta_sgd_20task.out 2>outputs/meta_sgd_20task.err &
+
+CUDA_VISIBLE_DEVICES=6 python main.py --dataset=rot-mnist --model=meta_sgd --lr=0.1 --meta_strategy=parallel \
+    --adapt_lr=0.01 --num_adapt_steps=5 --num_meta_examples=30 \
+    --savecheck=task \
+    >outputs/meta_sgd_mnist.out 2>outputs/meta_sgd_mnist.err &
 
 
 CUDA_VISIBLE_DEVICES=6 python main.py --dataset=seq-cifar100 --model=meta_sgd --lr=0.1 --meta_method=maml --meta_strategy=parallel --adapt_lr=0.01 --num_adapt_steps=2 \
@@ -31,6 +45,12 @@ CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100 --model=meta_er --b
     --adapt_lr=0.3 --num_adapt_steps=10 \
     --savecheck=task \
     >outputs/meta_er.out 2>outputs/meta_er.err &
+
+CUDA_VISIBLE_DEVICES=7 python main.py --dataset=rot-mnist --model=meta_er --buffer_size=500 --lr=0.1 \
+    --adapt_lr=0.3 --num_adapt_steps=10 \
+    --savecheck=task \
+    >outputs/meta_er_mnist.out 2>outputs/meta_er_mnist.err &
+
 
 CUDA_VISIBLE_DEVICES=7 python main.py --dataset=seq-cifar100 --model=meta_ewc --n_epochs=50 --lr=0.1 --e_lambda=10 --gamma=1 \
     --savecheck=task \
@@ -60,6 +80,7 @@ CUDA_VISIBLE_DEVICES=5 python eval_checkpoints.py \
 # Full checkpoint evaluation
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 python run_k_shot_evaluation.py \
+    --adapt_lr=0.01 --num_adapt_steps=10 \
     > outputs/eval_all.out 2> outputs/eval_all.err &
 
 
@@ -71,7 +92,7 @@ python plot_k_shot_results.py \
 
 python plot_k_shot_results.py \
     --plot-plasticity-comparisons \
-    --dataset=seq-cifar100-20task \
+    --dataset=rot-mnist \
     > outputs/plot_results.out 2> outputs/plot_results.err &
 
 # Compute plasticity scores
@@ -80,3 +101,45 @@ python utils/per_shot_plasticity.py \
     --process-all \
     --metric loss \
     > outputs/plasticity_scores.out 2> outputs/plasticity_scores.err &
+
+
+# Full pipeline
+
+# Seq CIFAR 100
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model sgd  --lr 0.1 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/sgd_seq_cifar100.out 2>outputs/sgd_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model meta_sgd  --lr 0.1 \
+    --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
+    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    >outputs/meta_sgd_seq_cifar100.out 2>outputs/meta_sgd_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model meta_sgd  --lr 0.1 \
+    --meta_method no_meta --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
+    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/no_meta_sgd_seq_cifar100.out 2>outputs/no_meta_sgd_seq_cifar100.err &
+
+# Struct CIFAR100
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model sgd  --lr 0.1 \
+    --adapt_lr 0.3 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/sgd_struct_cifar100.out 2>outputs/sgd_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset rot-mnist --model meta_er  --buffer_size 500 --lr 0.1 \
+    --meta_method reptile --meta_strategy parallel \
+    --adapt_lr 0.3 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/meta_er_mnist_full.out 2>outputs/meta_er_mnist_full.err &

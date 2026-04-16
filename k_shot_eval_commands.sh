@@ -109,16 +109,16 @@ python utils/per_shot_plasticity.py \
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model sgd  --lr 0.1 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     --skip_train \
     >outputs/sgd_seq_cifar100.out 2>outputs/sgd_seq_cifar100.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model meta_sgd  --lr 0.1 \
-    --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
-    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.2 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     >outputs/meta_sgd_seq_cifar100.out 2>outputs/meta_sgd_seq_cifar100.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
@@ -129,11 +129,29 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --savecheck task \
     >outputs/no_meta_sgd_seq_cifar100.out 2>outputs/no_meta_sgd_seq_cifar100.err &
 
+
+# Seq CIFAR 100 20 task
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model sgd  --lr 0.1 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/sgd_seq_cifar100.out 2>outputs/sgd_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model meta_sgd  --lr 0.1 \
+    --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    >outputs/meta_sgd_seq_cifar100_20task.out 2>outputs/meta_sgd_seq_cifar100_20task.err &
+
+
 # Struct CIFAR100
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-    python run_pipeline_full.py --dataset struct-cifar100 --model sgd  --lr 0.1 \
-    --adapt_lr 0.3 --num_adapt_steps 10 \
+    python run_pipeline_full.py --dataset seq-cifar100-superclass --model sgd  --lr 0.1 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/sgd_struct_cifar100.out 2>outputs/sgd_struct_cifar100.err &
 

@@ -296,8 +296,10 @@ def run_all(args: argparse.Namespace) -> None:
         model_settings = get_adapt_settings(model, adapt_settings, args.adapt_lr, args.num_adapt_steps)
         for dataset in args.datasets:
             if model.startswith('meta'):
-                for method in META_CL_METHODS:
-                    for strategy in META_CL_STRATEGIES:
+                eval_methods = [args.meta_method] if hasattr(args, 'meta_method') else META_CL_METHODS
+                eval_strategies = [args.meta_strategy] if hasattr(args, 'meta_strategy') else META_CL_STRATEGIES
+                for method in eval_methods:
+                    for strategy in eval_strategies:
                         checkpoint_paths = get_checkpoint_names(
                             model, dataset, method=method, strategy=strategy, checkpoint_dir=args.checkpoint_dir)
                         evaluate_checkpoints_for_k(

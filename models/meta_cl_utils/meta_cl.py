@@ -28,6 +28,8 @@ class MetaCL(ContinualModel):
                             help='Meta-learning strategy.')
         parser.add_argument('--num_lookahead_tasks', type=int, default=3,
                             help='Number of lookahead tasks for meta learning.')
+        parser.add_argument('--num_prev_tasks', type=int, default=0,
+                            help='Number of previous tasks for meta learning.')
         parser.add_argument('--num_adapt_steps', type=int, default=5,
                             help='Number of adaptation steps during evaluation.')
         parser.add_argument('--adapt_lr', type=float, required=False,

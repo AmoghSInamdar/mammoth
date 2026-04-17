@@ -3,20 +3,21 @@ import logging
 
 import higher
 import torch
+from torch.optim import SGD, Adam
 from tqdm import tqdm
 
 
 from models.utils.continual_model import ContinualModel
 
 
-def train_maml_sequential(model: ContinualModel, meta_train_dataloaders, meta_val_dataloaders):
+def train_maml_sequential(model: ContinualModel, meta_train_dataloaders, meta_val_dataloaders, use_model_opt=False):
     adapted_model = copy.deepcopy(model)
     optimizer_class = type(adapted_model.opt)
-    meta_opt = optimizer_class(
+    meta_opt = optimizer_class if use_model_opt else Adam(
         adapted_model.net.parameters(),
         lr=model.args.meta_lr
     )
-    inner_opt = optimizer_class(
+    inner_opt = optimizer_class if use_model_opt else SGD(
         adapted_model.net.parameters(),
         lr=model.args.adapt_lr
     )
@@ -42,28 +43,29 @@ def train_maml_sequential(model: ContinualModel, meta_train_dataloaders, meta_va
                 avg_loss = total_loss / num_batches if num_batches > 0 else 0
                 pbar.set_postfix(loss=f"{avg_loss:.4f}")
         
-        # Outer loop: Use the last validation dataloader for meta-update
+        # Outer loop: Compute validation loss on all validation dataloaders after sequential adaptation
         val_loss = 0.0
-        for val_batch in meta_val_dataloaders[-1]:
-            val_inputs, val_labels, val_not_aug_inputs = val_batch[0], val_batch[1], val_batch[2]
-            val_inputs, val_labels = val_inputs.to(fnet.device), val_labels.to(fnet.device, dtype=torch.long)
-            val_not_aug_inputs = val_not_aug_inputs.to(fnet.device)
-            val_loss += adapted_model.loss(fnet(val_inputs), val_labels)
-        logging.info(f"Validation loss after adaptation: {val_loss.item():.4f}")
+        for val_loader in meta_val_dataloaders:
+            for val_batch in val_loader:
+                val_inputs, val_labels, val_not_aug_inputs = val_batch[0], val_batch[1], val_batch[2]
+                val_inputs, val_labels = val_inputs.to(fnet.device), val_labels.to(fnet.device, dtype=torch.long)
+                val_not_aug_inputs = val_not_aug_inputs.to(fnet.device)
+                val_loss += adapted_model.loss(fnet(val_inputs), val_labels)
+        logging.info(f"Validation loss after sequential adaptation: {val_loss.item():.4f}")
         val_loss.backward()
     
     meta_opt.step()
     return adapted_model
 
 
-def train_maml_parallel(model: ContinualModel, meta_train_dataloaders, meta_val_dataloaders):
+def train_maml_parallel(model: ContinualModel, meta_train_dataloaders, meta_val_dataloaders, use_model_opt=False):
     adapted_model = copy.deepcopy(model)
     optimizer_class = type(adapted_model.opt)
-    meta_opt = optimizer_class(
+    meta_opt = optimizer_class if use_model_opt else Adam(
         adapted_model.net.parameters(),
         lr=model.args.meta_lr
     )
-    inner_opt = optimizer_class(
+    inner_opt = optimizer_class if use_model_opt else SGD(
         adapted_model.net.parameters(),
         lr=model.args.adapt_lr
     )
@@ -90,7 +92,7 @@ def train_maml_parallel(model: ContinualModel, meta_train_dataloaders, meta_val_
                 avg_loss = total_loss / num_batches if num_batches > 0 else 0
                 pbar.set_postfix(loss=f"{avg_loss:.4f}")
         
-            # Outer loop: Use the last validation dataloader for meta-update
+            # Outer loop: Compute validation loss on this task's validation dataloader
             val_loss = 0.0
             for val_batch in val_loader:
                 val_inputs, val_labels, val_not_aug_inputs = val_batch[0], val_batch[1], val_batch[2]

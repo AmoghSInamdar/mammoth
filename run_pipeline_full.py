@@ -103,6 +103,8 @@ def run_evaluation(
     adapt_lr: float = 0.01,
     num_adapt_steps: int = 5,
     max_subprocesses: int = 10,
+    meta_method: Optional[str] = None,
+    meta_strategy: Optional[str] = None
 ) -> None:
     """Run k-shot evaluation on trained checkpoints.
     
@@ -131,7 +133,11 @@ def run_evaluation(
         args.checkpoint_dir = Path('checkpoints')
         args.output_dir = Path('results/k_shot_evaluation')
         args.adapt_settings_file = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
-        
+        if meta_method is not None:
+            args.meta_method = meta_method
+        if meta_strategy is not None:
+            args.meta_strategy = meta_strategy
+
         # Parse to proper format
         if args.models:
             args.models = [m.strip() for m in args.models.split(',') if m.strip()]
@@ -264,7 +270,7 @@ def run_pipeline(
         # Step 2: Evaluation
         if do_eval:
             logger.info(f"Step 2/3: Evaluating {model} on {dataset}")
-            model_name_for_eval = model.replace('_', '-') if 'meta' in model else model
+            model_name_for_eval = model.replace('_', '-')                
             run_evaluation(
                 models=model_name_for_eval,
                 datasets=dataset,
@@ -272,6 +278,8 @@ def run_pipeline(
                 adapt_lr=adapt_lr,
                 num_adapt_steps=num_adapt_steps,
                 max_subprocesses=max_subprocesses,
+                meta_method=kwargs['meta_method'] if 'meta' in model else None,
+                meta_strategy=kwargs['meta_strategy'] if 'meta' in model else None
             )
             logger.info("✓ Evaluation completed")
             

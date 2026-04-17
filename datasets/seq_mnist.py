@@ -116,8 +116,6 @@ class SequentialMNIST(ContinualDataset):
         return 1
 
     def get_class_names(self):
-        if self.class_names is not None:
-            return self.class_names
         classes = MNIST(base_path() + 'MNIST', train=True, download=True).classes
         classes = [c.split('-')[1].strip() for c in classes]
         classes = fix_class_names_order(classes, self.args)

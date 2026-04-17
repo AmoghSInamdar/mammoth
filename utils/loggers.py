@@ -39,7 +39,7 @@ class Logger:
         self.args = args
         self.accs = []
         self.fullaccs = []
-        if setting_str == 'class-il':
+        if setting_str in ('class-il', 'task-il'):
             self.accs_mask_classes = []
             self.fullaccs_mask_classes = []
         self.setting = setting_str
@@ -71,7 +71,7 @@ class Logger:
             'bwt_mask_classes': self.bwt_mask_classes,
             'forgetting_mask_classes': self.forgetting_mask_classes,
         }
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             dic['accs_mask_classes'] = self.accs_mask_classes
             dic['fullaccs_mask_classes'] = self.fullaccs_mask_classes
 
@@ -92,7 +92,7 @@ class Logger:
         self.fwt_mask_classes = dic['fwt_mask_classes']
         self.bwt_mask_classes = dic['bwt_mask_classes']
         self.forgetting_mask_classes = dic['forgetting_mask_classes']
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             self.accs_mask_classes = dic['accs_mask_classes']
             self.fullaccs_mask_classes = dic['fullaccs_mask_classes']
 
@@ -113,7 +113,7 @@ class Logger:
             self.bwt_mask_classes = self.bwt_mask_classes[:-num]
             self.forgetting_mask_classes = self.forgetting_mask_classes[:-num]
 
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             self.accs_mask_classes = self.accs_mask_classes[:-num]
             self.fullaccs_mask_classes = self.fullaccs_mask_classes[:-num]
 
@@ -128,7 +128,7 @@ class Logger:
             accs_mask_classes: The accuracy values for masked classes.
         """
         self.fwt = forward_transfer(results, accs)
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             self.fwt_mask_classes = forward_transfer(results_mask_classes, accs_mask_classes)
 
         return self.fwt, self.fwt_mask_classes
@@ -142,7 +142,7 @@ class Logger:
             results_mask_classes: The results for masked classes.
         """
         self.bwt = backward_transfer(results)
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             self.bwt_mask_classes = backward_transfer(results_mask_classes)
 
         return self.bwt, self.bwt_mask_classes
@@ -156,7 +156,7 @@ class Logger:
             results_mask_classes: The results for masked classes.
         """
         self.forgetting = forgetting(results)
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             self.forgetting_mask_classes = forgetting(results_mask_classes)
 
         return self.forgetting, self.forgetting_mask_classes
@@ -182,7 +182,7 @@ class Logger:
         Args:
             accs: the accuracy values
         """
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             acc_class_il, acc_task_il = accs
             self.fullaccs.append(acc_class_il)
             self.fullaccs_mask_classes.append(acc_task_il)
@@ -244,7 +244,7 @@ class Logger:
         with open(path, 'a') as f:
             f.write(str(wrargs) + '\n')
 
-        if self.setting == 'class-il':
+        if self.setting in ('class-il', 'task-il'):
             create_if_not_exists(smart_joint(target_folder, "task-il/", self.dataset))
             create_if_not_exists(smart_joint(target_folder, "task-il", self.dataset, self.model))
 
@@ -268,16 +268,13 @@ def log_bias_accs(args: Namespace, logger: Logger, accs, t: int, setting: str, e
     """
     Logs the accuracy values and other metrics for the bias dataset.
     """
-
     attr_accuracies, group_statistics = accs
 
-    # Log the group statistics separately
     group_log_dict = {f"ACC_{key}": group_statistics[key] for key in group_statistics}
     logging.info(group_log_dict)
     if not args.nowand:
         wandb.log(group_log_dict)
 
-    # Calculate and log worst and avg for each task
     mean_avg_group, mean_worst_group, mean_best_group, mean_gap_group = [], [], [], []
     print("Accuracy per task:")
     for i in range(len(attr_accuracies)):
@@ -342,7 +339,6 @@ def log_accs(args: Namespace, logger: Logger, accs, t: int, setting: str, epoch=
         epoch: The epoch number (optional).
         prefix: The prefix for the metrics (default="RESULT").
     """
-
     mean_acc = print_mean_accuracy(accs, t + 1 if isinstance(t, (float, int)) else t,
                                    setting, joint=args.joint,
                                    epoch=epoch, future=future)
@@ -355,7 +351,7 @@ def log_accs(args: Namespace, logger: Logger, accs, t: int, setting: str, epoch=
         postfix = "" if epoch is None else f"_epoch_{epoch}"
         if future:
             prefix += "_transf"
-        if isinstance(mean_acc, float):  # domain or gcl
+        if isinstance(mean_acc, float):
             d2 = {f'{prefix}_domain_mean_accs{postfix}': mean_acc,
                   **{f'{prefix}_domain_acc_{i}{postfix}': a for i, a in enumerate(accs[0])},
                   'Task': t}
@@ -383,7 +379,6 @@ def log_extra_metrics(args, metric: float, metric_mask_class: float, metric_name
         epoch: The epoch number (optional).
         prefix: The prefix for the metrics (default="RESULT").
     """
-
     print(f'{metric_name}: [Class-IL]: {metric:.2f} \t [Task-IL]: {metric_mask_class:.2f}', file=sys.stderr)
     print(f'\tRaw {metric_name} values: Class-IL {metric} | Task-IL {metric_mask_class}', file=sys.stderr)
 

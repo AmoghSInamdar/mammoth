@@ -3,6 +3,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+import logging
+
+from PIL import Image
 import numpy as np
 import torchvision.transforms.functional as F
 
@@ -110,3 +113,25 @@ class IncrementalRotation(object):
             x: iteration index
         """
         self.iteration = x
+
+class SmoothRotation(object):
+    def __init__(self, init_deg: int = 0, increase_in_task: int = 5, increase_between_task=15, max_deg=360) -> None:
+        self.increase_in_task = increase_in_task
+        self.increase_between_task = increase_between_task
+        self.init_deg = init_deg
+        self.max_deg = max_deg
+
+    def get_task_range(self, task_id: int):
+        start = self.init_deg + task_id * (self.increase_in_task + self.increase_between_task)
+        end = min(start + self.increase_in_task, self.max_deg)
+        return start, end
+
+    def transform_batch_for_task(self, chunk: np.ndarray, task_id: int, dataset_name: str) -> np.ndarray:
+        start_range, end_range = self.get_task_range(task_id)
+        angles = np.random.uniform(start_range, end_range, size=len(chunk))
+        logging.info(f"[SmoothRotation][{dataset_name}] Task {task_id} start={start_range} end={end_range} angles=[{angles.min():.2f}, {angles.max():.2f}]")
+        return np.stack([
+            np.array(Image.fromarray(img, mode='L').rotate(float(angle)))
+            for img, angle in zip(chunk, angles)
+        ])
+    

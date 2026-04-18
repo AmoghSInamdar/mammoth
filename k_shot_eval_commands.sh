@@ -97,6 +97,11 @@ python plot_k_shot_results.py \
     --dataset=struct-cifar100 \
     > outputs/plot_results.out 2> outputs/plot_results.err &
 
+python plot_k_shot_results.py \
+    --plot-k-shot-comparisons \
+    --dataset=struct-cifar100 \
+    > outputs/plot_results.out 2> outputs/plot_results.err &
+
 # Compute plasticity scores
 
 python utils/per_shot_plasticity.py \

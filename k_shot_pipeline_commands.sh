@@ -2,6 +2,8 @@
 
 # Seq CIFAR 100
 
+## Non-meta baselines
+
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model sgd  --lr 0.1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
@@ -30,6 +32,26 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --skip_train \
     >outputs/ewc_seq_cifar100.out 2>outputs/ewc_seq_cifar100.err &
 
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model agem --buffer_size 500 --lr 0.03 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/agem_seq_cifar100.out 2>outputs/agem_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model lwf --lr 0.03 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/lwf_seq_cifar100.out 2>outputs/lwf_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model mer --lr 0.1 --beta 0.01 --gamma 0.03 --buffer_size 200 --minibatch_size 25 --n_epochs 1 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/mer_seq_cifar100.out 2>outputs/mer_seq_cifar100.err &
+
+## Meta learning
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model meta_sgd  --lr 0.1 \
@@ -57,6 +79,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
 
 # Seq CIFAR 100 20 task
 
+## Non-meta baselines
+
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100-20task --model sgd  --lr 0.1 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
@@ -82,6 +106,29 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --savecheck task \
     >outputs/ewc_seq_cifar100_20task.out 2>outputs/ewc_seq_cifar100_20task.err &
 
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model agem --buffer_size 500 --lr 0.03 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/agem_seq_cifar100_20task.out 2>outputs/agem_seq_cifar100_20task.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model lwf --lr 0.03 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/lwf_seq_cifar100_20task.out 2>outputs/lwf_seq_cifar100_20task.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model mer --lr 0.1 --beta 0.01 --gamma 0.03 --buffer_size 200 --minibatch_size 25 --n_epochs 1 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/mer_seq_cifar100_20task.out 2>outputs/mer_seq_cifar100_20task.err &
+
+## Meta learning
+
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100-20task --model meta_sgd  --lr 0.1 \
     --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
@@ -98,7 +145,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --savecheck task \
     >outputs/no_meta_sgd_seq_cifar100_20task.out 2>outputs/no_meta_sgd_seq_cifar100_20task.err &
 
-
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100-20task --model meta_sgd  --lr 0.1 \
     --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
@@ -108,8 +154,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     >outputs/maml_sgd_seq_cifar100_20task.out 2>outputs/maml_sgd_seq_cifar100_20task.err &
 
 
-
 # Struct CIFAR100
+
+## Non-meta baselines
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset struct-cifar100 --model sgd  --lr 0.1 \
@@ -134,6 +181,28 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/ewc_struct_cifar100.out 2>outputs/ewc_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model agem --buffer_size 500 --lr 0.03 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/agem_struct_cifar100.out 2>outputs/agem_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model lwf --lr 0.03 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train \
+    >outputs/lwf_struct_cifar100.out 2>outputs/lwf_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model mer --lr 0.1 --beta 0.01 --gamma 0.03 --buffer_size 200 --minibatch_size 25 --n_epochs 1 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/mer_struct_cifar100.out 2>outputs/mer_struct_cifar100.err &
+
+## Meta learning
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     python run_pipeline_full.py --dataset struct-cifar100 --model meta_sgd  --lr 0.1 \

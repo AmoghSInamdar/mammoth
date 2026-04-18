@@ -21,7 +21,7 @@ mammoth_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, mammoth_path)
 
 from run_k_shot_evaluation import run_all as run_eval_all, parse_args as parse_eval_args
-from plot_k_shot_results import plot_all, plot_plasticity_comparisons
+from plot_k_shot_results import plot_all, plot_k_shot_comparisons, plot_plasticity_comparisons
 from utils.per_shot_plasticity import add_plasticity_scores_to_all_csvs
 
 
@@ -70,9 +70,9 @@ def run_training(
         ]
 
         if n_epochs is not None:
-            args_list.extend(['--n-epochs', str(n_epochs)])
+            args_list.extend(['--n_epochs', str(n_epochs)])
         if batch_size is not None:
-            args_list.extend(['--batch-size', str(batch_size)])
+            args_list.extend(['--batch_size', str(batch_size)])
         
         if buffer_size is not None:
             args_list.extend(['--buffer_size', str(buffer_size)])
@@ -180,8 +180,10 @@ def run_plotting(
         logging.info("Generating plots...")
         
         # Plot k-shot results
-        plot_all(metric='accuracy')
-        plot_all(metric='loss')
+        plot_all(metric='accuracy', dataset=dataset)
+        plot_all(metric='loss', dataset=dataset)
+        plot_k_shot_comparisons(dataset=dataset, metric='accuracy')
+        plot_k_shot_comparisons(dataset=dataset, metric='loss')
 
         # Plot plasticity comparisons
         if dataset:

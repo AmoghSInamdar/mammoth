@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from datasets.utils.continual_dataset import ContinualDataset
 
 from utils import in_notebook, setup_logging
+from utils.conf import base_path, get_device, get_checkpoint_path
 
 setup_logging()
 
@@ -394,11 +395,15 @@ def parse_args(
         # Use simple naming scheme: model_dataset
         # Task number will be appended by save_mammoth_checkpoint
         if not args.ckpt_name:
-            args.ckpt_name = f"{args.model}_{args.dataset}"
+            ckpt_dir = os.path.join(get_checkpoint_path(), args.model, args.dataset)
+            create_if_not_exists(ckpt_dir)
+            args.ckpt_name = os.path.join(args.model, args.dataset, f"{args.model}_{args.dataset}")
 
         # meta-cl: add the meta method and strategy to the checkpoint name
         if args.model.startswith('meta'):
-            args.ckpt_name += f"_{args.meta_method}_{args.meta_strategy}"
+            ckpt_dir = os.path.join(get_checkpoint_path(), args.model, args.dataset, args.meta_method, args.meta_strategy)
+            create_if_not_exists(ckpt_dir)
+            args.ckpt_name = os.path.join(args.model, args.dataset, args.meta_method, args.meta_strategy, f"{args.model}_{args.dataset}_{args.meta_method}_{args.meta_strategy}")
 
         if verbose:
             logging.info(f"Saving checkpoint into: {args.ckpt_name}")
@@ -472,7 +477,6 @@ def extend_args(args, dataset):
 def initialize(
     args=None,
 ) -> Tuple["ContinualModel", "ContinualDataset", argparse.Namespace]:
-    from utils.conf import base_path, get_device, get_checkpoint_path
     from models import get_model
     from datasets import get_dataset
     from models.utils.future_model import FutureModel

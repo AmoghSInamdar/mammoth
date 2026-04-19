@@ -103,7 +103,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     print(f"Plot saved to {output_path}")
 
 
-def plot_plasticity_scores(model: str) -> None:
+def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
     """Plot average plasticity scores for a given model across all checkpoints and tasks, including forward and backward splits."""
     csv_path = RESULTS_DIR / f'evaluation_results_{model}.csv'
     if not csv_path.exists():
@@ -568,7 +568,7 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
             if plot_plasticity:
                 # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
                 model = csv_path.stem.replace('evaluation_results_', '')
-                plot_plasticity_scores(model)
+                plot_plasticity_scores(model, results_dir=results_dir)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 

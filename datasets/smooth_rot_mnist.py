@@ -125,3 +125,7 @@ class MNISTSmoothRotation(SequentialMNIST):
             all_classes = MNIST(base_path() + 'MNIST', train=True, download=True).classes
             self.class_names = [c.split('-')[1].strip() for c in all_classes]
         return self.class_names
+
+    @staticmethod
+    def get_transform():
+        return transforms.Compose((transforms.Grayscale(num_output_channels=3), transforms.ToTensor()))

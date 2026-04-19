@@ -43,6 +43,7 @@ def run_training(
     savecheck: str = 'task',
     meta_adapt_lr: Optional[float] = None,
     meta_adapt_steps: Optional[float] = None,
+    backbone: str = 'resnet18',
     **kwargs
 ) -> None:
     """Run training using main.py.
@@ -65,6 +66,7 @@ def run_training(
         args_list = [
             '--dataset', dataset,
             '--model', model,
+            '--backbone', backbone,
             '--lr', str(lr),
             '--savecheck', savecheck,
         ]
@@ -119,7 +121,6 @@ def run_evaluation(
     try:
         logging.info("Starting k-shot evaluation...")
         
-        # Create eval args namespace
         class EvalArgs:
             pass
         
@@ -130,8 +131,6 @@ def run_evaluation(
         args.adapt_lr = adapt_lr
         args.num_adapt_steps = num_adapt_steps
         args.max_subprocesses = max_subprocesses
-        args.checkpoint_dir = Path('checkpoints')
-        args.output_dir = Path('results/k_shot_evaluation')
         args.adapt_settings_file = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
         if meta_method is not None:
             args.meta_method = meta_method
@@ -144,8 +143,24 @@ def run_evaluation(
         if args.datasets:
             args.datasets = [d.strip() for d in args.datasets.split(',') if d.strip()]
         args.k_values = [int(k.strip()) for k in args.k_values.split(',') if k.strip()]
+
+        # Set per-model/dataset checkpoint and output dirs
+        model_list = args.models or ['unknown']
+        dataset_list = args.datasets or ['unknown']
+
+        for model in model_list:
+            for dataset in dataset_list:
+                if meta_method and meta_strategy:
+                    args.checkpoint_dir = Path('checkpoints') / model / dataset / meta_method / meta_strategy
+                    args.output_dir = Path('results') / model / dataset / meta_method / meta_strategy
+                else:
+                    args.checkpoint_dir = Path('checkpoints') / model / dataset
+                    args.output_dir = Path('results') / model / dataset
+
+                args.output_dir.mkdir(parents=True, exist_ok=True)
+                logging.info(f"  [{model}/{dataset}] ckpt={args.checkpoint_dir} out={args.output_dir}")
+                run_eval_all(args)
         
-        run_eval_all(args)
         logging.info("Evaluation completed successfully")
     except Exception as e:
         logging.error(f"Evaluation failed: {e}")
@@ -169,29 +184,32 @@ def compute_plasticity(metric: str = 'loss') -> None:
 
 def run_plotting(
     dataset: Optional[str] = None,
+    results_dir: Optional[Path] = None,
 ) -> None:
     """Generate plots for evaluation results.
     
     Args:
         metric: Metric to plot ('accuracy' or 'loss')
         dataset: Optional dataset name to filter plots
+        results_dir: Directory containing evaluation result CSVs
     """
+    results_dir = results_dir or Path('results/k_shot_evaluation')
     try:
         logging.info("Generating plots...")
         
         # Plot k-shot results
-        plot_all(metric='accuracy', dataset=dataset)
-        plot_all(metric='loss', dataset=dataset)
-        plot_k_shot_comparisons(dataset=dataset, metric='accuracy')
-        plot_k_shot_comparisons(dataset=dataset, metric='loss')
+        plot_all(metric='accuracy', dataset=dataset, results_dir=results_dir)
+        plot_all(metric='loss', dataset=dataset, results_dir=results_dir)
+        plot_k_shot_comparisons(dataset=dataset, metric='accuracy', results_dir=results_dir)
+        plot_k_shot_comparisons(dataset=dataset, metric='loss', results_dir=results_dir)
 
         # Plot plasticity comparisons
         if dataset:
             logging.info(f"Plotting plasticity comparisons for {dataset}...")
-            plot_plasticity_comparisons(dataset=dataset)
+            plot_plasticity_comparisons(results_dir=results_dir, dataset=dataset)
         else:
             logging.info("Plotting plasticity comparisons for all datasets...")
-            plot_plasticity_comparisons()
+            plot_plasticity_comparisons(results_dir=results_dir)
         
         logging.info("Plotting completed successfully")
     except Exception as e:
@@ -220,6 +238,7 @@ def run_pipeline(
     # Plotting args
     plot_metric: str = 'accuracy',
     plasticity_metric: str = 'loss',
+    backbone: str = 'resnet18',
     # Additional model args (passed via **kwargs)
     **kwargs
 ) -> None:
@@ -263,6 +282,7 @@ def run_pipeline(
                 batch_size=batch_size,
                 buffer_size=buffer_size,
                 savecheck=savecheck,
+                backbone=backbone,
                 **kwargs
             )
             logger.info("✓ Training completed")
@@ -280,8 +300,8 @@ def run_pipeline(
                 adapt_lr=adapt_lr,
                 num_adapt_steps=num_adapt_steps,
                 max_subprocesses=max_subprocesses,
-                meta_method=kwargs['meta_method'] if 'meta' in model else None,
-                meta_strategy=kwargs['meta_strategy'] if 'meta' in model else None
+                meta_method=kwargs.get('meta_method') if 'meta' in model else None,
+                meta_strategy=kwargs.get('meta_strategy') if 'meta' in model else None
             )
             logger.info("✓ Evaluation completed")
             
@@ -295,7 +315,10 @@ def run_pipeline(
         # Step 3: Plotting
         if do_plot:
             logger.info(f"Step 3/3: Plotting results")
-            run_plotting(dataset=dataset)
+            plot_dir = Path('results') / model / dataset
+            if kwargs.get('meta_method') and kwargs.get('meta_strategy'):
+                plot_dir = plot_dir / kwargs['meta_method'] / kwargs['meta_strategy']
+            run_plotting(dataset=dataset, results_dir=plot_dir)
             logger.info("✓ Plotting completed")
         else:
             logger.info("Step 3/3: Skipping plotting")
@@ -348,6 +371,7 @@ def main() -> None:
                         help='Checkpoint save frequency')
     parser.add_argument('--device', type=str, default='cuda',
                         help='Device to use (cuda or cpu)')
+    parser.add_argument('--ckpt_name', type=str, help='(optional) checkpoint save name.')
     
     # Evaluation arguments
     parser.add_argument('--k_values', type=str, default='0,1,2,5,10',

@@ -75,7 +75,6 @@ class MNISTSmoothRotation(SequentialMNIST):
         targets = np.array(wrapped_dataset.dataset.targets)
         dataset_name = "Train" if is_train else "Test"
 
-        # build balanced indices per task
         class_indices = {c: np.where(targets == c)[0].tolist() for c in range(self.N_CLASSES_PER_TASK)}
         min_class_count = min(len(v) for v in class_indices.values())
         samples_per_class = min_class_count // self.N_TASKS
@@ -128,4 +127,4 @@ class MNISTSmoothRotation(SequentialMNIST):
 
     @staticmethod
     def get_transform():
-        return transforms.Compose((transforms.Grayscale(num_output_channels=3)))
+        return transforms.Compose([transforms.Grayscale(num_output_channels=3)])

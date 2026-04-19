@@ -134,16 +134,19 @@ def create_k_shot_loader(dataset: ContinualDataset,
             img = self.data[idx]
             target = self.targets[idx]
 
+            if not isinstance(img, Image.Image):
+                img = Image.fromarray(img.astype(np.uint8))
+
             if self.transform:
                 img_aug = self.transform(img)
+                if not any(isinstance(t, transforms.ToTensor) for t in self.transform.transforms):
+                    img_aug = transforms.ToTensor()(img_aug)
             else:
-                pil_img = Image.fromarray(img.astype(np.uint8))
-                img_aug = transforms.ToTensor()(pil_img)
+                img_aug = transforms.ToTensor()(img)
 
-            pil_img = Image.fromarray(img.astype(np.uint8))
             img_noaug = transforms.Compose([
                 transforms.ToTensor(),
-            ])(pil_img)
+            ])(img)
 
             return img_aug, target, img_noaug
 

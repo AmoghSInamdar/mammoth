@@ -128,4 +128,4 @@ class MNISTSmoothRotation(SequentialMNIST):
 
     @staticmethod
     def get_transform():
-        return transforms.Compose((transforms.Grayscale(num_output_channels=3), transforms.ToTensor()))
+        return transforms.Compose((transforms.Grayscale(num_output_channels=3)))

@@ -34,7 +34,6 @@ class MammothDatasetWrapper(Dataset, object):
     targets: np.ndarray  # Required: the targets of the dataset
     indexes: np.ndarray  # The original indexes of the items in the complete dataset
     task_ids: np.ndarray  # The corresponding task ids of the items in the complete dataset. If present, will be used to split the dataset into tasks
-
     required_fields = ('data', 'targets')  # Required: the fields that must be defined
     extra_return_fields: Tuple[str] = tuple()  # Optional: extra fields to return from the dataset (must be defined)
 
@@ -165,6 +164,7 @@ class ContinualDataset(object):
     class_names: List[str] = None
     eval_fn: EvalFn
     log_fn: Callable
+    IS_SLICED = False
 
     @property
     def current_task(self) -> int:
@@ -445,11 +445,8 @@ def store_masked_loaders(train_dataset: Dataset, test_dataset: Dataset,
         the training and test loaders
     """
     # Initializations
-    train_dataset = MammothDatasetWrapper(train_dataset, train=True)
-    test_dataset = MammothDatasetWrapper(test_dataset, train=False)
-
-    if 'class-il' in setting.SETTING or 'task-il' in setting.SETTING:
-        setting.c_task += 1
+    train_dataset = train_dataset if isinstance(train_dataset, MammothDatasetWrapper) else MammothDatasetWrapper(train_dataset, train=True)
+    test_dataset = test_dataset if isinstance(test_dataset, MammothDatasetWrapper) else MammothDatasetWrapper(test_dataset, train=True)
 
     if not isinstance(train_dataset.targets, np.ndarray):
         train_dataset.targets = np.array(train_dataset.targets)
@@ -480,47 +477,48 @@ def store_masked_loaders(train_dataset: Dataset, test_dataset: Dataset,
         train_dataset.targets = noisy_targets  # overwrite the targets with the noisy ones
 
     # Split the dataset into tasks
-    if 'class-il' in setting.SETTING or 'task-il' in setting.SETTING:
-        if hasattr(train_dataset, 'task_ids'):
-            if not isinstance(test_dataset.task_ids, np.ndarray):
-                test_dataset.task_ids = np.array(test_dataset.task_ids)
-            if not isinstance(train_dataset.task_ids, np.ndarray):
-                train_dataset.task_ids = np.array(train_dataset.task_ids)
+    if not setting.IS_SLICED:
+        if 'class-il' in setting.SETTING or 'task-il' in setting.SETTING:
+            setting.c_task += 1
+            if hasattr(train_dataset, 'task_ids'):
+                if not isinstance(test_dataset.task_ids, np.ndarray):
+                    test_dataset.task_ids = np.array(test_dataset.task_ids)
+                if not isinstance(train_dataset.task_ids, np.ndarray):
+                    train_dataset.task_ids = np.array(train_dataset.task_ids)
 
-            train_mask = train_dataset.task_ids == setting.c_task
+                train_mask = train_dataset.task_ids == setting.c_task
 
-            if setting.args.validation_mode == 'current':
-                test_mask = test_dataset.task_ids == setting.c_task
-            elif setting.args.validation_mode == 'complete':
-                test_mask = np.logical_and(test_dataset.task_ids >= 0, test_dataset.task_ids <= setting.c_task)
+                if setting.args.validation_mode == 'current':
+                    test_mask = test_dataset.task_ids == setting.c_task
+                elif setting.args.validation_mode == 'complete':
+                    test_mask = np.logical_and(test_dataset.task_ids >= 0, test_dataset.task_ids <= setting.c_task)
+                else:
+                    raise ValueError('Unknown validation mode: {}'.format(setting.args.validation_mode))
             else:
-                raise ValueError('Unknown validation mode: {}'.format(setting.args.validation_mode))
-        else:
-            start_c, end_c = setting.get_offsets()
+                start_c, end_c = setting.get_offsets()
 
-            train_mask = np.logical_and(train_dataset.targets >= start_c,
-                                        train_dataset.targets < end_c)
+                train_mask = np.logical_and(train_dataset.targets >= start_c,
+                                            train_dataset.targets < end_c)
 
-            if setting.args.validation_mode == 'current':
-                test_mask = np.logical_and(test_dataset.targets >= start_c,
-                                           test_dataset.targets < end_c)
-            elif setting.args.validation_mode == 'complete':
-                test_mask = np.logical_and(test_dataset.targets >= 0,
-                                           test_dataset.targets < end_c)
-            else:
-                raise ValueError('Unknown validation mode: {}'.format(setting.args.validation_mode))
+                if setting.args.validation_mode == 'current':
+                    test_mask = np.logical_and(test_dataset.targets >= start_c,
+                                            test_dataset.targets < end_c)
+                elif setting.args.validation_mode == 'complete':
+                    test_mask = np.logical_and(test_dataset.targets >= 0,
+                                            test_dataset.targets < end_c)
+                else:
+                    raise ValueError('Unknown validation mode: {}'.format(setting.args.validation_mode))
 
-        test_dataset.data = test_dataset.data[test_mask]
-        test_dataset.targets = test_dataset.targets[test_mask]
-        test_dataset.indexes = test_dataset.indexes[test_mask]
-        if hasattr(test_dataset, 'task_ids'):
-            test_dataset.task_ids = test_dataset.task_ids[test_mask]
+            test_dataset.data = test_dataset.data[test_mask]
+            test_dataset.targets = test_dataset.targets[test_mask]
+            test_dataset.indexes = test_dataset.indexes[test_mask]
+            if hasattr(test_dataset, 'task_ids'):
+                test_dataset.task_ids = test_dataset.task_ids[test_mask]
 
-        train_dataset.data = train_dataset.data[train_mask]
-        train_dataset.targets = train_dataset.targets[train_mask]
-        train_dataset.indexes = train_dataset.indexes[train_mask]
-        if hasattr(train_dataset, 'task_ids'):
-            train_dataset.task_ids = train_dataset.task_ids[train_mask]
+            train_dataset.data = train_dataset.data[train_mask] 
+            train_dataset.indexes = train_dataset.indexes[train_mask]
+            if hasattr(train_dataset, 'task_ids'):
+                train_dataset.task_ids = train_dataset.task_ids[train_mask]
 
         if setting.SETTING == 'biased-class-il':
             assert hasattr(test_dataset, 'bias_label'), 'The dataset must have the bias label field (used during evaluation).'

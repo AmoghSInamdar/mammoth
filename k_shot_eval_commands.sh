@@ -94,7 +94,7 @@ python plot_k_shot_results.py \
 
 python plot_k_shot_results.py \
     --plot-plasticity-comparisons \
-    --dataset=struct-cifar100 \
+    --dataset=seq-cifar100-20task \
     > outputs/plot_results.out 2> outputs/plot_results.err &
 
 python plot_k_shot_results.py \

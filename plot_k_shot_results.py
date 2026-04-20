@@ -157,6 +157,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
     ax1.set_xlabel('Checkpoint Number')
     ax1.set_ylabel('Average Plasticity Score')
     ax1.set_title(f'AUAC Metrics for {model} (Overall)')
+    ax1.set_yscale('log')
     ax1.legend()
     ax1.grid(True)
     ax2.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall['SAUCE'], marker='o', label='SAUCE')
@@ -180,6 +181,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
         ax1.set_xlabel('Checkpoint Number')
         ax1.set_ylabel('Average Plasticity Score')
         ax1.set_title(f'AUAC Metrics for {model} (Forward)')
+        ax1.set_yscale('log')
         ax1.legend()
         ax1.grid(True)
         ax2.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward['SAUCE'], marker='o', label='SAUCE')
@@ -205,6 +207,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
         ax1.set_xlabel('Checkpoint Number')
         ax1.set_ylabel('Average Plasticity Score')
         ax1.set_title(f'AUAC Metrics for {model} (Backward)')
+        ax1.set_yscale('log')
         ax1.legend()
         ax1.grid(True)
         ax2.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward['SAUCE'], marker='o', label='SAUCE')
@@ -298,6 +301,9 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
                 ax.set_title(f'{metric} ({direction_labels[direction]})')
                 ax.set_xlabel('Checkpoint Number')
                 ax.set_ylabel('Average Plasticity Score')
+                # Use log scale for AUAC metrics
+                if 'AUAC' in metric:
+                    ax.set_yscale('log')
                 ax.grid(True)
                 ax.legend(fontsize='small')
 

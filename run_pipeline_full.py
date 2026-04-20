@@ -152,10 +152,10 @@ def run_evaluation(
             for dataset in dataset_list:
                 if meta_method and meta_strategy:
                     args.checkpoint_dir = Path('checkpoints') / model / dataset / meta_method / meta_strategy
-                    args.output_dir = Path('results') / model / dataset / meta_method / meta_strategy
+                    args.output_dir = Path('results') / model / dataset / meta_method / meta_strategy / f"adapt_lr{adapt_lr}" / f"num_adapt_steps{num_adapt_steps}"
                 else:
                     args.checkpoint_dir = Path('checkpoints') / model / dataset
-                    args.output_dir = Path('results') / model / dataset
+                    args.output_dir = Path('results') / model / dataset / f"adapt_lr{adapt_lr}" / f"num_adapt_steps{num_adapt_steps}"
 
                 args.output_dir.mkdir(parents=True, exist_ok=True)
                 logging.info(f"  [{model}/{dataset}] ckpt={args.checkpoint_dir} out={args.output_dir}")
@@ -315,10 +315,13 @@ def run_pipeline(
         # Step 3: Plotting
         if do_plot:
             logger.info(f"Step 3/3: Plotting results")
-            plot_dir = Path('results') / model / dataset
+            results_dir = Path('results') / model / dataset
             if kwargs.get('meta_method') and kwargs.get('meta_strategy'):
-                plot_dir = plot_dir / kwargs['meta_method'] / kwargs['meta_strategy']
-            run_plotting(dataset=dataset, results_dir=plot_dir)
+                results_dir = results_dir / kwargs['meta_method'] / kwargs['meta_strategy']
+            results_dir = results_dir / f"adapt_lr{adapt_lr}" / f"num_adapt_steps{num_adapt_steps}"
+            
+            results_dir.mkdir(parents=True, exist_ok=True)
+            run_plotting(dataset=dataset, results_dir=results_dir)
             logger.info("✓ Plotting completed")
         else:
             logger.info("Step 3/3: Skipping plotting")

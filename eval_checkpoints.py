@@ -42,6 +42,7 @@ from utils.few_shot import create_k_shot_loader, adapt_model, evaluate_adapted_m
 from utils.eval_results import EvaluationResult, EvaluationResults
 from utils.args import add_experiment_args, add_management_args, add_initial_args, add_dynamic_parsable_args
 from utils.conf import get_device, get_checkpoint_path
+from utils.per_shot_plasticity import add_plasticity_scores_to_csv
 
 # Import after path setup
 from datasets import get_dataset_class
@@ -401,6 +402,12 @@ def main():
 
     all_results.save_to_csv(csv_path)
     # all_results.save_to_json(json_path)
+
+    try:
+        add_plasticity_scores_to_csv(csv_path, metric_for_sauce='accuracy')
+        logging.info(f"Plasticity scores added to {csv_path}")
+    except Exception as e:
+        logging.warning(f"Failed to compute plasticity scores: {e}")
 
     logging.info(f"Evaluation complete. Results saved to {output_dir}")
 

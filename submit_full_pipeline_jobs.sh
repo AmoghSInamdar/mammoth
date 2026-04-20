@@ -21,13 +21,13 @@ for MODEL in $MODELS; do
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
 source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model sgd --lr 0.1 \
-    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --adapt_lr 0.003 --num_adapt_steps 20 \
     --savecheck task \
     --skip_train
 EOF
@@ -42,7 +42,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -50,7 +50,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model er --buffer_size 500 --lr 0.1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
-    --do_train
+    --skip_train
 EOF
             ;;
         derpp)
@@ -63,7 +63,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -71,7 +71,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model derpp --lr 0.03 --buffer_size 500 --alpha 0.3 --beta 0.5 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
-    --do_train
+    --skip_train
 EOF
             ;;
         ewc_on)
@@ -84,15 +84,15 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
 source .mammoth/bin/activate
-python run_pipeline_full.py --dataset ${DATASET} --model ewc-on --n_epochs 50 --lr 0.1 --e_lambda 10 --gamma 1 \
+python run_pipeline_full.py --dataset ${DATASET} --model ewc_on --n_epochs 50 --lr 0.1 --e_lambda 10 --gamma 1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
-    --do_train
+    --skip_train
 EOF
             ;;
         agem)
@@ -105,7 +105,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -125,7 +125,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -133,7 +133,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model lwf --lr 0.03 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
-    --do_train
+    --skip_train
 EOF
             ;;
         mer)
@@ -146,7 +146,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -167,7 +167,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -175,7 +175,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model meta-sgd --lr 0.1 \
     --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.2 \
     --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
-    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --adapt_lr 0.003 --num_adapt_steps 20 \
     --savecheck task
 EOF
             ;;
@@ -189,7 +189,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -197,7 +197,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model meta-sgd --lr 0.1 \
     --meta_method no_meta --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
     --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --adapt_lr 0.003 --num_adapt_steps 20 \
     --savecheck task
 EOF
             ;;
@@ -211,7 +211,7 @@ EOF
 #SBATCH --partition=short
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
-#SBATCH --mem=16G
+#SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 mkdir -p logs/${DATASET}
 
@@ -219,7 +219,7 @@ source .mammoth/bin/activate
 python run_pipeline_full.py --dataset ${DATASET} --model meta-sgd --lr 0.1 \
     --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
     --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --adapt_lr 0.003 --num_adapt_steps 20 \
     --savecheck task
 EOF
             ;;

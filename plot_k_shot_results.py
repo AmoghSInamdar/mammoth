@@ -17,9 +17,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+def get_plot_dir(csv_path: Path, base_plot_dir: Path) -> Path:
+    """Mirror the results subdir structure into plots dir.
+    
+    results/sgd/smooth-mnist/adapt_lr0.01/num_adapt_steps10/eval...csv
+    ->
+    plots/sgd/smooth-mnist/adapt_lr0.01/num_adapt_steps10/
+    """
+    # Find index of 'results' in path parts and take everything after
+    parts = csv_path.parts
+    try:
+        results_idx = next(i for i, p in enumerate(parts) if p == 'results')
+        relative_parts = parts[results_idx + 1:-1]  # skip 'results' and filename
+    except StopIteration:
+        relative_parts = parts[:-1]
+    
+    plot_dir = base_plot_dir.joinpath(*relative_parts)
+    plot_dir.mkdir(parents=True, exist_ok=True)
+    return plot_dir
+
 RESULTS_DIR = Path('results/k_shot_evaluation')
 PLOTS_DIR = Path('plots')
-
 
 def load_evaluation_results(csv_path: Path) -> pd.DataFrame:
     """Load evaluation results from CSV file into a pandas DataFrame."""
@@ -95,7 +113,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
 
     plt.tight_layout()
     dataset_name = get_dataset_name_from_csv_path(csv_path)
-    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir = get_plot_dir(csv_path, PLOTS_DIR)
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'{metric}_{csv_path.stem.replace("evaluation_results_", "")}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -147,7 +165,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
         avg_plasticity_backward = None
 
     dataset_name = get_dataset_name_from_model(model)
-    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir = get_plot_dir(csv_path, PLOTS_DIR)
     plot_dir.mkdir(exist_ok=True, parents=True)
 
     # Plot overall
@@ -234,7 +252,7 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
         print(f"Error: Results directory {results_dir} does not exist.")
         return
 
-    csv_files = sorted(results_dir.glob('*.csv'))
+    csv_files = sorted(results_dir.glob('**/*.csv'))
     if dataset:
         csv_files = [f for f in csv_files if dataset in f.name]
     
@@ -334,7 +352,7 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
         return
 
     # Find all CSV files for this dataset
-    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
+    csv_files = [f for f in results_dir.glob('**/*.csv') if dataset in f.name]
     
     if not csv_files:
         print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
@@ -541,7 +559,7 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     plt.tight_layout()
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / dataset
+    plot_dir = get_plot_dir(csv_path, PLOTS_DIR)
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'k_shot_comparison_{dataset}_{metric}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -555,7 +573,7 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
         print(f"Error: Results directory {results_dir} does not exist.")
         return
 
-    csv_files = list(results_dir.glob('*.csv')) if dataset is None else list(results_dir.glob(f'*{dataset}*.csv'))
+    csv_files = list(results_dir.glob('**/*.csv')) if dataset is None else list(results_dir.glob(f'*{dataset}*.csv'))
     if not csv_files:
         print(f"No CSV files found in {results_dir}")
         return

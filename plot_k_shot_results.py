@@ -36,7 +36,7 @@ def get_dataset_name_from_csv_path(csv_path: Path) -> str:
     base_name = csv_path.stem.replace('evaluation_results_', '')
     tokens = base_name.split('_')
     for token in tokens:
-        if token.startswith(('seq-', 'std-', 'struct-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
+        if token.startswith(('seq-', 'std-', 'struct-', 'smooth-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
             return token
     return tokens[-1]
 
@@ -45,7 +45,7 @@ def get_dataset_name_from_model(model: str) -> str:
     """Extract the dataset portion from a model_dataset string."""
     tokens = model.split('_')
     for token in tokens:
-        if token.startswith(('seq-', 'std-', 'struct-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
+        if token.startswith(('seq-', 'std-', 'struct-', 'smooth-', 'perm-', 'rot-', 'bias-', 'bias', 'cifar', 'mnist', 'tiny', 'imagenet', 'eurosat', 'mit', 'resisc', 'isic')):
             return token
     return tokens[-1]
 

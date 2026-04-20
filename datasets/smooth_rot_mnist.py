@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torchvision.datasets import MNIST
+from datasets.utils import set_default_from_args
 
 from datasets.perm_mnist import MyMNIST
 from datasets.seq_mnist import SequentialMNIST
@@ -128,3 +129,7 @@ class MNISTSmoothRotation(SequentialMNIST):
     @staticmethod
     def get_transform():
         return transforms.Compose([transforms.Grayscale(num_output_channels=3)])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"

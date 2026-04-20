@@ -397,13 +397,13 @@ def parse_args(
         if not args.ckpt_name:
             ckpt_dir = os.path.join(get_checkpoint_path(), args.model, args.dataset)
             create_if_not_exists(ckpt_dir)
-            args.ckpt_name = os.path.join(args.model, args.dataset, f"{args.model}_{args.dataset}")
+            args.ckpt_name = f"{args.model}_{args.dataset}"
 
         # meta-cl: add the meta method and strategy to the checkpoint name
         if args.model.startswith('meta'):
             ckpt_dir = os.path.join(get_checkpoint_path(), args.model, args.dataset, args.meta_method, args.meta_strategy)
             create_if_not_exists(ckpt_dir)
-            args.ckpt_name = os.path.join(args.model, args.dataset, args.meta_method, args.meta_strategy, f"{args.model}_{args.dataset}_{args.meta_method}_{args.meta_strategy}")
+            args.ckpt_name += f"_{args.meta_method}_{args.meta_strategy}"
 
         if verbose:
             logging.info(f"Saving checkpoint into: {args.ckpt_name}")

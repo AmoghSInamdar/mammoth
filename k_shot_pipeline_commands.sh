@@ -237,14 +237,12 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model sgd  --lr 0.1 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
     --savecheck task \
-    --skip_train \
     >outputs/sgd_smooth_mnist.out 2>outputs/sgd_smooth_mnist.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model er --buffer_size 500 --lr 0.1 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
     --savecheck task \
-    --skip_train \
     >outputs/er_smooth_mnist.out 2>outputs/er_smooth_mnist.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
@@ -281,15 +279,15 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 
 ## Meta learning
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_sgd  --lr 0.1 \
     --meta_method reptile --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.01 \
     --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
-    --skip_train \
+    --savecheck task \
     >outputs/meta_sgd_smooth_mnist.out 2>outputs/meta_sgd_smooth_mnist.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_sgd  --lr 0.1 \
     --meta_method no_meta --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.1 \
     --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \
@@ -297,7 +295,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --savecheck task \
     >outputs/no_meta_sgd_smooth_mnist.out 2>outputs/no_meta_sgd_smooth_mnist.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_sgd  --lr 0.1 \
     --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
     --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \

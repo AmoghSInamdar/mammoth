@@ -12,7 +12,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     >outputs/sgd_seq_cifar100.out 2>outputs/sgd_seq_cifar100.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
-    python run_pipeline_full.py --dataset seq-cifar100 --model=er --buffer_size=500 --lr=0.1 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model er --buffer_size 500 --lr 0.1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     --skip_train \
@@ -26,7 +26,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     >outputs/derpp_seq_cifar100.out 2>outputs/derpp_seq_cifar100.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
-    python run_pipeline_full.py --dataset seq-cifar100 --model=ewc_on --n_epochs=50 --lr=0.1 --e_lambda=10 --gamma=1 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model ewc_on --n_epochs 50 --lr 0.1 --e_lambda 10 --gamma 1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     --skip_train \
@@ -75,6 +75,14 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --adapt_lr 0.2 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/maml_sgd_seq_cifar100.out 2>outputs/maml_sgd_seq_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset seq-cifar100 --model meta_er  --buffer_size 500 --lr 0.1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_er_seq_cifar100.out 2>outputs/maml_er_seq_cifar100.err &
 
 
 # Seq CIFAR 100 20 task
@@ -153,6 +161,14 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --savecheck task \
     >outputs/maml_sgd_seq_cifar100_20task.out 2>outputs/maml_sgd_seq_cifar100_20task.err &
 
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model meta_er  --buffer_size 500 --lr 0.1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_er_seq_cifar100_20task.out 2>outputs/maml_er_seq_cifar100_20task.err &
+
 
 # Struct CIFAR100
 
@@ -228,6 +244,14 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --savecheck task \
     >outputs/maml_sgd_struct_cifar100.out 2>outputs/maml_sgd_struct_cifar100.err &
 
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model meta_er --buffer_size 500 --lr 0.1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \
+    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_er_struct_cifar100.out 2>outputs/maml_er_struct_cifar100.err &
+
 
 # Smooth Rotated MNIST
 
@@ -301,3 +325,12 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --adapt_lr 0.003 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/maml_sgd_smooth_mnist.out 2>outputs/maml_sgd_smooth_mnist.err &
+
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+    python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_er  --buffer_size 500 --lr 0.1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.003 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.003 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_er_smooth_mnist.out 2>outputs/maml_er_smooth_mnist.err &

@@ -516,6 +516,7 @@ def store_masked_loaders(train_dataset: Dataset, test_dataset: Dataset,
                 test_dataset.task_ids = test_dataset.task_ids[test_mask]
 
             train_dataset.data = train_dataset.data[train_mask] 
+            train_dataset.targets = train_dataset.targets[train_mask]
             train_dataset.indexes = train_dataset.indexes[train_mask]
             if hasattr(train_dataset, 'task_ids'):
                 train_dataset.task_ids = train_dataset.task_ids[train_mask]

@@ -127,12 +127,13 @@ class SmoothRotation(object):
         end = min(start + self.increase_in_task, self.max_deg)
         return start, end
 
+    # Rotating with F.rotate makes run time twice as long due to grid_sample in F.rotate
     def transform_batch_for_task(self, chunk: torch.Tensor, task_id: int, dataset_name: str) -> torch.Tensor:
         start_range, end_range = self.get_task_range(task_id)
         angles = np.random.uniform(start_range, end_range, size=len(chunk))
         logging.info(f"[SmoothRotation][{dataset_name}] Task {task_id} start={start_range} end={end_range} angles=[{angles.min():.2f}, {angles.max():.2f}]")
-        return torch.stack([
-            F.rotate(img.unsqueeze(0), float(angle)).squeeze(0)
+        return torch.from_numpy(np.stack([
+            np.array(Image.fromarray(img.numpy(), mode='L').rotate(float(angle)))
             for img, angle in zip(chunk, angles)
-        ])
+        ]))
     

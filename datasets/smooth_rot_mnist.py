@@ -61,13 +61,8 @@ class MNISTSmoothRotation(SequentialMNIST):
             )
             self.reorder_samples_by_task(test_dataset, is_train=False)
 
-        rotated_train_data = self.rotation.transform_batch_for_task(self.train_slices[self.c_task].dataset.data, self.c_task, self.NAME)
-        self.train_slices[self.c_task].dataset.data = rotated_train_data
-        train_slice = self.train_slices[self.c_task]
-
-        rotated_test_data  = self.rotation.transform_batch_for_task(self.test_slices[self.c_task].dataset.data, self.c_task, self.NAME)
-        self.test_slices[self.c_task].dataset.data = rotated_test_data
-        test_slice = self.test_slices[self.c_task]
+        train_slice = self.get_rotated_data()
+        test_slice = self.get_rotated_data(is_train=False)
 
         unique, counts = np.unique(train_slice.dataset.targets.numpy(), return_counts=True)
         te_unique, te_counts = np.unique(test_slice.dataset.targets.numpy(), return_counts=True)
@@ -114,7 +109,6 @@ class MNISTSmoothRotation(SequentialMNIST):
             start = task_id * task_size
             end   = start + task_size
 
-            chunk = wrapped_dataset.dataset.data[start:end].numpy()
             logging.info(f"[{self.NAME}] {dataset_name} Task {task_id} - new_total={new_total} task_size={task_size} start={start} end={end}")
 
             cache = self.train_slices if is_train else self.test_slices
@@ -124,7 +118,15 @@ class MNISTSmoothRotation(SequentialMNIST):
             sliced.dataset.targets = wrapped_dataset.dataset.targets[start:end]
             sliced.task_ids        = wrapped_dataset.task_ids[start:end].copy()
             sliced.indexes         = np.arange(task_size)
-            cache[task_id] = sliced         
+            cache[task_id] = {'wrapped_dataset': sliced, 'rotated': False} 
+
+    def get_rotated_data(self, is_train=True):
+        cache = self.train_slices if is_train else self.test_slices
+        if not cache[self.c_task]['rotated']:
+            rotated_data = self.rotation.transform_batch_for_task(cache[self.c_task]['wrapped_dataset'].dataset.data, self.c_task, self.NAME)
+            cache[self.c_task]['wrapped_dataset'].dataset.data = rotated_data
+            cache[self.c_task]['rotated'] = True  
+        return cache[self.c_task]['wrapped_dataset']    
 
     def get_class_names(self):
         if self.class_names is None:

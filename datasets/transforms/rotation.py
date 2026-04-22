@@ -131,10 +131,9 @@ class SmoothRotation(object):
     def transform_batch_for_task(self, chunk: torch.Tensor, task_id: int, dataset_name: str) -> torch.Tensor:
         start_range, end_range = self.get_task_range(task_id)
         rng = np.random.default_rng(seed=task_id)
-        angles = rng.uniform(start_range, end_range, size=len(chunk))
+        angles = rng.integers(int(start_range), int(end_range) + 1, size=len(chunk))
         logging.info(f"[SmoothRotation][{dataset_name}] Task {task_id} start={start_range} end={end_range} angles=[{angles.min():.2f}, {angles.max():.2f}]")
         return torch.from_numpy(np.stack([
             np.array(Image.fromarray(img.numpy(), mode='L').rotate(float(angle)))
             for img, angle in zip(chunk, angles)
         ]))
-    

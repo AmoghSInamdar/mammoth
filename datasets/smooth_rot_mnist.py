@@ -43,23 +43,23 @@ class MNISTSmoothRotation(SequentialMNIST):
         super().__init__(args)
 
     def get_data_loaders(self):
+        self.c_task += 1
+
         logging.info(f"[{self.NAME}] get_data_loaders called, c_task={self.c_task}")
 
-        if not self.train_slices:
+        if self.c_task not in self.train_slices:
             train_dataset = MammothDatasetWrapper(
                 MyMNIST(base_path() + 'MNIST', train=True, download=True, transform=self.TRANSFORM),
                 train=True
             )
             self.reorder_samples_by_task(train_dataset, is_train=True)
 
-        if not self.test_slices:
+        if self.c_task not in self.test_slices:
             test_dataset = MammothDatasetWrapper(
                 MNIST(base_path() + 'MNIST', train=False, download=True, transform=self.TRANSFORM),
                 train=False
             )
             self.reorder_samples_by_task(test_dataset, is_train=False)
-
-        self.c_task += 1
 
         rotated_train_data = self.rotation.transform_batch_for_task(self.train_slices[self.c_task].dataset.data, self.c_task, self.NAME)
         self.train_slices[self.c_task].dataset.data = rotated_train_data

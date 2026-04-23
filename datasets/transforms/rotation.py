@@ -137,3 +137,28 @@ class SmoothRotation(object):
             np.array(Image.fromarray(img.numpy(), mode='L').rotate(float(angle)))
             for img, angle in zip(chunk, angles)
         ]))
+    
+class NonRandomSmoothRotation(SmoothRotation):
+    def __init__(self, init_deg: int = 0, increase_in_task: int = 5, increase_between_task=15, max_deg=360) -> None:
+       super().__init__(init_deg, increase_in_task, increase_between_task, max_deg)
+
+    def transform_batch_for_task(self, chunk: torch.Tensor, targets: torch.Tensor, task_id: int, dataset_name: str) -> torch.Tensor:
+        start_range, end_range = self.get_task_range(task_id)
+        angle_range = list(range(int(start_range), int(end_range) + 1))
+        n_angles = len(angle_range)
+        
+        angles = np.zeros(len(chunk), dtype=int)
+        
+        for cls in torch.unique(targets):
+            cls_mask = (targets == cls).numpy()
+            cls_indices = np.where(cls_mask)[0]
+            n_samples = len(cls_indices)
+            # tile angles evenly across samples for this class
+            cls_angles = np.tile(angle_range, n_samples // n_angles + 1)[:n_samples]
+            angles[cls_indices] = cls_angles
+        
+        logging.info(f"[SmoothRotation][{dataset_name}] Task {task_id} start={start_range} end={end_range} angles=[{angles.min()}, {angles.max()}]")
+        return torch.from_numpy(np.stack([
+            np.array(Image.fromarray(img.numpy(), mode='L').rotate(float(angle)))
+            for img, angle in zip(chunk, angles)
+        ]))

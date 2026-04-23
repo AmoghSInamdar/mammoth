@@ -12,19 +12,18 @@ from datasets.utils import set_default_from_args
 
 from datasets.perm_mnist import MyMNIST
 from datasets.seq_mnist import SequentialMNIST
-from datasets.transforms.rotation import SmoothRotation
+from datasets.transforms.rotation import SmoothRotation, NonRandomSmoothRotation
 from datasets.utils.continual_dataset import MammothDatasetWrapper, store_masked_loaders
 from utils.conf import base_path
-
 
 class MNISTSmoothRotation(SequentialMNIST):
     NAME = 'smooth-mnist'
     N_CLASSES = 10
-    N_TASKS = 10
+    N_TASKS = 20
     IN_TASK_ANGLE_RANGE = 15
     BETWEEN_TASK_ANGLE_RANGE = 5
     INIT_ANGLE = 0
-    MAX_ANGLE = 360
+    MAX_ANGLE = 720
     N_CLASSES_PER_TASK = 10
     IS_SLICED = True
     train_slices = {}  # keyed by task_id
@@ -134,6 +133,61 @@ class MNISTSmoothRotation(SequentialMNIST):
             self.class_names = [c.split('-')[1].strip() for c in all_classes]
         return self.class_names
 
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationEasy(MNISTSmoothRotation):
+    NAME = 'smooth-mnist-easy'
+    N_CLASSES = 10
+    N_TASKS = 20
+    IN_TASK_ANGLE_RANGE = 5
+    BETWEEN_TASK_ANGLE_RANGE = 10
+    def __init__(self, args: Namespace) -> None:
+        super().__init__(args)
+    
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationNonRandom(MNISTSmoothRotation):
+    NAME = 'smooth-mnist-nonrandom'
+    def __init__(self, args: Namespace) -> None:
+        self.rotation = NonRandomSmoothRotation(
+            self.INIT_ANGLE,
+            self.IN_TASK_ANGLE_RANGE,
+            self.BETWEEN_TASK_ANGLE_RANGE,
+            self.MAX_ANGLE
+        )
+        super().__init__(args)
+    
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationEasyNonRandom(MNISTSmoothRotationEasy):
+    NAME = 'smooth-mnist-easy-nonrandom'
+    def __init__(self, args: Namespace) -> None:
+        self.rotation = NonRandomSmoothRotation(
+            self.INIT_ANGLE,
+            self.IN_TASK_ANGLE_RANGE,
+            self.BETWEEN_TASK_ANGLE_RANGE,
+            self.MAX_ANGLE
+        )
+        super().__init__(args)
+    
     @staticmethod
     def get_transform():
         return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])

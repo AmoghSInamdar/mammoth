@@ -38,7 +38,7 @@ EOF
 #SBATCH --job-name=${DATASET}_er
 #SBATCH --output=logs/${DATASET}/er_%j.out
 #SBATCH --error=logs/${DATASET}/er_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -59,7 +59,7 @@ EOF
 #SBATCH --job-name=${DATASET}_derpp
 #SBATCH --output=logs/${DATASET}/derpp_%j.out
 #SBATCH --error=logs/${DATASET}/derpp_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -80,7 +80,7 @@ EOF
 #SBATCH --job-name=${DATASET}_ewc_on
 #SBATCH --output=logs/${DATASET}/ewc_on_%j.out
 #SBATCH --error=logs/${DATASET}/ewc_on_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -101,7 +101,7 @@ EOF
 #SBATCH --job-name=${DATASET}_agem
 #SBATCH --output=logs/${DATASET}/agem_%j.out
 #SBATCH --error=logs/${DATASET}/agem_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -121,7 +121,7 @@ EOF
 #SBATCH --job-name=${DATASET}_lwf
 #SBATCH --output=logs/${DATASET}/lwf_%j.out
 #SBATCH --error=logs/${DATASET}/lwf_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -142,7 +142,7 @@ EOF
 #SBATCH --job-name=${DATASET}_mer
 #SBATCH --output=logs/${DATASET}/mer_%j.out
 #SBATCH --error=logs/${DATASET}/mer_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -206,7 +206,7 @@ EOF
 #SBATCH --job-name=${DATASET}_no_meta_sgd
 #SBATCH --output=logs/${DATASET}/no_meta_sgd_%j.out
 #SBATCH --error=logs/${DATASET}/no_meta_sgd_%j.err
-#SBATCH --time=00:15:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -228,7 +228,7 @@ EOF
 #SBATCH --job-name=${DATASET}_maml
 #SBATCH --output=logs/${DATASET}/maml_%j.out
 #SBATCH --error=logs/${DATASET}/maml_%j.err
-#SBATCH --time=00:40:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1
@@ -249,7 +249,7 @@ EOF
 #SBATCH --job-name=${DATASET}_maml_parallel
 #SBATCH --output=logs/${DATASET}/maml_parallel_%j.out
 #SBATCH --error=logs/${DATASET}/maml_parallel_%j.err
-#SBATCH --time=00:40:00
+#SBATCH --time=01:00:00
 #SBATCH --partition=short,burst
 #SBATCH --account=zgroup
 #SBATCH --gres=gpu:A6000:1

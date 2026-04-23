@@ -1,7 +1,9 @@
 from argparse import Namespace
 import copy
 import logging
+from typing import Tuple
 
+from PIL import Image
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -10,25 +12,25 @@ from datasets.utils import set_default_from_args
 
 from datasets.perm_mnist import MyMNIST
 from datasets.seq_mnist import SequentialMNIST
-from datasets.transforms.rotation import SmoothRotation
+from datasets.transforms.rotation import SmoothRotation, NonRandomSmoothRotation
 from datasets.utils.continual_dataset import MammothDatasetWrapper, store_masked_loaders
 from utils.conf import base_path
 
-
 class MNISTSmoothRotation(SequentialMNIST):
-    NAME = 'smooth-rot-mnist'
+    NAME = 'smooth-mnist'
     N_CLASSES = 10
-    N_TASKS = 10
+    N_TASKS = 20
     IN_TASK_ANGLE_RANGE = 15
     BETWEEN_TASK_ANGLE_RANGE = 5
     INIT_ANGLE = 0
-    MAX_ANGLE = 360
+    MAX_ANGLE = 720
     N_CLASSES_PER_TASK = 10
     IS_SLICED = True
     train_slices = {}  # keyed by task_id
     test_slices = {}
     SETTING = 'domain-il'
     c_task = 0
+    TRANSFORM =  transforms.Compose([transforms.Grayscale(num_output_channels=3), transforms.ToTensor()])
 
     def __init__(self, args: Namespace) -> None:
         self.rotation = SmoothRotation(
@@ -40,27 +42,27 @@ class MNISTSmoothRotation(SequentialMNIST):
         super().__init__(args)
 
     def get_data_loaders(self):
-        logging.info(f"[{self.NAME}] get_data_loaders called, c_task={self.c_task}")
-        transform = transforms.Compose((transforms.Grayscale(num_output_channels=3), transforms.ToTensor()))
-
-        if not self.train_slices:
-            train_dataset = MammothDatasetWrapper(
-                MyMNIST(base_path() + 'MNIST', train=True, download=True, transform=transform),
-                train=True
-            )
-            self.transform(train_dataset, is_train=True)
-
-        if not self.test_slices:
-            test_dataset = MammothDatasetWrapper(
-                MNIST(base_path() + 'MNIST', train=False, download=True, transform=transform),
-                train=False
-            )
-            self.transform(test_dataset, is_train=False)
-
         self.c_task += 1
 
-        train_slice = self.train_slices[self.c_task]
-        test_slice  = self.test_slices[self.c_task]
+        logging.info(f"[{self.NAME}] get_data_loaders called, c_task={self.c_task}")
+
+        if self.c_task not in self.train_slices:
+            train_dataset = MammothDatasetWrapper(
+                MyMNIST(base_path() + 'MNIST', train=True, download=True, transform=self.TRANSFORM),
+                train=True
+            )
+            self.reorder_samples_by_task(train_dataset, is_train=True)
+
+        if self.c_task not in self.test_slices:
+            test_dataset = MammothDatasetWrapper(
+                MNIST(base_path() + 'MNIST', train=False, download=True, transform=self.TRANSFORM),
+                train=False
+            )
+            self.reorder_samples_by_task(test_dataset, is_train=False)
+
+        train_slice = self.get_rotated_data()
+        test_slice = self.get_rotated_data(is_train=False)
+
         unique, counts = np.unique(train_slice.dataset.targets.numpy(), return_counts=True)
         te_unique, te_counts = np.unique(test_slice.dataset.targets.numpy(), return_counts=True)
 
@@ -72,7 +74,7 @@ class MNISTSmoothRotation(SequentialMNIST):
         train, test = store_masked_loaders(train_slice, test_slice, self)
         return train, test
 
-    def transform(self, wrapped_dataset: MammothDatasetWrapper, is_train=True):
+    def reorder_samples_by_task(self, wrapped_dataset: MammothDatasetWrapper, is_train=True):
         targets = np.array(wrapped_dataset.dataset.targets)
         dataset_name = "Train" if is_train else "Test"
 
@@ -106,10 +108,7 @@ class MNISTSmoothRotation(SequentialMNIST):
             start = task_id * task_size
             end   = start + task_size
 
-            chunk = wrapped_dataset.dataset.data[start:end].numpy()
-            chunk = self.rotation.transform_batch_for_task(chunk, task_id, dataset_name)
             logging.info(f"[{self.NAME}] {dataset_name} Task {task_id} - new_total={new_total} task_size={task_size} start={start} end={end}")
-            wrapped_dataset.dataset.data[start:end] = torch.from_numpy(chunk)
 
             cache = self.train_slices if is_train else self.test_slices
             sliced = copy.copy(wrapped_dataset)
@@ -118,7 +117,15 @@ class MNISTSmoothRotation(SequentialMNIST):
             sliced.dataset.targets = wrapped_dataset.dataset.targets[start:end]
             sliced.task_ids        = wrapped_dataset.task_ids[start:end].copy()
             sliced.indexes         = np.arange(task_size)
-            cache[task_id] = sliced         
+            cache[task_id] = {'wrapped_dataset': sliced, 'rotated': False} 
+
+    def get_rotated_data(self, is_train=True):
+        cache = self.train_slices if is_train else self.test_slices
+        if not cache[self.c_task]['rotated']:
+            rotated_data = self.rotation.transform_batch_for_task(cache[self.c_task]['wrapped_dataset'].dataset.data, self.c_task, self.NAME)
+            cache[self.c_task]['wrapped_dataset'].dataset.data = rotated_data
+            cache[self.c_task]['rotated'] = True  
+        return cache[self.c_task]['wrapped_dataset']    
 
     def get_class_names(self):
         if self.class_names is None:
@@ -128,7 +135,62 @@ class MNISTSmoothRotation(SequentialMNIST):
 
     @staticmethod
     def get_transform():
-        return transforms.Compose([transforms.Grayscale(num_output_channels=3)])
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationEasy(MNISTSmoothRotation):
+    NAME = 'smooth-mnist-easy'
+    N_CLASSES = 10
+    N_TASKS = 20
+    IN_TASK_ANGLE_RANGE = 5
+    BETWEEN_TASK_ANGLE_RANGE = 10
+    def __init__(self, args: Namespace) -> None:
+        super().__init__(args)
+    
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationNonRandom(MNISTSmoothRotation):
+    NAME = 'smooth-mnist-nonrandom'
+    def __init__(self, args: Namespace) -> None:
+        self.rotation = NonRandomSmoothRotation(
+            self.INIT_ANGLE,
+            self.IN_TASK_ANGLE_RANGE,
+            self.BETWEEN_TASK_ANGLE_RANGE,
+            self.MAX_ANGLE
+        )
+        super().__init__(args)
+    
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
+    
+    @set_default_from_args("backbone")
+    def get_backbone():
+        return "resnet18"
+
+class MNISTSmoothRotationEasyNonRandom(MNISTSmoothRotationEasy):
+    NAME = 'smooth-mnist-easy-nonrandom'
+    def __init__(self, args: Namespace) -> None:
+        self.rotation = NonRandomSmoothRotation(
+            self.INIT_ANGLE,
+            self.IN_TASK_ANGLE_RANGE,
+            self.BETWEEN_TASK_ANGLE_RANGE,
+            self.MAX_ANGLE
+        )
+        super().__init__(args)
+    
+    @staticmethod
+    def get_transform():
+        return transforms.Compose([transforms.ToPILImage(), MNISTSmoothRotation.TRANSFORM])
     
     @set_default_from_args("backbone")
     def get_backbone():

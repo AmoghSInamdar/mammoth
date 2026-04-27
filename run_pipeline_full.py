@@ -21,7 +21,7 @@ mammoth_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, mammoth_path)
 
 from run_k_shot_evaluation import run_all as run_eval_all, parse_args as parse_eval_args
-from plot_k_shot_results import plot_all, plot_k_shot_comparisons, plot_k_shot_improvement, plot_plasticity_comparisons
+from plot_k_shot_results import load_evaluation_results, plot_all, plot_k_shot_comparisons, plot_k_shot_improvement, plot_plasticity_comparisons
 from utils.per_shot_plasticity import add_plasticity_scores_to_all_csvs
 
 
@@ -101,6 +101,8 @@ def run_evaluation(
     datasets: Optional[str] = None,
     k_values: str = '0,1,2,5,10',
     adapt_lr: float = 0.01,
+    seeds: str = '42',
+    multirun_csv_dir: str = '',
     num_adapt_steps: int = 5,
     max_subprocesses: int = 10,
     meta_method: Optional[str] = None,
@@ -132,6 +134,8 @@ def run_evaluation(
         args.max_subprocesses = max_subprocesses
         args.checkpoint_dir = Path('checkpoints')
         args.output_dir = Path('results/k_shot_evaluation')
+        args.seeds = seeds
+        args.multirun_output_dir = Path(multirun_csv_dir)
         args.adapt_settings_file = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
         if meta_method is not None:
             args.meta_method = meta_method
@@ -200,6 +204,35 @@ def run_plotting(
         logging.error(f"Plotting failed: {e}")
         raise
 
+def run_plotting_multirun(
+    dir: str,
+    dataset: Optional[str] = None,
+) -> None:
+    """Generate plots for multirun evaluation results, aggregating across seeds."""
+    try:
+        logging.info("Generating multirun plots...")
+
+        csv_dir = Path(dir)
+
+        # Now run all existing plot functions against the aggregated directory
+        plot_all(metric='accuracy', dataset=dataset, results_dir=csv_dir)
+        plot_all(metric='loss', dataset=dataset, results_dir=csv_dir)
+
+        if dataset:
+            plot_k_shot_comparisons(dataset=dataset, metric='accuracy', results_dir=csv_dir)
+            plot_k_shot_comparisons(dataset=dataset, metric='loss', results_dir=csv_dir)
+            plot_k_shot_improvement(dataset=dataset, metric='accuracy', results_dir=csv_dir)
+            plot_k_shot_improvement(dataset=dataset, metric='loss', results_dir=csv_dir)
+        else:
+            logging.warning("--dataset not specified; skipping k-shot comparison and improvement plots")
+
+        plot_plasticity_comparisons(dataset=dataset, results_dir=csv_dir)
+
+        logging.info("Multirun plotting completed successfully")
+    except Exception as e:
+        logging.error(f"Multirun plotting failed: {e}")
+        raise
+
 
 def run_pipeline(
     dataset: str,
@@ -207,6 +240,7 @@ def run_pipeline(
     do_train: bool = True,
     do_eval: bool = True,
     do_plot: bool = True,
+    do_plot_per_seed: bool = False,
     # Training args
     lr: float = 0.1,
     n_epochs: int = 50,
@@ -219,6 +253,8 @@ def run_pipeline(
     adapt_lr: float = 0.01,
     num_adapt_steps: int = 5,
     max_subprocesses: int = 10,
+    seeds: str = '42',
+    multirun_csv_dir: str = '',
     # Plotting args
     plot_metric: str = 'accuracy',
     plasticity_metric: str = 'loss',
@@ -233,6 +269,8 @@ def run_pipeline(
         do_train: Whether to train a model
         do_eval: Whether to evaluate trained checkpoints
         do_plot: Whether to generate plots
+        do_plot_per_seed: Whether to generate multirun plots
+        multirun_output_dir: Output directory for multirun plots
         lr: Training learning rate
         n_epochs: Number of training epochs
         batch_size: Training batch size
@@ -243,6 +281,7 @@ def run_pipeline(
         adapt_lr: Adaptation learning rate
         num_adapt_steps: Adaptation steps
         max_subprocesses: Max concurrent GPU evaluations
+        seeds: Comma-separated random seeds for multirun evaluation (e.g., '42,1,2')
         plot_metric: Metric to plot
         plasticity_metric: Metric for plasticity computation
         **kwargs: Additional model-specific arguments
@@ -280,6 +319,8 @@ def run_pipeline(
                 datasets=dataset,
                 k_values=k_values,
                 adapt_lr=adapt_lr,
+                seeds=seeds,
+                multirun_csv_dir=multirun_csv_dir,
                 num_adapt_steps=num_adapt_steps,
                 max_subprocesses=max_subprocesses,
                 meta_method=kwargs['meta_method'] if 'meta' in model else None,
@@ -295,9 +336,15 @@ def run_pipeline(
             logger.info("Step 2/3: Skipping evaluation")
         
         # Step 3: Plotting
-        if do_plot:
+        if do_plot and not do_plot_per_seed:
             logger.info(f"Step 3/3: Plotting results")
             run_plotting(dataset=dataset)
+            logger.info("✓ Plotting completed")
+        elif do_plot_per_seed:
+            logger.info(f"Step 3/3: Plotting results, grouped by random seed")
+            run_plotting_multirun(dir=multirun_output_dir, dataset=dataset)
+            logger.info(f"Step 3b/3: Plotting aggregated results (mean and stdev) over each random seed")
+            run_plotting_multirun(dir=f"{multirun_output_dir}/aggregated", dataset=dataset)
             logger.info("✓ Plotting completed")
         else:
             logger.info("Step 3/3: Skipping plotting")
@@ -336,6 +383,8 @@ def main() -> None:
                         help='Run plotting phase')
     parser.add_argument('--skip_plot', action='store_false', dest='do_plot',
                         help='Skip plotting phase')
+    parser.add_argument('--do_plot_per_seed', action='store_false', dest='do_plot_per_seed',
+                        help='Group by seed during plotting phase')
     
     # Training arguments
     parser.add_argument('--lr', type=float, default=0.1,
@@ -360,6 +409,10 @@ def main() -> None:
                         help='Number of adaptation steps')
     parser.add_argument('--max_subprocesses', type=int, default=10,
                         help='Max concurrent evaluations per GPU')
+    parser.add_argument('--seeds', type=str, default='42',
+                        help='random seeds for evaluation (comma-separated, e.g., "0,42,123,1234,1")')
+    parser.add_argument('--multirun_csv_dir', type=str, default='results/k_shot_evaluation_multirun',
+                        help='Directory to save results csv generated from multiple runs with different seeds')
     
     # Plotting arguments
     parser.add_argument('--plot_metric', type=str, default='accuracy',
@@ -408,6 +461,8 @@ def main() -> None:
         do_train=args.do_train,
         do_eval=args.do_eval,
         do_plot=args.do_plot,
+        do_plot_per_seed=args.do_plot_per_seed,
+        multirun_csv_dir=args.multirun_csv_dir,
         lr=args.lr,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
@@ -416,6 +471,7 @@ def main() -> None:
         device=args.device,
         k_values=args.k_values,
         adapt_lr=args.adapt_lr,
+        seeds=args.seeds,
         num_adapt_steps=args.num_adapt_steps,
         max_subprocesses=args.max_subprocesses,
         plot_metric=args.plot_metric,

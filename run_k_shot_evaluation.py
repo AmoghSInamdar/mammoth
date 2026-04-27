@@ -122,6 +122,7 @@ def run_checkpoint_evaluation(
     model: str,
     dataset: str,
     k_values_csv: str,
+    seeds: str,
     adapt_lr: Optional[float],
     num_adapt_steps: Optional[int],
     output_dir: Path,
@@ -145,6 +146,8 @@ def run_checkpoint_evaluation(
         '0.0',
         '--k_values',
         k_values_csv,
+        '--seeds',
+        seeds,
         '--adapt_lr',
         str(adapt_lr),
         '--num_adapt_steps',
@@ -156,7 +159,7 @@ def run_checkpoint_evaluation(
     checkpoint_name = Path(checkpoint_path).stem
     print(
         f"Evaluating checkpoint={checkpoint_name}, model={model}, dataset={dataset}, "
-        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}"
+        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}, seeds={seeds}"
     )
     subprocess.run(command, check=True, env=env)
     return output_dir / f"evaluation_results_{checkpoint_name}.csv"
@@ -190,6 +193,7 @@ def evaluate_checkpoints_for_k(
     dataset: str,
     k_values: Sequence[int],
     adapt_settings: Dict[str, Any],
+    seeds: str = '42',
     output_dir: Path = OUTPUT_DIR,
     max_subprocesses: int = 10,
 ) -> None:
@@ -220,7 +224,7 @@ def evaluate_checkpoints_for_k(
             checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id = task
             pool_map.append(pools[gpu_id].apply_async(
                 run_checkpoint_evaluation,
-                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id)
+                args=(checkpoint_path, model, dataset, k_values_csv, seeds, adapt_lr, num_adapt_steps, temp_dir, gpu_id)
             ))
 
         for pool in pools.values():
@@ -308,6 +312,7 @@ def run_all(args: argparse.Namespace) -> None:
                             dataset,
                             args.k_values,
                             model_settings,
+                            seeds=args.seeds,
                             output_dir=args.output_dir,
                             max_subprocesses=args.max_subprocesses,
                         )
@@ -319,6 +324,7 @@ def run_all(args: argparse.Namespace) -> None:
                     dataset,
                     args.k_values,
                     model_settings,
+                    seeds=args.seeds,
                     output_dir=args.output_dir,
                     max_subprocesses=args.max_subprocesses,
                 )

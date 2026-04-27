@@ -27,6 +27,9 @@ import os
 import sys
 from pathlib import Path
 from typing import List, Optional
+import torch
+
+from utils.multirun_eval_results import MultirunEvaluationResult, MultirunEvaluationResults
 
 # Add mammoth path
 if os.path.dirname(__file__) == 'utils':
@@ -83,6 +86,10 @@ def parse_eval_args() -> argparse.Namespace:
                            help='Directory to save evaluation results')
     eval_group.add_argument('--custom_metric_module', type=str,
                            help='Path to custom metric module for aggregation')
+    eval_group.add_argument('--seeds', type=str, default='42',
+                            help='random seeds for evaluation (comma-separated, e.g., "0,42,123,1234,1")')
+    eval_group.add_argument('--multirun_output_dir', type=str, default='eval_results_multirun',
+                            help='Directory to save multirun evaluation results csv')
 
     # Stage 3: Experiment args (reuse from training)
     add_experiment_args(parser)
@@ -172,6 +179,12 @@ def parse_eval_args() -> argparse.Namespace:
         args.k_values = [int(x.strip()) for x in args.k_values.split(',')]
     except ValueError:
         parser.error("--k_values must be comma-separated integers")
+
+    # Parse seeds
+    try:
+        args.seeds = [int(x.strip()) for x in args.seeds.split(',')]
+    except ValueError:
+        parser.error("--seeds must be comma-separated integers")
 
     return args
 
@@ -342,6 +355,59 @@ def evaluate_checkpoint(checkpoint_path: str,
 
     return results
 
+def evaluate_checkpoint_multirun(checkpoint_path: str,
+                                  eval_args: argparse.Namespace,
+                                  train_args: argparse.Namespace,
+                                  dataset: 'ContinualDataset') -> List[MultirunEvaluationResult]:
+    results = []
+
+    model, loaded_args, checkpoint_id = load_checkpoint_for_eval(checkpoint_path, eval_args.device, eval_args)
+
+    for eval_task_id in eval_args.eval_tasks:
+        logging.info(f"Evaluating checkpoint {checkpoint_id} on task {eval_task_id}")
+
+        for k in eval_args.k_values:
+            logging.info(f"\nk={k} adaptation")
+
+            for seed in eval_args.seeds:
+                k_shot_loader, adapted_model = None, copy.deepcopy(model)
+                if k > 0:
+                    batch_size = 32 if model.NAME != 'mer' else 1
+                    k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size, sampling_seed=seed)
+                    if k_shot_loader is None:
+                        logging.warning(f"Could not create {k}-shot loader for task {eval_task_id}, skipping")
+                        continue
+
+                    adapted_model = adapt_model(
+                        model=model,
+                        k_shot_loader=k_shot_loader,
+                        num_steps=eval_args.num_adapt_steps if k > 0 else 0,
+                        learning_rate=eval_args.adapt_lr,
+                        task_id=eval_task_id
+                    )
+                    logging.info(f"Adapted model for task {eval_task_id} with k={k}, seed={seed}")
+
+                accuracy, loss = evaluate_adapted_model(
+                    adapted_model, dataset, eval_task_id, return_loss=True
+                )
+
+                result = MultirunEvaluationResult(
+                    checkpoint_id=checkpoint_id,
+                    eval_task_id=eval_task_id,
+                    k_value=k,
+                    accuracy=accuracy,
+                    loss=loss,
+                    num_adapt_steps=eval_args.num_adapt_steps if k > 0 else 0,
+                    adapt_lr=eval_args.adapt_lr if k > 0 else None,
+                    num_examples_used=len(k_shot_loader) * k_shot_loader.batch_size if k_shot_loader else 0,
+                    seed=seed,
+                )
+
+                results.append(result)
+                logging.info(f"    Task {eval_task_id}, k={k}, seed={seed}: {accuracy:.2f}% accuracy")
+
+    return results
+
 
 def get_results_group_name(checkpoint_paths: List[str]) -> str:
     """Derive a representative group name from checkpoint stems."""
@@ -366,9 +432,10 @@ def main():
 
     # Set device
     args.device = get_device(args.device)
+    is_multirun = len(args.seeds) > 1
 
     # Create output directory
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.output_dir) if not is_multirun else Path(args.multirun_output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load first checkpoint to get training args (assume all checkpoints have same structure)
@@ -382,13 +449,12 @@ def main():
     dataset.get_data_loaders()  # This sets up test_loaders
 
     # Evaluate all checkpoints
-    all_results = EvaluationResults()
+    all_results = MultirunEvaluationResults() if is_multirun else EvaluationResults()
+    eval_fn = evaluate_checkpoint_multirun if is_multirun else evaluate_checkpoint
 
     for checkpoint_path in args.checkpoint_paths:
         try:
-            checkpoint_results = evaluate_checkpoint(
-                checkpoint_path, args, train_args, dataset
-            )
+            checkpoint_results = eval_fn(checkpoint_path, args, train_args, dataset)
             all_results.add_results(checkpoint_results)
         except Exception as e:
             logging.error(f"Failed to evaluate checkpoint {checkpoint_path}: {e}")

@@ -18,9 +18,9 @@ from utils.conf import base_path
 class MNISTSmoothRotation(SequentialMNIST):
     NAME = 'smooth-rot-mnist'
     N_CLASSES = 10
-    N_TASKS = 10
-    IN_TASK_ANGLE_RANGE = 15
-    BETWEEN_TASK_ANGLE_RANGE = 5
+    N_TASKS = 20
+    IN_TASK_ANGLE_RANGE = 5
+    BETWEEN_TASK_ANGLE_RANGE = 15
     INIT_ANGLE = 0
     MAX_ANGLE = 360
     N_CLASSES_PER_TASK = 10
@@ -128,8 +128,17 @@ class MNISTSmoothRotation(SequentialMNIST):
 
     @staticmethod
     def get_transform():
-        return transforms.Compose([transforms.Grayscale(num_output_channels=3)])
+        return transforms.Compose([transforms.ToPILImage(), transforms.Grayscale(num_output_channels=3), transforms.ToTensor()])
     
     @set_default_from_args("backbone")
     def get_backbone():
         return "resnet18"
+    
+    @set_default_from_args('batch_size')
+    def get_batch_size(self):
+        return 64
+
+    @set_default_from_args('n_epochs')
+    def get_epochs(self):
+        return 5
+    

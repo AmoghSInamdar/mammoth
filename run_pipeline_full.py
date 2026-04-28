@@ -152,15 +152,16 @@ def run_evaluation(
         raise
 
 
-def compute_plasticity(metric: str = 'loss') -> None:
+def compute_plasticity(metric: str = 'loss', dataset: Optional[str] = None) -> None:
     """Compute plasticity metrics on evaluation results.
     
     Args:
         metric: Metric to use for SAUCE computation ('accuracy' or 'loss')
+        dataset: Optional dataset name to filter results
     """
     try:
         logging.info("Computing plasticity metrics...")
-        add_plasticity_scores_to_all_csvs(metric_for_sauce=metric)
+        add_plasticity_scores_to_all_csvs(metric_for_sauce=metric, dataset=dataset)
         logging.info("Plasticity metrics computed successfully")
     except Exception as e:
         logging.error(f"Plasticity computation failed: {e}")
@@ -289,7 +290,7 @@ def run_pipeline(
             
             # Compute plasticity
             logger.info(f"Step 2b/3: Computing plasticity metrics")
-            compute_plasticity(metric=plasticity_metric)
+            compute_plasticity(metric=plasticity_metric, dataset=dataset)
             logger.info("✓ Plasticity computation completed")
         else:
             logger.info("Step 2/3: Skipping evaluation")

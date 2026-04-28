@@ -103,9 +103,9 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     print(f"Plot saved to {output_path}")
 
 
-def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
+def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: str = 'accuracy') -> None:
     """Plot average plasticity scores for a given model across all checkpoints and tasks, including forward and backward splits."""
-    csv_path = RESULTS_DIR / f'evaluation_results_{model}.csv'
+    csv_path = results_dir / f'evaluation_results_{model}.csv'
     if not csv_path.exists():
         print(f"Error: CSV file {csv_path} does not exist for model {model}")
         return
@@ -168,7 +168,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
     ax2.legend()
     ax2.grid(True)
     plt.tight_layout()
-    output_path = plot_dir / f'plasticity_{model}.png'
+    output_path = plot_dir / f'plasticity_{metric}_{model}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Overall plasticity plot saved to {output_path}")
@@ -192,7 +192,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'forward_plasticity_{model}.png'
+        output_path = plot_dir / f'forward_plasticity_{metric}_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Forward plasticity plot saved to {output_path}")
@@ -218,7 +218,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'backward_plasticity_{model}.png'
+        output_path = plot_dir / f'backward_plasticity_{metric}_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Backward plasticity plot saved to {output_path}")
@@ -794,7 +794,7 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
             if plot_plasticity:
                 # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
                 model = csv_path.stem.replace('evaluation_results_', '')
-                plot_plasticity_scores(model, results_dir=results_dir)
+                plot_plasticity_scores(model, results_dir=results_dir, metric=metric)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 

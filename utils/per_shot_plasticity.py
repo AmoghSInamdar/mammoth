@@ -159,15 +159,20 @@ def add_plasticity_scores_to_csv(csv_path: Path, metric_for_sauce: str = 'accura
     print(f"Plasticity scores added to {csv_path}")
 
 
-def add_plasticity_scores_to_all_csvs(results_dir: Path = RESULTS_DIR, metric_for_sauce: str = 'accuracy') -> None:
+def add_plasticity_scores_to_all_csvs(
+    results_dir: Path = RESULTS_DIR, 
+    metric_for_sauce: str = 'accuracy',
+    dataset: Optional[str] = None
+) -> None:
     """
-    Compute per-shot plasticity scores for all CSV files in RESULTS_DIR.
+    Compute per-shot plasticity scores for CSV files in RESULTS_DIR.
 
     Processes each CSV file, skipping any with errors and printing exceptions.
 
     Args:
         results_dir: Directory containing evaluation result CSV files
         metric_for_sauce: Metric to compute plasticity scores from
+        dataset: If specified, only process CSV files containing this dataset name
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -177,6 +182,13 @@ def add_plasticity_scores_to_all_csvs(results_dir: Path = RESULTS_DIR, metric_fo
     if not csv_files:
         print(f"No CSV files found in {results_dir}")
         return
+
+    # Filter by dataset if specified
+    if dataset:
+        csv_files = [f for f in csv_files if dataset in f.name]
+        if not csv_files:
+            print(f"No CSV files found in {results_dir} for dataset '{dataset}'")
+            return
 
     print(f"Found {len(csv_files)} CSV files to process.")
     for csv_path in csv_files:
@@ -196,10 +208,12 @@ if __name__ == '__main__':
                         help='Metric to compute plasticity scores from (default: accuracy)')
     parser.add_argument('--process-all', action='store_true',
                         help='Process all CSV files in RESULTS_DIR instead of a single file')
+    parser.add_argument('--dataset', type=str, default=None,
+                        help='Dataset name to filter results (e.g., seq-cifar100)')
     args = parser.parse_args()
 
     if args.process_all:
-        add_plasticity_scores_to_all_csvs(metric_for_sauce=args.metric)
+        add_plasticity_scores_to_all_csvs(metric_for_sauce=args.metric, dataset=args.dataset)
     elif args.csv_file:
         csv_path = Path(args.csv_file)
         if not csv_path.exists():

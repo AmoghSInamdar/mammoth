@@ -80,3 +80,9 @@ def mnistmlp(num_classes: int, mlp_hidden_size: int = 100) -> BaseMNISTMLP:
     if mlp_hidden_size != 100:
         logging.debug(f"hidden size is set to `{mlp_hidden_size}` instead of the default `100`")
     return BaseMNISTMLP(28 * 28, num_classes, hidden_size=mlp_hidden_size)
+
+@register_backbone("mnistmlp_small")
+def mnistmlp(num_classes: int, mlp_hidden_size: int = 16) -> BaseMNISTMLP:
+    if mlp_hidden_size != 16:
+        logging.debug(f"hidden size is set to `{mlp_hidden_size}` instead of the default `16`")
+    return BaseMNISTMLP(28 * 28, num_classes, hidden_size=mlp_hidden_size)

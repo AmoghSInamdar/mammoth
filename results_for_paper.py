@@ -1164,7 +1164,7 @@ def plot_meta_improvement(
     # Create figure with 1 row and N columns
     nrows = 1
     ncols = len(directions)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(2 * ncols, 3), squeeze=False)
     
     def get_xticklabel(non_meta: str, meta: str) -> str:
         """Create xticklabel: non-meta base + meta with + prefix."""

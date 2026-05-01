@@ -58,6 +58,12 @@ python results_for_paper.py --dataset smooth-rot-mnist --plot-type sauce
 
 ## meta-cl improvement
 
+python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 1
+python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --k-values 1
+python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --k-values 1
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --k-values 1
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --k-values 1
+
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 2
 python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --k-values 2
 python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --k-values 2
@@ -231,11 +237,11 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --savecheck task \
     >outputs/maml_sgd_seq_cifar100.out 2>outputs/maml_sgd_seq_cifar100.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model meta_er  --buffer_size 500 --lr 0.1 \
     --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
-    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 50 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/maml_er_seq_cifar100.out 2>outputs/maml_er_seq_cifar100.err &
 
@@ -367,6 +373,22 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --adapt_lr 0.03 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/maml_derpp_seq_cifar100_20task.out 2>outputs/maml_derpp_seq_cifar100_20task.err &
+
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model meta_ewc --lr 0.1 --e_lambda 10 --gamma 1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_ewc_seq_cifar100_20task.out 2>outputs/maml_ewc_seq_cifar100_20task.err &
+
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset seq-cifar100-20task --model meta_agem --buffer_size 500 --lr 0.03 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.03 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.03 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_agem_seq_cifar100_20task.out 2>outputs/maml_agem_seq_cifar100_20task.err &
 
 
 # Struct CIFAR100

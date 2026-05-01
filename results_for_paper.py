@@ -1153,9 +1153,9 @@ def plot_meta_improvement(
     ncols = 3
     fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
     
-    col_titles = ['Backward\n(eval_task_id < checkpoint_num)', 
-                  'Current\n(eval_task_id == checkpoint_num)',
-                  'Forward\n(eval_task_id > checkpoint_num)']
+    col_titles = ['Backward', 'Current', 'Forward'] #\n(eval_task_id < checkpoint_num)', 
+                #   'Current\n(eval_task_id == checkpoint_num)',
+                #   'Forward\n(eval_task_id > checkpoint_num)']
     
     def get_xticklabel(non_meta: str, meta: str) -> str:
         """Create xticklabel: non-meta base + meta with + prefix."""

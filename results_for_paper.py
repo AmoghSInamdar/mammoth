@@ -1164,7 +1164,7 @@ def plot_meta_improvement(
     # Create figure with 1 row and N columns
     nrows = 1
     ncols = len(directions)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
     
     def get_xticklabel(non_meta: str, meta: str) -> str:
         """Create xticklabel: non-meta base + meta with + prefix."""
@@ -1265,7 +1265,8 @@ def plot_meta_improvement(
                           label='Meta', color=colors_meta, alpha=0.9)
         
         # Add legend
-        ax.legend(loc='upper right', fontsize=8)
+        if direction == 'forward':
+            ax.legend(loc='upper right', fontsize=8)
         
         # ax.set_xlabel('Method Pair')
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')

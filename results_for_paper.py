@@ -1015,14 +1015,15 @@ def plot_meta_improvement(
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
-    forward_only: bool = False
+    forward_only: bool = False,
+    num_lookahead: int = 0
 ) -> None:
     """Plot meta vs non-meta method comparison for backward, current, and forward tasks.
     
     Creates a plot with 3 columns in a single row (or 1 column if forward_only=True):
     - Left: Backward tasks (eval_task_id < checkpoint_num)
     - Middle: Current tasks (eval_task_id == checkpoint_num)
-    - Right: Forward tasks (eval_task_id > checkpoint_num)
+    - Right: Forward tasks (eval_task_id > checkpoint_num + num_lookahead if num_lookahead > 0)
     
     If forward_only=True, only plots the forward transfer column.
     
@@ -1037,6 +1038,7 @@ def plot_meta_improvement(
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
         forward_only: If True, only plot forward transfer column (default: False)
+        num_lookahead: Number of tasks to skip ahead when computing forward accuracy (default: 0)
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -1204,17 +1206,22 @@ def plot_meta_improvement(
                 k_subset_meta = meta_results[meta_results['k_value'] == k_val]
                 
                 if direction == 'forward':
-                    # Forward: eval_task_id > checkpoint_num
-                    data_non = k_subset_non[k_subset_non['eval_task_id'] > k_subset_non['checkpoint_num']]
-                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] > k_subset_meta['checkpoint_num']]
+                    # Forward: eval_task_id > checkpoint_num + num_lookahead
+                    forward_threshold = k_subset_non['checkpoint_num'] + num_lookahead
+                    data_non = k_subset_non[k_subset_non['eval_task_id'] > forward_threshold]
+                    forward_threshold = k_subset_meta['checkpoint_num'] + num_lookahead
+                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] > forward_threshold]
                 elif direction == 'backward':
                     # Backward: eval_task_id < checkpoint_num
                     data_non = k_subset_non[k_subset_non['eval_task_id'] < k_subset_non['checkpoint_num']]
                     data_meta = k_subset_meta[k_subset_meta['eval_task_id'] < k_subset_meta['checkpoint_num']]
                 else:  # current
                     # Current: eval_task_id == checkpoint_num
-                    data_non = k_subset_non[k_subset_non['eval_task_id'] == k_subset_non['checkpoint_num']]
-                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] == k_subset_meta['checkpoint_num']]
+                    # Evaluate 0-shot performance at the checkpoint task
+                    k_subset_non_cur = non_meta_results[non_meta_results['k_value'] == 0]
+                    k_subset_meta_cur = meta_results[meta_results['k_value'] == 0]
+                    data_non = k_subset_non_cur[k_subset_non_cur['eval_task_id'] == k_subset_non_cur['checkpoint_num']]
+                    data_meta = k_subset_meta_cur[k_subset_meta_cur['eval_task_id'] == k_subset_meta_cur['checkpoint_num']]
                 
                 if not data_non.empty:
                     non_meta_values.append(data_non[metric].mean())
@@ -1314,6 +1321,8 @@ def plot_meta_improvement(
         filename_parts.insert(1, 'no_meta')
     if include_20task:
         filename_parts.append('20task')
+    if num_lookahead > 0:
+        filename_parts.append(f'lookahead{num_lookahead}')
     if use_avg:
         filename_parts.append('avg')
     else:
@@ -1339,6 +1348,8 @@ def main() -> None:
                         help='Include 20-task variant CSVs')
     parser.add_argument('--forward-only', action='store_true',
                         help='For meta_improvement plot type: only plot forward transfer column')
+    parser.add_argument('--num-lookahead', type=int, default=0,
+                        help='For meta_improvement plot type: number of tasks to skip ahead when computing forward accuracy (default: 0)')
     parser.add_argument('--plot-type', type=str, default='stability',
                         choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement'],
                         help='Type of plot to create (default: stability)')
@@ -1387,7 +1398,8 @@ def main() -> None:
             metric=args.metric,
             with_meta=not args.no_meta,
             include_20task=args.include_20task,
-            forward_only=args.forward_only
+            forward_only=args.forward_only,
+            num_lookahead=args.num_lookahead
         )
 
 

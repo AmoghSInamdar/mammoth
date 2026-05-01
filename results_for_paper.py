@@ -222,7 +222,7 @@ def plot_k_shot_stability(
     # Create figure with one subplot per k-value
     nrows = 1
     ncols = len(k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
     col_titles = [f'k={k}' for k in k_values]
@@ -296,7 +296,7 @@ def plot_k_shot_stability(
         ax.set_xticklabels([get_method_label(m) for m in methods_with_data], 
                           rotation=45, ha='right', fontsize=8)
         ax.grid(True, axis='y', alpha=0.3)
-        ax.set_title(dataset)
+        ax.set_title(dataset.upper())
         
         # Set y-axis limits based on metric with extra headroom for labels
         if metric == 'accuracy':
@@ -509,7 +509,7 @@ def plot_forward_transfer(
     # Create figure with one column per k-value
     nrows = 1
     ncols = len(k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
     # Plot each k-value
@@ -569,6 +569,7 @@ def plot_forward_transfer(
         secax = ax.secondary_xaxis('top')
         secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["0-shot Current", f'{k_val}-shot Forward'])
         ax.axvline(x=(x_current[-1] + x_forward[0]) / 2, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
+        ax.set_title(dataset.upper())
         
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.grid(True, axis='y', alpha=0.3)
@@ -724,7 +725,7 @@ def plot_improvement(
     ncols = 1
     fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     
-    row_titles = [f'{dataset} (Backward)', f'{dataset} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
+    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
                 #   'Forward\n(eval_task_id > checkpoint_num)']
     
     # Collect handles and labels for legend
@@ -928,7 +929,7 @@ def plot_sauce(
     ncols = 1
     fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     
-    row_titles = [f'{dataset} (Backward)', f'{dataset} (Forward)'] 
+    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)'] 
     # row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
     #               'Forward SAUCE\n(eval_task_id > checkpoint_num)']
     
@@ -1013,14 +1014,17 @@ def plot_meta_improvement(
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
-    include_20task: bool = False
+    include_20task: bool = False,
+    forward_only: bool = False
 ) -> None:
     """Plot meta vs non-meta method comparison for backward, current, and forward tasks.
     
-    Creates a plot with 3 columns in a single row:
+    Creates a plot with 3 columns in a single row (or 1 column if forward_only=True):
     - Left: Backward tasks (eval_task_id < checkpoint_num)
     - Middle: Current tasks (eval_task_id == checkpoint_num)
     - Right: Forward tasks (eval_task_id > checkpoint_num)
+    
+    If forward_only=True, only plots the forward transfer column.
     
     For each non-meta method that has a meta-equivalent, plots side-by-side bars.
     Uses plot_plasticity coloring with lower opacity for non-meta methods.
@@ -1032,6 +1036,7 @@ def plot_meta_improvement(
         results_dir: Directory containing evaluation result CSVs
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
+        forward_only: If True, only plot forward transfer column (default: False)
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -1148,14 +1153,18 @@ def plot_meta_improvement(
     # Use Dark2 colormap (same as plot_plasticity)
     cmap = plt.cm.Dark2
     
-    # Create figure with 1 row and 3 columns (backward, current, forward)
-    nrows = 1
-    ncols = 3
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
+    # Determine columns to plot
+    if forward_only:
+        directions = ['forward']
+        col_titles = [dataset.upper()]
+    else:
+        directions = ['backward', 'current', 'forward']
+        col_titles = ['Backward', 'Current', 'Forward']
     
-    col_titles = ['Backward', 'Current', 'Forward'] #\n(eval_task_id < checkpoint_num)', 
-                #   'Current\n(eval_task_id == checkpoint_num)',
-                #   'Forward\n(eval_task_id > checkpoint_num)']
+    # Create figure with 1 row and N columns
+    nrows = 1
+    ncols = len(directions)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
     
     def get_xticklabel(non_meta: str, meta: str) -> str:
         """Create xticklabel: non-meta base + meta with + prefix."""
@@ -1168,7 +1177,7 @@ def plot_meta_improvement(
     
     # Plot each column
     for col_idx, (direction, col_title) in enumerate(zip(
-        ['backward', 'current', 'forward'], col_titles)):
+        directions, col_titles)):
         ax = axes[0, col_idx]
         
         # Collect data for each method pair
@@ -1258,7 +1267,7 @@ def plot_meta_improvement(
         # Add legend
         ax.legend(loc='upper right', fontsize=8)
         
-        ax.set_xlabel('Method Pair')
+        # ax.set_xlabel('Method Pair')
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.set_title(col_title)
         ax.set_xticks(x_positions)
@@ -1296,7 +1305,10 @@ def plot_meta_improvement(
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     # Build filename based on options
-    filename_parts = ['meta_improvement', dataset, metric]
+    if forward_only:
+        filename_parts = ['forward_meta_improvement', dataset, metric]
+    else:
+        filename_parts = ['meta_improvement', dataset, metric]
     if not with_meta:
         filename_parts.insert(1, 'no_meta')
     if include_20task:
@@ -1324,6 +1336,8 @@ def main() -> None:
                         help='Exclude meta-learning methods')
     parser.add_argument('--include-20task', action='store_true',
                         help='Include 20-task variant CSVs')
+    parser.add_argument('--forward-only', action='store_true',
+                        help='For meta_improvement plot type: only plot forward transfer column')
     parser.add_argument('--plot-type', type=str, default='stability',
                         choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement'],
                         help='Type of plot to create (default: stability)')
@@ -1371,7 +1385,8 @@ def main() -> None:
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
-            include_20task=args.include_20task
+            include_20task=args.include_20task,
+            forward_only=args.forward_only
         )
 
 

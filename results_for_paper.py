@@ -17,6 +17,60 @@ import pandas as pd
 RESULTS_DIR = Path('results/k_shot_evaluation')
 PLOTS_DIR = Path('plots')
 
+# Consistent color scheme for each method across all plots
+METHOD_COLORS = {
+    # Non-meta methods
+    'sgd': '#1f77b4',       # blue
+    'sgd_': '#1f77b4',      # blue variant
+    'derpp': '#ff7f0e',     # orange
+    'ewc_on': '#2ca02c',    # green
+    'ewc': '#2ca02c',       # green variant
+    'agem': '#d62728',      # red
+    'mer': '#9467bd',       # purple
+    'mas': '#8c564b',       # brown
+    'rps': '#e377c2',       # pink
+    'lwf': '#7f7f7f',       # gray
+    'icarl': '#bcbd22',     # yellow-green
+    'finetune': '#17becf',  # cyan
+    # Meta methods
+    'meta_sgd': '#1f77b4',       # blue (same as sgd)
+    'meta_derpp': '#ff7f0e',    # orange (same as derpp)
+    'meta_ewc': '#2ca02c',      # green (same as ewc)
+    'meta_ewc_on': '#2ca02c',   # green (same as ewc_on)
+    'meta_agem': '#d62728',     # red (same as agem)
+    'meta_mer': '#9467bd',      # purple (same as mer)
+    'meta_maml': '#8c564b',     # brown
+    'meta_reptile': '#e377c2',  # pink
+    'meta_no': '#7f7f7f',       # gray
+}
+
+
+def get_method_color(method: str, cmap=plt.cm.Dark2) -> str:
+    """Get consistent color for a method."""
+    # Check for exact match first
+    if method in METHOD_COLORS:
+        return METHOD_COLORS[method]
+    
+    # Try prefix matching for meta methods
+    if method.startswith('meta_'):
+        base = method[5:]  # Remove 'meta_' prefix
+        if base in METHOD_COLORS:
+            return METHOD_COLORS[base]
+        # Try first part of base
+        base_part = base.split('_')[0]
+        if base_part in METHOD_COLORS:
+            return METHOD_COLORS[base_part]
+    
+    # Try matching first part of method name
+    method_part = method.split('_')[0]
+    if method_part in METHOD_COLORS:
+        return METHOD_COLORS[method_part]
+    
+    # Default to Dark2 colormap - generate a consistent color based on hash
+    import hashlib
+    hash_val = int(hashlib.md5(method.encode()).hexdigest(), 16)
+    return cmap(hash_val % cmap.N)
+
 
 def load_evaluation_results(csv_path: Path) -> pd.DataFrame:
     """Load evaluation results from CSV file into a pandas DataFrame."""
@@ -168,7 +222,7 @@ def plot_k_shot_stability(
     # Create figure with one subplot per k-value
     nrows = 1
     ncols = len(k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3, 4), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
     axes_flat = axes.flatten()
     
     col_titles = [f'k={k}' for k in k_values]
@@ -219,22 +273,24 @@ def plot_k_shot_stability(
         methods_with_data = [m for m in sorted_methods if m in method_0shot or m in method_kshot]
         
         x_positions = np.arange(len(methods_with_data))
-        bar_width = 0.35
+        bar_width = 0.4
         
-        # 0-shot bars
+        # 0-shot bars (lighter version)
         values_0shot = [method_0shot.get(m, 0) for m in methods_with_data]
+        colors_0shot = [get_method_color(m) for m in methods_with_data]
         bars_0shot = ax.bar(x_positions - bar_width/2, values_0shot, bar_width, 
-                           label='0-shot', color='steelblue', alpha=0.8)
+                           label='0-shot', color=colors_0shot, alpha=0.4)
         
-        # k-shot bars
+        # k-shot bars (darker version)
         values_kshot = [method_kshot.get(m, 0) for m in methods_with_data]
+        colors_kshot = [get_method_color(m) for m in methods_with_data]
         bars_kshot = ax.bar(x_positions + bar_width/2, values_kshot, bar_width, 
-                           label=f'{k_val}-shot', color='coral', alpha=0.8)
+                           label=f'{k_val}-shot', color=colors_kshot, alpha=0.9)
         
         # Add legend in top right of each subplot
         ax.legend(loc='upper right', fontsize=8)
         
-        ax.set_xlabel('Method')
+        # ax.set_xlabel('Method')
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.set_xticks(x_positions)
         ax.set_xticklabels([get_method_label(m) for m in methods_with_data], 
@@ -453,7 +509,7 @@ def plot_forward_transfer(
     # Create figure with one column per k-value
     nrows = 1
     ncols = len(k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 6), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
     axes_flat = axes.flatten()
     
     # Plot each k-value
@@ -493,22 +549,25 @@ def plot_forward_transfer(
         methods_with_data = [m for m in sorted_methods if m in method_current or m in method_forward]
         bar_width = 0.5
 
-
         x_current = [x + bar_width + 0.15 for x in range(len(methods_with_data))]
         x_forward = [x_current[-1] + 1 + x + bar_width + 0.15 for x in range(len(methods_with_data))]
 
         current_values = [method_current.get(m, 0) for m in methods_with_data]
         forward_values = [method_forward.get(m, 0) for m in methods_with_data]
-        colors = plt.cm.Dark2.colors[:len(methods_with_data)] * 2
+        
+        # Use consistent method colors (lighter for current, darker for forward)
+        colors_current = [get_method_color(m) for m in methods_with_data]
+        colors_forward = [get_method_color(m) for m in methods_with_data]
 
-        ax.bar(x_current+x_forward, current_values+forward_values, width=bar_width, alpha=0.85, color=colors)
+        ax.bar(x_current, current_values, width=bar_width, alpha=0.4, color=colors_current)
+        ax.bar(x_forward, forward_values, width=bar_width, alpha=0.9, color=colors_forward)
 
         all_labels = [get_method_label(m) for m in methods_with_data] * 2
         tick_positions = x_current + x_forward
         ax.set_xticks(tick_positions)
         ax.set_xticklabels(all_labels, rotation=45, ha='right', fontsize=8)
         secax = ax.secondary_xaxis('top')
-        secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["CL Plasticity", f'{k_val}-shot Forward Transfer'])
+        secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["0-shot Current", f'{k_val}-shot Forward'])
         ax.axvline(x=(x_current[-1] + x_forward[0]) / 2, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
         
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
@@ -663,242 +722,10 @@ def plot_improvement(
     # Create figure with 2 rows (backward, forward) and one column
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(10, 10), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     
-    row_titles = ['Backward\n(eval_task_id < checkpoint_num)', 
-                  'Forward\n(eval_task_id > checkpoint_num)']
-    
-    # Collect handles and labels for legend
-    all_handles = []
-    all_labels = []
-    
-    # Plot each row
-    for row_idx, (direction, row_title) in enumerate(zip(
-        ['backward', 'forward'], row_titles)):
-        ax = axes[row_idx, 0]
-        
-        for method_idx, (method, results) in enumerate(model_results.items()):
-            # For each method, compute performance across checkpoints
-            method_data = []
-            
-            for k_val in k_values:
-                # Filter by k_value
-                k_subset = results[results['k_value'] == k_val]
-                if k_subset.empty:
-                    continue
-                
-                if direction == 'forward':
-                    subset = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
-                else:  # backward
-                    subset = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
-                
-                if subset.empty:
-                    continue
-                
-                # Group by checkpoint_num and compute mean
-                plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
-                if plot_data.empty:
-                    continue
-                
-                method_data.append(plot_data)
-                num_checkpoints = plot_data['checkpoint_num'].nunique()
-                if direction == 'forward':
-                    ax.set_xticks(ticks=range(num_checkpoints), labels=range(1,num_checkpoints+1))
-                else:
-                    ax.set_xticks(ticks=range(1, num_checkpoints+1), labels=range(2, num_checkpoints+2))
-            
-            # If using avg, compute average across all k-values for each checkpoint
-            if use_avg and method_data:
-                # Combine all k-value data and compute mean per checkpoint
-                combined = pd.concat(method_data, ignore_index=True)
-                plot_data = combined.groupby('checkpoint_num')[[metric]].mean().reset_index()
-            elif method_data:
-                # Use the last k-value's data (or could average)
-                plot_data = method_data[-1] if method_data else None
-            else:
-                plot_data = None
-            
-            if plot_data is not None and not plot_data.empty:
-                plot_data = plot_data.sort_values('checkpoint_num')
-                color = cmap(method_idx / max(len(model_results) - 1, 1))
-                line, = ax.plot(plot_data['checkpoint_num'], plot_data[metric], 
-                       marker='o', label=get_method_label(method), color=color)
-                all_handles.append(line)
-                all_labels.append(get_method_label(method))
-        
-        ax.set_title(row_title)
-        ax.set_xlabel('Checkpoint Number')
-        ax.set_ylabel(metric.capitalize())
-        ax.grid(True)
-        
-        # # Set y-axis limits based on metric with extra headroom
-        # if metric == 'accuracy':
-        #     ax.set_ylim(0, 110)
-        # else:
-        #     ax.set_ylim(0, 1.1)
-    
-    # Add single legend outside the subplots to the right
-    # Remove duplicates from legend handles/labels
-    unique_pairs = []
-    seen_labels = set()
-    for handle, label in zip(all_handles, all_labels):
-        if label not in seen_labels:
-            unique_pairs.append((handle, label))
-            seen_labels.add(label)
-    
-    if unique_pairs:
-        handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='center right', 
-                   bbox_to_anchor=(1.02, 0.5), fontsize='small', 
-                   title='Method', title_fontsize='small')
-    
-    plt.tight_layout()
-    plt.subplots_adjust(right=0.88)
-    
-    # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
-    plot_dir.mkdir(exist_ok=True, parents=True)
-    
-    # Build filename based on options
-    filename_parts = ['improvement', dataset, metric]
-    if not with_meta:
-        filename_parts.insert(1, 'no_meta')
-    if include_20task:
-        filename_parts.append('20task')
-    if use_avg:
-        filename_parts.append('avg')
-    else:
-        filename_parts.append('k' + '-'.join(str(k) for k in k_values))
-    output_path = plot_dir / f'{"_".join(filename_parts)}.png'
-    
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close(fig)
-    print(f"Saved improvement plot to {output_path}")
-
-
-def plot_plasticity(
-    dataset: str,
-    k_values: List[int] = None,
-    metric: str = 'accuracy',
-    results_dir: Path = RESULTS_DIR,
-    with_meta: bool = True,
-    include_20task: bool = False
-) -> None:
-    """Plot backward and forward k-shot improvement as 2 vertically stacked subplots.
-    
-    Creates a plot with 2 rows:
-    - Top: Backward k-shot improvement (eval_task_id < checkpoint_num)
-    - Bottom: Forward k-shot improvement (eval_task_id > checkpoint_num)
-    
-    Each row shows performance as checkpoint_id increases.
-    
-    Args:
-        dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
-        k_values: List of k-values to plot (default: [1, 2, 5, 10]). Use 'avg' for average across all k-values.
-        metric: Metric to plot ('accuracy' or 'loss')
-        results_dir: Directory containing evaluation result CSVs
-        with_meta: If True, include CSVs containing 'meta' in the name
-        include_20task: If True, include CSVs with '20task' in the name
-    """
-    if not results_dir.exists():
-        print(f"Error: Results directory {results_dir} does not exist.")
-        return
-
-    # Default k_values if not specified
-    if k_values is None:
-        k_values = [1, 2, 5, 10]
-    
-    # Handle 'avg' special case
-    use_avg = 'avg' in [str(k) for k in k_values]
-    if use_avg:
-        k_values = [k for k in k_values if str(k) != 'avg']
-    
-    # Filter to only k > 0
-    k_values = [k for k in k_values if k > 0]
-    if not k_values:
-        print("No k-values > 0 specified.")
-        return
-
-    # Find all CSV files for this dataset
-    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
-    
-    if not csv_files:
-        print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
-        return
-
-    # Filter by with_meta flag
-    if not with_meta:
-        csv_files = [f for f in csv_files if not (
-            f.name.startswith('evaluation_results_meta-') or 
-            '_meta_' in f.name
-        )]
-    
-    # Filter by include_20task flag
-    if not include_20task:
-        csv_files = [f for f in csv_files if '20task' not in f.name]
-    else:
-        csv_files = [f for f in csv_files if '20task' in f.name]
-    
-    if not csv_files:
-        print(f"No CSV files found after filtering for dataset '{dataset}'")
-        return
-
-    print(f"Found {len(csv_files)} CSV files for dataset '{dataset}'")
-
-    # Load all model results
-    model_results = {}
-    for csv_path in csv_files:
-        model_dataset = csv_path.stem.replace('evaluation_results_', '')
-        results = load_evaluation_results(csv_path)
-        if results.empty:
-            print(f"Skipping empty CSV for {model_dataset}")
-            continue
-        results = results.copy()
-        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
-        model_results[model_dataset] = results
-        print(f"  Loaded {model_dataset}: {len(results)} rows")
-
-    if not model_results:
-        print("No valid results to plot.")
-        return
-
-    # Check available k-values in data
-    available_k_values = []
-    for model, results in model_results.items():
-        available_k_values.extend(results['k_value'].unique())
-    available_k_values = sorted(set(available_k_values))
-    
-    # If 'avg' is requested, use all available k-values > 0
-    if use_avg:
-        k_values = [k for k in available_k_values if k > 0]
-    else:
-        k_values = [k for k in k_values if k in available_k_values]
-    
-    if 0 not in available_k_values:
-        print(f"Warning: k=0 not found in data. Available k-values: {available_k_values}")
-    
-    if not k_values:
-        print(f"None of the requested k-values {k_values} found in data. Available: {available_k_values}")
-        return
-
-    print(f"Plotting for k-values: {k_values}")
-
-    # Get sorted list of methods
-    all_methods = sorted(model_results.keys())
-    non_meta = [m for m in all_methods if not m.startswith('meta')]
-    meta = [m for m in all_methods if m.startswith('meta')]
-    sorted_methods = non_meta + meta
-    
-    # Use Dark2 colormap
-    cmap = plt.cm.Dark2
-    
-    # Create figure with 2 rows (backward, forward) and one column
-    nrows = 2
-    ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(10, 10), squeeze=False)
-    
-    row_titles = ['Backward\n(eval_task_id < checkpoint_num)', 
-                  'Forward\n(eval_task_id > checkpoint_num)']
+    row_titles = [f'{dataset} (Backward)', f'{dataset} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
+                #   'Forward\n(eval_task_id > checkpoint_num)']
     
     # Collect handles and labels for legend
     all_handles = []
@@ -953,8 +780,12 @@ def plot_plasticity(
             if plot_data is not None and not plot_data.empty:
                 plot_data = plot_data.sort_values('checkpoint_num')
                 color = cmap(method_idx / max(len(model_results) - 1, 1))
+                # Use bold line for meta methods
+                linewidth = 1.5 if method.startswith('meta') else 1.0
+                linestyle = '-' if not with_meta or method.startswith('meta') else '--'
                 line, = ax.plot(plot_data['checkpoint_num'], plot_data[metric], 
-                       marker='o', label=get_method_label(method), color=color)
+                       marker='o', label=get_method_label(method), color=color,
+                       linewidth=linewidth, linestyle=linestyle)
                 all_handles.append(line)
                 all_labels.append(get_method_label(method))
         
@@ -980,9 +811,9 @@ def plot_plasticity(
     
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='center right', 
-                   bbox_to_anchor=(1.02, 0.5), fontsize='small', 
-                   title='Method', title_fontsize='small')
+        fig.legend(handles, labels, loc='lower center', ncols=5,
+                   bbox_to_anchor=(0.5, -0.1), fontsize='small') #, 
+                #    title='Method', title_fontsize='small')
     
     plt.tight_layout()
     plt.subplots_adjust(right=0.88)
@@ -1095,10 +926,11 @@ def plot_sauce(
     # Create figure with 2 rows (backward, forward) and one column
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(10, 10), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     
-    row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
-                  'Forward SAUCE\n(eval_task_id > checkpoint_num)']
+    row_titles = [f'{dataset} (Backward)', f'{dataset} (Forward)'] 
+    # row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
+    #               'Forward SAUCE\n(eval_task_id > checkpoint_num)']
     
     # Collect handles and labels for legend
     all_handles = []
@@ -1126,8 +958,12 @@ def plot_sauce(
             
             plot_data = plot_data.sort_values('checkpoint_num')
             color = cmap(method_idx / max(len(model_results) - 1, 1))
+            # Use bold line for meta methods
+            linewidth = 1.5 if method.startswith('meta') else 1.0
+            linestyle = '-' if not with_meta or method.startswith('meta') else '--'           
             line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                   marker='o', label=get_method_label(method), color=color)
+                            marker='o', label=get_method_label(method), color=color,
+                            linewidth=linewidth, linestyle=linestyle)
             all_handles.append(line)
             all_labels.append(get_method_label(method))
         
@@ -1135,6 +971,7 @@ def plot_sauce(
         ax.set_xlabel('Checkpoint Number')
         ax.set_ylabel('SAUCE')
         ax.grid(True)
+        ax.set_yscale('log')
     
     # Add single legend outside the subplots to the right
     unique_pairs = []
@@ -1146,8 +983,8 @@ def plot_sauce(
     
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='center right', 
-                   bbox_to_anchor=(1.02, 0.5), fontsize='small', 
+        fig.legend(handles, labels, loc='center right', ncols=1,
+                   bbox_to_anchor=(1.3, 0.5), fontsize='small', 
                    title='Method', title_fontsize='small')
     
     plt.tight_layout()
@@ -1170,6 +1007,311 @@ def plot_sauce(
     print(f"Saved SAUCE plot to {output_path}")
 
 
+def plot_meta_improvement(
+    dataset: str,
+    k_values: List[int] = None,
+    metric: str = 'accuracy',
+    results_dir: Path = RESULTS_DIR,
+    with_meta: bool = True,
+    include_20task: bool = False
+) -> None:
+    """Plot meta vs non-meta method comparison for backward, current, and forward tasks.
+    
+    Creates a plot with 3 columns in a single row:
+    - Left: Backward tasks (eval_task_id < checkpoint_num)
+    - Middle: Current tasks (eval_task_id == checkpoint_num)
+    - Right: Forward tasks (eval_task_id > checkpoint_num)
+    
+    For each non-meta method that has a meta-equivalent, plots side-by-side bars.
+    Uses plot_plasticity coloring with lower opacity for non-meta methods.
+    
+    Args:
+        dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
+        k_values: List of k-values to plot (default: [1, 2, 5, 10]). Use 'avg' for average.
+        metric: Metric to plot ('accuracy' or 'loss')
+        results_dir: Directory containing evaluation result CSVs
+        with_meta: If True, include CSVs containing 'meta' in the name
+        include_20task: If True, include CSVs with '20task' in the name
+    """
+    if not results_dir.exists():
+        print(f"Error: Results directory {results_dir} does not exist.")
+        return
+
+    # Default k_values if not specified
+    if k_values is None:
+        k_values = [1, 2, 5, 10]
+    
+    # Handle 'avg' special case
+    use_avg = 'avg' in [str(k) for k in k_values]
+    if use_avg:
+        k_values = [k for k in k_values if str(k) != 'avg']
+    
+    # Filter to only k > 0
+    k_values = [k for k in k_values if k > 0]
+    if not k_values:
+        print("No k-values > 0 specified.")
+        return
+
+    # Find all CSV files for this dataset
+    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
+    
+    if not csv_files:
+        print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
+        return
+
+    # Filter by with_meta flag
+    if not with_meta:
+        csv_files = [f for f in csv_files if not (
+            f.name.startswith('evaluation_results_meta-') or 
+            '_meta_' in f.name
+        )]
+    
+    # Filter by include_20task flag
+    if not include_20task:
+        csv_files = [f for f in csv_files if '20task' not in f.name]
+    else:
+        csv_files = [f for f in csv_files if '20task' in f.name]
+    
+    if not csv_files:
+        print(f"No CSV files found after filtering for dataset '{dataset}'")
+        return
+
+    print(f"Found {len(csv_files)} CSV files for dataset '{dataset}'")
+
+    # Load all model results
+    model_results = {}
+    for csv_path in csv_files:
+        model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        results = load_evaluation_results(csv_path)
+        if results.empty:
+            print(f"Skipping empty CSV for {model_dataset}")
+            continue
+        results = results.copy()
+        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
+        model_results[model_dataset] = results
+        print(f"  Loaded {model_dataset}: {len(results)} rows")
+
+    if not model_results:
+        print("No valid results to plot.")
+        return
+
+    # Check available k-values in data
+    available_k_values = []
+    for model, results in model_results.items():
+        available_k_values.extend(results['k_value'].unique())
+    available_k_values = sorted(set(available_k_values))
+    
+    # If 'avg' is requested, use all available k-values > 0
+    if use_avg:
+        k_values = [k for k in available_k_values if k > 0]
+    else:
+        k_values = [k for k in k_values if k in available_k_values]
+    
+    if 0 not in available_k_values:
+        print(f"Warning: k=0 not found in data. Available k-values: {available_k_values}")
+    
+    if not k_values:
+        print(f"None of the requested k-values {k_values} found in data. Available: {available_k_values}")
+        return
+
+    print(f"Plotting for k-values: {k_values}")
+
+    # Identify non-meta methods and their meta equivalents
+    # Map from non-meta base to meta equivalent
+    non_meta_methods = []
+    meta_methods = []
+    
+    for method in model_results.keys():
+        if method.startswith('meta'):
+            meta_methods.append(method)
+        else:
+            non_meta_methods.append(method)
+    
+    # Find pairs: non-meta method -> meta method
+    # e.g., 'sgd' -> 'meta_sgd', 'derpp' -> 'meta_derpp', 'ewc_on' -> 'meta_ewc'
+    method_pairs = {}
+    for non_meta in non_meta_methods:
+        # Try to find corresponding meta method
+        base = non_meta.split('_')[0]  # e.g., 'sgd', 'derpp', 'ewc'
+        for meta in meta_methods:
+            base = 'ewc' if base.startswith('ewc') else base
+            if meta == f'meta-{base}' or meta.startswith(f'meta-{base}_'):
+                method_pairs[non_meta] = meta
+                break
+    
+    if not method_pairs:
+        print("No matching non-meta/meta method pairs found.")
+        return
+
+    print(f"Found {len(method_pairs)} method pairs: {method_pairs}")
+
+    # Use Dark2 colormap (same as plot_plasticity)
+    cmap = plt.cm.Dark2
+    
+    # Create figure with 1 row and 3 columns (backward, current, forward)
+    nrows = 1
+    ncols = 3
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.5 * ncols, 4), squeeze=False)
+    
+    col_titles = ['Backward\n(eval_task_id < checkpoint_num)', 
+                  'Current\n(eval_task_id == checkpoint_num)',
+                  'Forward\n(eval_task_id > checkpoint_num)']
+    
+    def get_xticklabel(non_meta: str, meta: str) -> str:
+        """Create xticklabel: non-meta base + meta with + prefix."""
+        # Non-meta: just the base technique
+        non_meta_label = non_meta.split('_')[0]
+        # Meta: last 2 segments prefixed by '+'
+        meta_parts = meta.split('_')
+        meta_label = '+' + '_'.join(meta_parts[-2:]) if len(meta_parts) >= 2 else '+' + meta
+        return f"{non_meta_label}" #/{meta_label}"
+    
+    # Plot each column
+    for col_idx, (direction, col_title) in enumerate(zip(
+        ['backward', 'current', 'forward'], col_titles)):
+        ax = axes[0, col_idx]
+        
+        # Collect data for each method pair
+        pair_data = []
+        color_idx = 0
+        
+        for non_meta, meta in method_pairs.items():
+            non_meta_results = model_results.get(non_meta)
+            meta_results = model_results.get(meta)
+            
+            if non_meta_results is None or meta_results is None:
+                continue
+            
+            # Get color for this pair
+            color = cmap(color_idx / max(len(method_pairs) - 1, 1))
+            color_idx += 1
+            
+            # Compute performance for each k-value
+            non_meta_values = []
+            meta_values = []
+            
+            for k_val in k_values:
+                k_subset_non = non_meta_results[non_meta_results['k_value'] == k_val]
+                k_subset_meta = meta_results[meta_results['k_value'] == k_val]
+                
+                if direction == 'forward':
+                    # Forward: eval_task_id > checkpoint_num
+                    data_non = k_subset_non[k_subset_non['eval_task_id'] > k_subset_non['checkpoint_num']]
+                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] > k_subset_meta['checkpoint_num']]
+                elif direction == 'backward':
+                    # Backward: eval_task_id < checkpoint_num
+                    data_non = k_subset_non[k_subset_non['eval_task_id'] < k_subset_non['checkpoint_num']]
+                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] < k_subset_meta['checkpoint_num']]
+                else:  # current
+                    # Current: eval_task_id == checkpoint_num
+                    data_non = k_subset_non[k_subset_non['eval_task_id'] == k_subset_non['checkpoint_num']]
+                    data_meta = k_subset_meta[k_subset_meta['eval_task_id'] == k_subset_meta['checkpoint_num']]
+                
+                if not data_non.empty:
+                    non_meta_values.append(data_non[metric].mean())
+                else:
+                    non_meta_values.append(0)
+                
+                if not data_meta.empty:
+                    meta_values.append(data_meta[metric].mean())
+                else:
+                    meta_values.append(0)
+            
+            # If using avg, compute average across all k-values
+            if use_avg:
+                non_meta_val = np.mean(non_meta_values) if non_meta_values else 0
+                meta_val = np.mean(meta_values) if meta_values else 0
+            else:
+                # Use the last k-value
+                non_meta_val = non_meta_values[-1] if non_meta_values else 0
+                meta_val = meta_values[-1] if meta_values else 0
+            
+            pair_data.append({
+                'non_meta': non_meta,
+                'meta': meta,
+                'non_meta_val': non_meta_val,
+                'meta_val': meta_val,
+                'color': color
+            })
+        
+        if not pair_data:
+            print(f"No data found for {direction} direction.")
+            continue
+        
+        # Plot side-by-side bars
+        n_pairs = len(pair_data)
+        x_positions = np.arange(n_pairs)
+        bar_width = 0.35
+        
+        # Non-meta bars (lower opacity)
+        non_meta_vals = [p['non_meta_val'] for p in pair_data]
+        colors_non_meta = [p['color'] for p in pair_data]
+        bars_non_meta = ax.bar(x_positions - bar_width/2, non_meta_vals, bar_width, 
+                               label='Non-meta', color=colors_non_meta, alpha=0.5)
+        
+        # Meta bars (full opacity)
+        meta_vals = [p['meta_val'] for p in pair_data]
+        colors_meta = [p['color'] for p in pair_data]
+        bars_meta = ax.bar(x_positions + bar_width/2, meta_vals, bar_width, 
+                          label='Meta', color=colors_meta, alpha=0.9)
+        
+        # Add legend
+        ax.legend(loc='upper right', fontsize=8)
+        
+        ax.set_xlabel('Method Pair')
+        ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+        ax.set_title(col_title)
+        ax.set_xticks(x_positions)
+        ax.set_xticklabels([get_xticklabel(p['non_meta'], p['meta']) for p in pair_data], 
+                          rotation=45, ha='right', fontsize=8)
+        ax.grid(True, axis='y', alpha=0.3)
+        
+        # Set y-axis limits based on metric
+        if metric == 'accuracy':
+            ax.set_ylim(0, 110)
+        else:
+            ax.set_ylim(0, 1.1)
+        
+        # Add value labels on bars
+        for bar, val in zip(bars_non_meta, non_meta_vals):
+            if val > 0:
+                ax.annotate(f'{val:.1f}',
+                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                           xytext=(0, 3),
+                           textcoords="offset points",
+                           ha='center', va='bottom', fontsize=6, rotation=90)
+        for bar, val in zip(bars_meta, meta_vals):
+            if val > 0:
+                ax.annotate(f'{val:.1f}',
+                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                           xytext=(0, 3),
+                           textcoords="offset points",
+                           ha='center', va='bottom', fontsize=6, rotation=90)
+    
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.2)
+    
+    # Save to dataset-specific directory
+    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir.mkdir(exist_ok=True, parents=True)
+    
+    # Build filename based on options
+    filename_parts = ['meta_improvement', dataset, metric]
+    if not with_meta:
+        filename_parts.insert(1, 'no_meta')
+    if include_20task:
+        filename_parts.append('20task')
+    if use_avg:
+        filename_parts.append('avg')
+    else:
+        filename_parts.append('k' + '-'.join(str(k) for k in k_values))
+    output_path = plot_dir / f'{"_".join(filename_parts)}.png'
+    
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    print(f"Saved meta improvement plot to {output_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description='Plot finalized results for paper')
     parser.add_argument('--dataset', type=str, required=True,
@@ -1183,7 +1325,7 @@ def main() -> None:
     parser.add_argument('--include-20task', action='store_true',
                         help='Include 20-task variant CSVs')
     parser.add_argument('--plot-type', type=str, default='stability',
-                        choices=['stability', 'forward_transfer', 'improvement', 'sauce'],
+                        choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement'],
                         help='Type of plot to create (default: stability)')
     
     args = parser.parse_args()
@@ -1219,6 +1361,14 @@ def main() -> None:
     elif args.plot_type == 'sauce':
         plot_sauce(
             dataset=args.dataset,
+            metric=args.metric,
+            with_meta=not args.no_meta,
+            include_20task=args.include_20task
+        )
+    elif args.plot_type == 'meta_improvement':
+        plot_meta_improvement(
+            dataset=args.dataset,
+            k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
             include_20task=args.include_20task

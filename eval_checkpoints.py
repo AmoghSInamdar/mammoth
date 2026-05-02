@@ -27,6 +27,9 @@ import os
 import sys
 from pathlib import Path
 from typing import List, Optional
+import torch
+
+from utils.multirun_eval_results import MultirunEvaluationResult, MultirunEvaluationResults
 
 # Add mammoth path
 if os.path.dirname(__file__) == 'utils':
@@ -83,6 +86,10 @@ def parse_eval_args() -> argparse.Namespace:
                            help='Directory to save evaluation results')
     eval_group.add_argument('--custom_metric_module', type=str,
                            help='Path to custom metric module for aggregation')
+    eval_group.add_argument('--n_seeds', type=int, default=10,
+                           help='num of random seeds for evaluation')
+    eval_group.add_argument('--multirun_temp_csv_dir', type=str, default='eval_results_multirun',
+                            help='Directory to save temp multirun evaluation results csv')
 
     # Stage 3: Experiment args (reuse from training)
     add_experiment_args(parser)
@@ -173,6 +180,9 @@ def parse_eval_args() -> argparse.Namespace:
     except ValueError:
         parser.error("--k_values must be comma-separated integers")
 
+    # Generate seeds
+    args.seeds = list(range(args.n_seeds))
+    
     return args
 
 
@@ -342,6 +352,59 @@ def evaluate_checkpoint(checkpoint_path: str,
 
     return results
 
+def evaluate_checkpoint_multirun(checkpoint_path: str,
+                                  eval_args: argparse.Namespace,
+                                  train_args: argparse.Namespace,
+                                  dataset: 'ContinualDataset') -> List[MultirunEvaluationResult]:
+    results = []
+
+    model, loaded_args, checkpoint_id = load_checkpoint_for_eval(checkpoint_path, eval_args.device, eval_args)
+
+    for eval_task_id in eval_args.eval_tasks:
+        logging.info(f"Evaluating checkpoint {checkpoint_id} on task {eval_task_id}")
+
+        for k in eval_args.k_values:
+            logging.info(f"\nk={k} adaptation")
+
+            for seed in eval_args.seeds:
+                k_shot_loader, adapted_model = None, copy.deepcopy(model)
+                if k > 0:
+                    batch_size = 32 if model.NAME != 'mer' else 1
+                    k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size, sampling_seed=seed)
+                    if k_shot_loader is None:
+                        logging.warning(f"Could not create {k}-shot loader for task {eval_task_id}, skipping")
+                        continue
+
+                    adapted_model = adapt_model(
+                        model=model,
+                        k_shot_loader=k_shot_loader,
+                        num_steps=eval_args.num_adapt_steps if k > 0 else 0,
+                        learning_rate=eval_args.adapt_lr,
+                        task_id=eval_task_id
+                    )
+                    logging.info(f"Adapted model for task {eval_task_id} with k={k}, seed={seed}")
+
+                accuracy, loss = evaluate_adapted_model(
+                    adapted_model, dataset, eval_task_id, return_loss=True
+                )
+
+                result = MultirunEvaluationResult(
+                    checkpoint_id=checkpoint_id,
+                    eval_task_id=eval_task_id,
+                    k_value=k,
+                    accuracy=accuracy,
+                    loss=loss,
+                    num_adapt_steps=eval_args.num_adapt_steps if k > 0 else 0,
+                    adapt_lr=eval_args.adapt_lr if k > 0 else None,
+                    num_examples_used=len(k_shot_loader) * k_shot_loader.batch_size if k_shot_loader else 0,
+                    seed=seed,
+                )
+
+                results.append(result)
+                logging.info(f"    Task {eval_task_id}, k={k}, seed={seed}: {accuracy:.2f}% accuracy")
+
+    return results
+
 
 def get_results_group_name(checkpoint_paths: List[str]) -> str:
     """Derive a representative group name from checkpoint stems."""
@@ -366,9 +429,10 @@ def main():
 
     # Set device
     args.device = get_device(args.device)
+    is_multirun = len(args.seeds) > 1
 
     # Create output directory
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.multirun_temp_csv_dir) if is_multirun else Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load first checkpoint to get training args (assume all checkpoints have same structure)
@@ -382,13 +446,12 @@ def main():
     dataset.get_data_loaders()  # This sets up test_loaders
 
     # Evaluate all checkpoints
-    all_results = EvaluationResults()
+    all_results = MultirunEvaluationResults() if is_multirun else EvaluationResults()
+    eval_fn = evaluate_checkpoint_multirun if is_multirun else evaluate_checkpoint
 
     for checkpoint_path in args.checkpoint_paths:
         try:
-            checkpoint_results = evaluate_checkpoint(
-                checkpoint_path, args, train_args, dataset
-            )
+            checkpoint_results = eval_fn(checkpoint_path, args, train_args, dataset)
             all_results.add_results(checkpoint_results)
         except Exception as e:
             logging.error(f"Failed to evaluate checkpoint {checkpoint_path}: {e}")
@@ -398,14 +461,18 @@ def main():
     # Save results
     checkpoint_group_name = get_results_group_name(args.checkpoint_paths)
     csv_path = output_dir / f"evaluation_results_{checkpoint_group_name}.csv"
+    agg_path = output_dir / 'aggregated' / f"evaluation_results_{checkpoint_group_name}.csv"
+    agg_path.parent.mkdir(parents=True, exist_ok=True)
+
     json_path = output_dir / f"evaluation_results_{checkpoint_group_name}.json"
 
     all_results.save_to_csv(csv_path)
     # all_results.save_to_json(json_path)
 
     try:
-        add_plasticity_scores_to_csv(csv_path, metric_for_sauce='accuracy')
-        logging.info(f"Plasticity scores added to {csv_path}")
+        target_path = agg_path if is_multirun else csv_path
+        add_plasticity_scores_to_csv(target_path, metric_for_sauce='accuracy')
+        logging.info(f"Plasticity scores added to {target_path}")
     except Exception as e:
         logging.warning(f"Failed to compute plasticity scores: {e}")
 
@@ -425,10 +492,10 @@ def main():
 
                 # Save aggregated results
                 import json
-                agg_path = output_dir / "aggregated_metrics.json"
-                with open(agg_path, 'w') as f:
+                custom_agg_path = output_dir / "aggregated_metrics.json"
+                with open(custom_agg_path, 'w') as f:
                     json.dump(aggregated, f, indent=2)
-                logging.info(f"Aggregated metrics saved to {agg_path}")
+                logging.info(f"Aggregated metrics saved to {custom_agg_path}")
             else:
                 logging.warning("Custom metric module does not have 'compute_metric' function")
 

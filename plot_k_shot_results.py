@@ -49,15 +49,46 @@ def get_dataset_name_from_model(model: str) -> str:
             return token
     return tokens[-1]
 
-
-def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
+def plot_multirun_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
     """Plot results for a single checkpoint."""
-    # Get unique k_values and sort
     k_values = sorted(results['k_value'].unique())
 
     for k_val in k_values:
         subset = results[results['k_value'] == k_val].sort_values('eval_task_id')
-        plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        std_col = f'{metric}_std'
+        line, = plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        if std_col in results.columns:
+            plt.fill_between(
+                subset['eval_task_id'],
+                subset[metric] - subset[std_col],
+                subset[metric] + subset[std_col],
+                alpha=0.15,
+                color=line.get_color()
+            )
+
+    plt.xlabel('Evaluation Task ID')
+    plt.ylabel(metric.capitalize())
+    plt.title(f'Checkpoint: {int(checkpoint_id.split("_")[-1])+1}')
+    if checkpoint_id.endswith("_0"):
+        plt.legend()
+    plt.grid(True)
+
+def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
+    """Plot results for a single checkpoint."""
+    k_values = sorted(results['k_value'].unique())
+
+    for k_val in k_values:
+        subset = results[results['k_value'] == k_val].sort_values('eval_task_id')
+        std_col = f'{metric}_std'
+        line, = plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        if std_col in results.columns:
+            plt.fill_between(
+                subset['eval_task_id'],
+                subset[metric] - subset[std_col],
+                subset[metric] + subset[std_col],
+                alpha=0.15,
+                color=line.get_color()
+            )
 
     plt.xlabel('Evaluation Task ID')
     plt.ylabel(metric.capitalize())
@@ -67,7 +98,7 @@ def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: s
     plt.grid(True)
 
 
-def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
+def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy', is_multirun: bool = False) -> None:
     """Plot results from CSV file with one subplot per checkpoint."""
     results = load_evaluation_results(csv_path)
     grouped_results = group_results_by_checkpoint(results)
@@ -85,7 +116,10 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
 
     for i, (checkpoint_id, ckpt_results) in enumerate(grouped_results.items()):
         plt.sca(axes_flat[int(checkpoint_id.split('_')[-1])])  # Use checkpoint number for subplot index
-        plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
+        if is_multirun:
+            plot_multirun_checkpoint_results(checkpoint_id, ckpt_results, metric)
+        else:
+            plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
         plt.xticks(ticks=range(num_checkpoints), labels=range(1, num_checkpoints+1))
         plt.axvline(x=int(checkpoint_id.split('_')[-1]), color='green', linestyle='--', alpha=0.5)
 
@@ -103,7 +137,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     print(f"Plot saved to {output_path}")
 
 
-def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: str = 'accuracy') -> None:
+def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
     """Plot average plasticity scores for a given model across all checkpoints and tasks, including forward and backward splits."""
     csv_path = results_dir / f'evaluation_results_{model}.csv'
     if not csv_path.exists():
@@ -168,7 +202,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     ax2.legend()
     ax2.grid(True)
     plt.tight_layout()
-    output_path = plot_dir / f'plasticity_{metric}_{model}.png'
+    output_path = plot_dir / f'plasticity_{model}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Overall plasticity plot saved to {output_path}")
@@ -192,7 +226,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'forward_plasticity_{metric}_{model}.png'
+        output_path = plot_dir / f'forward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Forward plasticity plot saved to {output_path}")
@@ -218,7 +252,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'backward_plasticity_{metric}_{model}.png'
+        output_path = plot_dir / f'backward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Backward plasticity plot saved to {output_path}")
@@ -441,10 +475,11 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
         
         bar_width = 0.8
         means = [np.mean(method_values[m]) for m in sorted_methods]
-        
+        stds = [np.std(method_values[m]) for m in sorted_methods]
+
         bars = ax.bar(x_positions, means, bar_width, 
-                     color=[cmap(method_idx / max(len(sorted_methods) - 1, 1)) for method_idx in range(len(sorted_methods))],
-                     alpha=0.85)
+                      color=[cmap(method_idx / max(len(sorted_methods) - 1, 1)) for method_idx in range(len(sorted_methods))],
+                      alpha=0.85, yerr=stds, capsize=3, error_kw={'elinewidth': 1, 'ecolor': 'black'})
         
         ax.set_xticks(x_positions)
         ax.set_xticklabels([get_method_label(m) for m in sorted_methods], rotation=45, ha='right', fontsize=8)
@@ -775,8 +810,8 @@ def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     print(f"Saved k-shot improvement plot to {output_path}")
 
 
-def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None) -> None:
-    """Plot all CSV files in RESULTS_DIR, skipping any with errors."""
+def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None, is_multirun=False) -> None:
+    """Plot all CSV files in results_dir, skipping any with errors."""
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
         return
@@ -790,11 +825,11 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
     for csv_path in csv_files:
         try:
             print(f"Plotting {csv_path.name}...", end=' ')
-            plot_k_shot_results(csv_path, metric)
+            plot_k_shot_results(csv_path, metric, is_multirun)
             if plot_plasticity:
                 # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
                 model = csv_path.stem.replace('evaluation_results_', '')
-                plot_plasticity_scores(model, results_dir=results_dir, metric=metric)
+                plot_plasticity_scores(model, results_dir=results_dir)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 
@@ -817,32 +852,41 @@ def main() -> None:
                         help='Plot forward/backward k-shot performance as checkpoint_id increases')
     parser.add_argument('--k-values', type=str, default='0,1,2,5,10',
                         help='Comma-separated k-values for comparison plot (default: 0,1,2,5,10)')
+    parser.add_argument('--n_seeds', type=int, default=1,
+                        help='num of random seeds for evaluation')
+    parser.add_argument('--multirun_output_dir', type=str, default='results/k_shot_evaluation_multirun',
+                        help='Directory to save multirun evaluation results csv')
+
     args = parser.parse_args()
+
+    is_multirun = args.n_seeds > 1
+    parent_result_dir = Path(args.multirun_output_dir)
+    parent_result_dir.mkdir(parents=True, exist_ok=True)
+    results_dir = Path(f'{args.multirun_output_dir}/aggregated') if is_multirun else RESULTS_DIR
 
     if args.plot_k_shot_improvement:
         if not args.dataset:
             parser.error("--plot-k-shot-improvement requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_improvement(args.dataset, k_values, args.metric)
+        plot_k_shot_improvement(args.dataset, k_values, args.metric, results_dir=results_dir)
     elif args.plot_k_shot_comparisons:
         if not args.dataset:
             parser.error("--plot-k-shot-comparisons requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_comparisons(args.dataset, k_values, args.metric)
+        plot_k_shot_comparisons(args.dataset, k_values, args.metric, results_dir=results_dir)
     elif args.plot_plasticity_comparisons:
-        plot_plasticity_comparisons(dataset=args.dataset)
+        plot_plasticity_comparisons(dataset=args.dataset, results_dir=results_dir)
     elif args.plot_all:
-        plot_all('accuracy')
-        plot_all('loss')
+        plot_all('accuracy', results_dir=results_dir)
+        plot_all('loss', results_dir=results_dir)
     elif args.csv_file:
-        csv_path = Path(os.path.join(RESULTS_DIR, args.csv_file))
+        csv_path = Path(os.path.join(results_dir, args.csv_file))
         if not csv_path.exists():
             print(f"Error: CSV file {csv_path} does not exist.")
             return
-        plot_k_shot_results(csv_path, args.metric)
+        plot_k_shot_results(csv_path, args.metric, is_multirun)
     else:
         parser.error("Either provide a CSV file, use --plot-all, --plot-plasticity-comparisons, --plot-k-shot-comparisons, or --plot-k-shot-improvement")
-
 
 if __name__ == '__main__':
     main()

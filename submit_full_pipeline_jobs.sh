@@ -230,3 +230,7 @@ EOF
 
     echo "Submitted: model=${MODEL}, dataset=${DATASET}"
 done
+python run_pipeline_full.py --dataset seq-mnist --model sgd --lr 0.1 \
+    --adapt_lr 0.005 --num_adapt_steps 10 \
+    --savecheck task \
+    --skip_train --n_seeds 10 --do_plot_multirun

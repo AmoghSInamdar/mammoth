@@ -16,7 +16,7 @@ from utils.conf import base_path
 
 
 class MNISTSmoothRotation(SequentialMNIST):
-    NAME = 'smooth-rot-mnist'
+    NAME = 'smooth-mnist'
     N_CLASSES = 10
     N_TASKS = 20
     IN_TASK_ANGLE_RANGE = 5

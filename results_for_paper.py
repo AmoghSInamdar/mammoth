@@ -44,6 +44,22 @@ METHOD_COLORS = {
     'meta_no': '#7f7f7f',       # gray
 }
 
+LABEL_MAP = {
+    'sgd': 'SGD',
+    'derpp': 'DER++',
+    'ewc_on': 'EWC',
+    'ewc': 'EWC',
+    'agem': 'AGEM',
+    'mer': 'MER',
+    'lwf': 'LwF',
+    'er': 'ER',
+    'meta_sgd': 'Meta-SGD',
+    'meta_derpp': 'Meta-DER++',
+    'meta_ewc': 'Meta-EWC',
+    'meta_ewc_on': 'Meta-EWC',
+    'meta_agem': 'Meta-AGEM',
+    'meta_mer': 'Meta-MER',
+}
 
 def get_method_color(method: str, cmap=plt.cm.Dark2) -> str:
     """Get consistent color for a method."""
@@ -51,18 +67,19 @@ def get_method_color(method: str, cmap=plt.cm.Dark2) -> str:
     if method in METHOD_COLORS:
         return METHOD_COLORS[method]
     
-    # Try prefix matching for meta methods
-    if method.startswith('meta_'):
-        base = method[5:]  # Remove 'meta_' prefix
+    # Try prefix matching for meta methods (supports both meta_ and meta- naming)
+    if method.startswith('meta_') or method.startswith('meta-'):
+        base = method[5:]
+        base = base.lstrip('-_')
         if base in METHOD_COLORS:
             return METHOD_COLORS[base]
-        # Try first part of base
-        base_part = base.split('_')[0]
+        # Try first part of base using both separators
+        base_part = base.split('_')[0].split('-')[0]
         if base_part in METHOD_COLORS:
             return METHOD_COLORS[base_part]
     
     # Try matching first part of method name
-    method_part = method.split('_')[0]
+    method_part = method.split('_')[0].split('-')[0]
     if method_part in METHOD_COLORS:
         return METHOD_COLORS[method_part]
     
@@ -117,12 +134,15 @@ def plot_k_shot_stability(
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
-    include_20task: bool = False
+    include_20task: bool = False,
+    do_avg: bool = False
 ) -> None:
     """Plot backward 0-shot and k-shot performance as side-by-side bars for each k > 0.
     
     Creates one plot per k-value (k > 0), showing backward performance comparison
     between 0-shot (k=0) and k-shot for each method.
+    If do_avg=True and multiple k-values are supplied, averages across selected
+    k-values and produces a single averaged subplot.
     
     Args:
         dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
@@ -131,6 +151,7 @@ def plot_k_shot_stability(
         results_dir: Directory containing evaluation result CSVs
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
+        do_avg: If True, average metrics across all selected k-values instead of creating one subplot per k.
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -150,6 +171,8 @@ def plot_k_shot_stability(
     if not k_values:
         print("No k-values > 0 specified.")
         return
+
+    average_over_k_values = use_avg or do_avg
 
     # Find all CSV files for this dataset
     csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
@@ -219,15 +242,13 @@ def plot_k_shot_stability(
     # Use Dark2 colormap
     cmap = plt.cm.Dark2
     
-    # Create figure with one subplot per k-value
+    plot_k_values = [None] if average_over_k_values else k_values
     nrows = 1
-    ncols = len(k_values)
+    ncols = len(plot_k_values)
     fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
-    col_titles = [f'k={k}' for k in k_values]
-    if use_avg:
-        col_titles = ['avg']
+    col_titles = ['avg'] if average_over_k_values else [f'k={k}' for k in k_values]
     
     # Get sorted list of methods
     all_methods = sorted(model_results.keys())
@@ -236,7 +257,7 @@ def plot_k_shot_stability(
     sorted_methods = non_meta + meta
     
     # Plot each k-value
-    for col_idx, k_val in enumerate(k_values):
+    for col_idx, k_val in enumerate(plot_k_values):
         ax = axes_flat[col_idx]
         
         # Collect 0-shot and k-shot values for each method
@@ -251,23 +272,21 @@ def plot_k_shot_stability(
                 if not backward_0shot.empty:
                     method_0shot[method] = backward_0shot[metric].mean()
             
-            # Get k-shot backward performance (k=k_val, eval_task_id < checkpoint_num)
-            k_subset = results[results['k_value'] == k_val]
-            backward_kshot = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
-            if not backward_kshot.empty:
-                method_kshot[method] = backward_kshot[metric].mean()
-        
-        # If using avg, compute average across all k-values
-        if use_avg and not method_kshot:
-            # Compute average across all available k-values > 0
-            all_kshot = []
-            for k_v in k_values:
-                k_sub = results[results['k_value'] == k_v]
-                backward_k = k_sub[k_sub['eval_task_id'] < k_sub['checkpoint_num']]
-                if not backward_k.empty:
-                    all_kshot.append(backward_k[metric].mean())
-            if all_kshot:
-                method_kshot[method] = np.mean(all_kshot)
+            if average_over_k_values:
+                all_kshot = []
+                for k_v in k_values:
+                    k_sub = results[results['k_value'] == k_v]
+                    backward_k = k_sub[k_sub['eval_task_id'] < k_sub['checkpoint_num']]
+                    if not backward_k.empty:
+                        all_kshot.append(backward_k[metric].mean())
+                if all_kshot:
+                    method_kshot[method] = np.mean(all_kshot)
+            else:
+                # Get k-shot backward performance (k=k_val, eval_task_id < checkpoint_num)
+                k_subset = results[results['k_value'] == k_val]
+                backward_kshot = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
+                if not backward_kshot.empty:
+                    method_kshot[method] = backward_kshot[metric].mean()
         
         # Prepare data for side-by-side bars
         methods_with_data = [m for m in sorted_methods if m in method_0shot or m in method_kshot]
@@ -333,6 +352,8 @@ def plot_k_shot_stability(
         filename_parts.insert(1, 'no_meta')
     if include_20task:
         filename_parts.append('20task')
+    if do_avg and not use_avg:
+        filename_parts.append('doavg')
     if use_avg:
         filename_parts.append('avg')
     else:
@@ -350,7 +371,8 @@ def plot_forward_transfer(
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
-    include_20task: bool = False
+    include_20task: bool = False,
+    do_avg: bool = False
 ) -> None:
     """Plot 0-shot current vs k-shot forward transfer for each k-value.
     
@@ -358,7 +380,7 @@ def plot_forward_transfer(
     - Left side: 0-shot 'current' accuracy (CL Plasticity)
     - Right side: k-shot 'forward' accuracy (k-shot Forward Transfer)
     - Separated by a vertical line
-    - One column per k-value
+    - One column per k-value unless do_avg is True
     
     Args:
         dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
@@ -367,6 +389,7 @@ def plot_forward_transfer(
         results_dir: Directory containing evaluation result CSVs
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
+        do_avg: If True, average metrics across all selected k-values instead of creating one subplot per k.
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -386,6 +409,8 @@ def plot_forward_transfer(
     if not k_values:
         print("No k-values > 0 specified.")
         return
+
+    average_over_k_values = use_avg or do_avg
 
     # Find all CSV files for this dataset
     csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
@@ -506,14 +531,15 @@ def plot_forward_transfer(
     n_non_meta = len(non_meta)
     n_meta = len(meta)
     
+    plot_k_values = [None] if average_over_k_values else k_values
     # Create figure with one column per k-value
     nrows = 1
-    ncols = len(k_values)
+    ncols = len(plot_k_values)
     fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
     # Plot each k-value
-    for col_idx, k_val in enumerate(k_values):
+    for col_idx, k_val in enumerate(plot_k_values):
         ax = axes_flat[col_idx]
         
         # Collect 0-shot current and k-shot forward values for each method
@@ -528,22 +554,21 @@ def plot_forward_transfer(
                 if not current.empty:
                     method_current[method] = current[metric].mean()
             
-            # Get k-shot forward performance (k=k_val, eval_task_id > checkpoint_num)
-            k_subset = results[results['k_value'] == k_val]
-            forward = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
-            if not forward.empty:
-                method_forward[method] = forward[metric].mean()
-        
-        # If using avg, compute average across all k-values
-        if use_avg and not method_forward:
-            all_forward = []
-            for k_v in k_values:
-                k_sub = results[results['k_value'] == k_v]
-                forward_k = k_sub[k_sub['eval_task_id'] > k_sub['checkpoint_num']]
-                if not forward_k.empty:
-                    all_forward.append(forward_k[metric].mean())
-            if all_forward:
-                method_forward[method] = np.mean(all_forward)
+            if average_over_k_values:
+                all_forward = []
+                for k_v in k_values:
+                    k_sub = results[results['k_value'] == k_v]
+                    forward_k = k_sub[k_sub['eval_task_id'] > k_sub['checkpoint_num']]
+                    if not forward_k.empty:
+                        all_forward.append(forward_k[metric].mean())
+                if all_forward:
+                    method_forward[method] = np.mean(all_forward)
+            else:
+                # Get k-shot forward performance (k=k_val, eval_task_id > checkpoint_num)
+                k_subset = results[results['k_value'] == k_val]
+                forward = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
+                if not forward.empty:
+                    method_forward[method] = forward[metric].mean()
         
         # Prepare data for side-by-side bars
         methods_with_data = [m for m in sorted_methods if m in method_current or m in method_forward]
@@ -593,6 +618,8 @@ def plot_forward_transfer(
         filename_parts.insert(1, 'no_meta')
     if include_20task:
         filename_parts.append('20task')
+    if do_avg and not use_avg:
+        filename_parts.append('doavg')
     if use_avg:
         filename_parts.append('avg')
     else:
@@ -610,7 +637,8 @@ def plot_improvement(
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
-    include_20task: bool = False
+    include_20task: bool = False,
+    do_avg: bool = False
 ) -> None:
     """Plot backward and forward k-shot improvement as 2 vertically stacked subplots.
     
@@ -627,6 +655,7 @@ def plot_improvement(
         results_dir: Directory containing evaluation result CSVs
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
+        do_avg: If True, average metrics across all selected k-values instead of using the last k-value.
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -646,6 +675,8 @@ def plot_improvement(
     if not k_values:
         print("No k-values > 0 specified.")
         return
+
+    average_over_k_values = use_avg or do_avg
 
     # Find all CSV files for this dataset
     csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
@@ -723,7 +754,7 @@ def plot_improvement(
     # Create figure with 2 rows (backward, forward) and one column
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
     
     row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
                 #   'Forward\n(eval_task_id > checkpoint_num)']
@@ -767,8 +798,8 @@ def plot_improvement(
                 else:
                     ax.set_xticks(ticks=range(1, num_checkpoints+1), labels=range(2, num_checkpoints+2))
             
-            # If using avg, compute average across all k-values for each checkpoint
-            if use_avg and method_data:
+            # If averaging across k-values, compute average across all selected k-values for each checkpoint
+            if average_over_k_values and method_data:
                 # Combine all k-value data and compute mean per checkpoint
                 combined = pd.concat(method_data, ignore_index=True)
                 plot_data = combined.groupby('checkpoint_num')[[metric]].mean().reset_index()
@@ -780,13 +811,14 @@ def plot_improvement(
             
             if plot_data is not None and not plot_data.empty:
                 plot_data = plot_data.sort_values('checkpoint_num')
-                color = cmap(method_idx / max(len(model_results) - 1, 1))
+                color = get_method_color(method)
                 # Use bold line for meta methods
                 linewidth = 1.5 if method.startswith('meta') else 1.0
                 linestyle = '-' if not with_meta or method.startswith('meta') else '--'
+                alpha = 1.0 if not with_meta or method.startswith('meta') else 0.7
                 line, = ax.plot(plot_data['checkpoint_num'], plot_data[metric], 
-                       marker='o', label=get_method_label(method), color=color,
-                       linewidth=linewidth, linestyle=linestyle)
+                       marker='o', markersize=5, label=get_method_label(method), color=color,
+                       linewidth=linewidth, linestyle=linestyle, alpha=alpha)
                 all_handles.append(line)
                 all_labels.append(get_method_label(method))
         
@@ -807,7 +839,7 @@ def plot_improvement(
     seen_labels = set()
     for handle, label in zip(all_handles, all_labels):
         if label not in seen_labels:
-            unique_pairs.append((handle, label))
+            unique_pairs.append((handle, LABEL_MAP.get(label, label)))
             seen_labels.add(label)
     
     if unique_pairs:
@@ -829,6 +861,8 @@ def plot_improvement(
         filename_parts.insert(1, 'no_meta')
     if include_20task:
         filename_parts.append('20task')
+    if do_avg and not use_avg:
+        filename_parts.append('doavg')
     if use_avg:
         filename_parts.append('avg')
     else:
@@ -927,7 +961,7 @@ def plot_sauce(
     # Create figure with 2 rows (backward, forward) and one column
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
     
     row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)'] 
     # row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
@@ -958,13 +992,14 @@ def plot_sauce(
                 continue
             
             plot_data = plot_data.sort_values('checkpoint_num')
-            color = cmap(method_idx / max(len(model_results) - 1, 1))
+            color = get_method_color(method)
             # Use bold line for meta methods
             linewidth = 1.5 if method.startswith('meta') else 1.0
-            linestyle = '-' if not with_meta or method.startswith('meta') else '--'           
+            linestyle = '-' if not with_meta or method.startswith('meta') else '--'  
+            alpha = 1.0 if not with_meta or method.startswith('meta') else 0.7         
             line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                            marker='o', label=get_method_label(method), color=color,
-                            linewidth=linewidth, linestyle=linestyle)
+                            marker='o',markersize=5, label=get_method_label(method), color=color,
+                            linewidth=linewidth, linestyle=linestyle, alpha=alpha)
             all_handles.append(line)
             all_labels.append(get_method_label(method))
         
@@ -978,15 +1013,17 @@ def plot_sauce(
     unique_pairs = []
     seen_labels = set()
     for handle, label in zip(all_handles, all_labels):
+        if 'meta' in label.lower():
+            label = '+Meta'
         if label not in seen_labels:
-            unique_pairs.append((handle, label))
+            unique_pairs.append((handle, LABEL_MAP.get(label, label)))
             seen_labels.add(label)
     
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='center right', ncols=1,
-                   bbox_to_anchor=(1.3, 0.5), fontsize='small', 
-                   title='Method', title_fontsize='small')
+        fig.legend(handles, labels, loc='lower center', ncols=5,
+                   bbox_to_anchor=(0.5, -0.1), fontsize='small')
+                #    title='Method', title_fontsize='small')
     
     plt.tight_layout()
     plt.subplots_adjust(right=0.88)
@@ -1016,7 +1053,8 @@ def plot_meta_improvement(
     with_meta: bool = True,
     include_20task: bool = False,
     forward_only: bool = False,
-    num_lookahead: int = 0
+    num_lookahead: int = 0,
+    do_avg: bool = False
 ) -> None:
     """Plot meta vs non-meta method comparison for backward, current, and forward tasks.
     
@@ -1039,6 +1077,7 @@ def plot_meta_improvement(
         include_20task: If True, include CSVs with '20task' in the name
         forward_only: If True, only plot forward transfer column (default: False)
         num_lookahead: Number of tasks to skip ahead when computing forward accuracy (default: 0)
+        do_avg: If True, average metrics across all selected k-values instead of using the last k-value.
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -1058,6 +1097,8 @@ def plot_meta_improvement(
     if not k_values:
         print("No k-values > 0 specified.")
         return
+
+    average_over_k_values = use_avg or do_avg
 
     # Find all CSV files for this dataset
     csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
@@ -1171,7 +1212,7 @@ def plot_meta_improvement(
     def get_xticklabel(non_meta: str, meta: str) -> str:
         """Create xticklabel: non-meta base + meta with + prefix."""
         # Non-meta: just the base technique
-        non_meta_label = non_meta.split('_')[0]
+        non_meta_label = LABEL_MAP.get(non_meta.split('_')[0], non_meta.split('_')[0])
         # Meta: last 2 segments prefixed by '+'
         meta_parts = meta.split('_')
         meta_label = '+' + '_'.join(meta_parts[-2:]) if len(meta_parts) >= 2 else '+' + meta
@@ -1194,7 +1235,7 @@ def plot_meta_improvement(
                 continue
             
             # Get color for this pair
-            color = cmap(color_idx / max(len(method_pairs) - 1, 1))
+            color = get_method_color(non_meta)
             color_idx += 1
             
             # Compute performance for each k-value
@@ -1233,8 +1274,8 @@ def plot_meta_improvement(
                 else:
                     meta_values.append(0)
             
-            # If using avg, compute average across all k-values
-            if use_avg:
+            # If averaging across k-values, compute average across all selected k-values
+            if average_over_k_values:
                 non_meta_val = np.mean(non_meta_values) if non_meta_values else 0
                 meta_val = np.mean(meta_values) if meta_values else 0
             else:
@@ -1323,7 +1364,7 @@ def plot_meta_improvement(
         filename_parts.append('20task')
     if num_lookahead > 0:
         filename_parts.append(f'lookahead{num_lookahead}')
-    if use_avg:
+    if do_avg or use_avg:
         filename_parts.append('avg')
     else:
         filename_parts.append('k' + '-'.join(str(k) for k in k_values))
@@ -1350,6 +1391,8 @@ def main() -> None:
                         help='For meta_improvement plot type: only plot forward transfer column')
     parser.add_argument('--num-lookahead', type=int, default=0,
                         help='For meta_improvement plot type: number of tasks to skip ahead when computing forward accuracy (default: 0)')
+    parser.add_argument('--do-avg', action='store_true',
+                        help='Average metrics across all selected k-values for applicable plot types')
     parser.add_argument('--plot-type', type=str, default='stability',
                         choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement'],
                         help='Type of plot to create (default: stability)')
@@ -1366,7 +1409,8 @@ def main() -> None:
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
-            include_20task=args.include_20task
+            include_20task=args.include_20task,
+            do_avg=args.do_avg
         )
     elif args.plot_type == 'forward_transfer':
         plot_forward_transfer(
@@ -1374,7 +1418,8 @@ def main() -> None:
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
-            include_20task=args.include_20task
+            include_20task=args.include_20task,
+            do_avg=args.do_avg
         )
     elif args.plot_type == 'improvement':
         plot_improvement(
@@ -1382,7 +1427,8 @@ def main() -> None:
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
-            include_20task=args.include_20task
+            include_20task=args.include_20task,
+            do_avg=args.do_avg
         )
     elif args.plot_type == 'sauce':
         plot_sauce(

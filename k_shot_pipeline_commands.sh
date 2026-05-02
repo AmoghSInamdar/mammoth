@@ -491,14 +491,37 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     --savecheck task \
     >outputs/seq_maml_sgd_struct_cifar100.out 2>outputs/seq_maml_sgd_struct_cifar100.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
     python run_pipeline_full.py --dataset struct-cifar100 --model meta_er --buffer_size 500 --lr 0.1 \
     --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
-    --meta_adapt_lr 0.2 --meta_adapt_steps 10 --num_meta_examples 25 \
-    --adapt_lr 0.2 --num_adapt_steps 10 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 25 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/maml_er_struct_cifar100.out 2>outputs/maml_er_struct_cifar100.err &
 
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model meta_derpp --lr 0.03 --buffer_size 500 --alpha 0.3 --beta 0.5 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.03 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.03 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_derpp_struct_cifar100.out 2>outputs/maml_derpp_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model meta_ewc --lr 0.1 --e_lambda 10 --gamma 1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_ewc_struct_cifar100.out 2>outputs/maml_ewc_struct_cifar100.err &
+
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset struct-cifar100 --model meta_agem --buffer_size 500 --lr 0.03 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.03 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.03 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_agem_struct_cifar100.out 2>outputs/maml_agem_struct_cifar100.err &
 
 # Smooth Rotated MNIST
 
@@ -615,7 +638,21 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 \
     --savecheck task \
     >outputs/seq_maml_derpp_smooth_mnist.out 2>outputs/seq_maml_derpp_smooth_mnist.err &
 
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+    python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_ewc --lr 0.1 --e_lambda 10 --gamma 1 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.1 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_ewc_smooth_mnist.out 2>outputs/maml_ewc_smooth_mnist.err &
 
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
+    python run_pipeline_full.py --dataset smooth-rot-mnist --model meta_agem --buffer_size 500 --lr 0.03 \
+    --meta_method maml --meta_strategy parallel --num_lookahead_tasks 3 --meta_lr 0.001 \
+    --meta_adapt_lr 0.03 --meta_adapt_steps 10 --num_meta_examples 50 \
+    --adapt_lr 0.03 --num_adapt_steps 10 \
+    --savecheck task \
+    >outputs/maml_agem_smooth_mnist.out 2>outputs/maml_agem_smooth_mnist.err &
 
 
 # Seq TinyImagenet

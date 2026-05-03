@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import numpy as np
 import pandas as pd
 
@@ -1554,6 +1555,7 @@ def all_results_table(
 
 def compare_meta_methods(
     dataset: str,
+    k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     include_20task: bool = False
@@ -1562,10 +1564,11 @@ def compare_meta_methods(
     
     Creates two figures:
     1. SAUCE values across checkpoints (backward and forward)
-    2. Average k-shot accuracy across checkpoints for each k > 0
-    
+    2. Aggregated k-shot accuracy bar charts for each k > 0, with separate backward and forward values per subplot
+
     Args:
         dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
+        k_values: List of k-values to plot (default: None means all available k > 0)
         metric: Metric to plot ('accuracy' or 'loss')
         results_dir: Directory containing evaluation result CSVs
         include_20task: If True, include CSVs with '20task' in the name
@@ -1622,7 +1625,17 @@ def compare_meta_methods(
     for results in model_results.values():
         available_k_values.update(results['k_value'].unique())
     available_k_values = sorted(available_k_values)
-    k_values_for_plot = [k for k in available_k_values if k > 0]
+    if k_values is None:
+        k_values_for_plot = [k for k in available_k_values if k > 0]
+    else:
+        requested_k_values = [k for k in k_values if k > 0]
+        missing_k_values = [k for k in requested_k_values if k not in available_k_values]
+        if missing_k_values:
+            print(f"Warning: requested k-values {missing_k_values} not found in data. Available: {available_k_values}")
+        k_values_for_plot = [k for k in requested_k_values if k in available_k_values]
+        if not k_values_for_plot:
+            print(f"None of the requested k-values {requested_k_values} found in data. Available: {available_k_values}")
+            return
 
     # Figure 1: SAUCE plots
     nrows = 2
@@ -1657,9 +1670,9 @@ def compare_meta_methods(
             
             plot_data = plot_data.sort_values('checkpoint_num')
             color = get_method_color(method)
-            linewidth = 1.5
+            linewidth = 1
             if 'maml' in method:
-                linewidth = 1.5
+                linewidth = 1
                 linestyle = 'solid'
                 alpha = 1
             elif 'reptile' in method:
@@ -1671,7 +1684,7 @@ def compare_meta_methods(
                 linestyle = 'dotted'
                 alpha = 0.6
             ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                    marker='o', markersize=5, label=get_method_label(method), 
+                    marker='o', markersize=2, label=get_method_label(method), 
                     color=color, linewidth=linewidth, linestyle=linestyle, alpha=alpha)
         
         ax.set_title(row_title)
@@ -1709,62 +1722,122 @@ def compare_meta_methods(
     plt.close(fig1)
     print(f"Saved meta methods SAUCE plot to {output_path1}")
 
-    # Figure 2: k-shot accuracy plots
-    nrows = 2
-    ncols = 1
-    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
-    
-    row_titles_acc = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']
-    
-    # Plot accuracy for each row
-    for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles_acc)):
-        ax = axes2[row_idx, 0]
-        
-        for method_idx, (method, results) in enumerate(model_results.items()):
-            color = get_method_color(method)
-            
-            for k_val in k_values_for_plot:
+    # Figure 2: k-shot accuracy bar charts per k-value
+    n_k = len(k_values_for_plot)
+    if n_k == 0:
+        print("No k-values > 0 available for accuracy plots.")
+        return
+
+    # All subplots in one row
+    nrows = 1
+    ncols = n_k
+    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(8 * ncols, 4), squeeze=False)
+
+    # Get unique base methods and their corresponding meta methods
+    base_to_methods = {}
+    for method in model_results.keys():
+        if method.startswith('meta-'):
+            base = method.split('-')[1].split('_')[0]  # e.g., 'sgd', 'derpp', 'ewc'
+            base_to_methods.setdefault(base, []).append(method)
+    bases = sorted(base_to_methods.keys())
+    for base in bases:
+        base_to_methods[base].sort()
+
+    for idx, k_val in enumerate(k_values_for_plot):
+        ax = axes2[0, idx]
+
+        backward_vals = []
+        forward_vals = []
+        colors = []
+        labels = []
+        hatches = []
+        alphas = []
+        backward_x = []
+        base_centers_back = []
+
+        x_pos = 0.0
+        small_gap = 0.5
+        large_gap = 1.0
+        direction_gap = 1.5
+
+        edge_lws = []
+        for base in bases:
+            methods = base_to_methods[base]
+            base_start = x_pos
+            for method in methods:
+                results = model_results[method]
                 k_subset = results[results['k_value'] == k_val]
                 if k_subset.empty:
-                    continue
-                
-                if direction == 'forward':
-                    subset = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
-                else:  # backward
-                    subset = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
-                
-                if subset.empty:
-                    continue
-                
-                # Group by checkpoint_num and compute mean accuracy
-                plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
-                if plot_data.empty:
-                    continue
-                
-                plot_data = plot_data.sort_values('checkpoint_num')
-                
-                # Use different line styles for different k values
-                linestyle = '-' if k_val == k_values_for_plot[0] else '--' if k_val == k_values_for_plot[-1] else '-.'
-                label = f'{get_method_label(method)} (k={k_val})'
-                
-                ax.plot(plot_data['checkpoint_num'], plot_data[metric], 
-                        marker='o', markersize=4, label=label, 
-                        color=color, linestyle=linestyle, alpha=0.8)
-        
-        ax.set_title(row_title)
-        ax.set_xlabel('Checkpoint Number')
+                    backward_vals.append(np.nan)
+                    forward_vals.append(np.nan)
+                else:
+                    backward_subset = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
+                    forward_subset = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
+
+                    backward_acc = backward_subset[metric].mean() if not backward_subset.empty else np.nan
+                    forward_acc = forward_subset[metric].mean() if not forward_subset.empty else np.nan
+
+                    backward_vals.append(backward_acc)
+                    forward_vals.append(forward_acc)
+                colors.append(get_method_color(base))
+                labels.append(get_method_label(method))
+
+                if 'maml' in method:
+                    hatches.append(None)
+                    alphas.append(1.0)
+                elif 'reptile' in method:
+                    hatches.append('///')
+                    alphas.append(1.0)
+                else:  # 'no' or others
+                    hatches.append(None)
+                    alphas.append(0.6)
+
+                if 'parallel' in method:
+                    edge_lws.append(1.5)
+                else:
+                    edge_lws.append(0.8)
+
+                backward_x.append(x_pos)
+                x_pos += small_gap
+
+            if methods:
+                base_center = base_start + small_gap * (len(methods) - 1) / 2.0
+                base_centers_back.append(base_center)
+            x_pos += large_gap - small_gap
+
+        if not backward_x:
+            continue
+
+        forward_offset = backward_x[-1] + direction_gap
+        forward_x = [x + forward_offset for x in backward_x]
+        base_centers_fwd = [c + forward_offset for c in base_centers_back]
+
+        for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(backward_x, backward_vals, colors, hatches, alphas, edge_lws)):
+            ax.bar(x, val, width=0.4, label='Backward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+
+        for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(forward_x, forward_vals, colors, hatches, alphas, edge_lws)):
+            ax.bar(x, val, width=0.4, label='Forward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+
+        ax.axvline(x=backward_x[-1] + direction_gap / 2.0, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
+
+        ax.set_xticks(base_centers_back + base_centers_fwd)
+        ax.set_xticklabels(bases + bases, rotation=45, ha='right', fontsize=8)
+
+        ax.set_title(f'k={k_val}')
         ax.set_ylabel(metric.capitalize())
-        ax.grid(True)
-    
-    # Add legend
-    handles2, labels2 = axes2[0, 0].get_legend_handles_labels()
-    if handles2:
-        fig2.legend(handles2, labels2, loc='lower center', ncols=2, 
-                   bbox_to_anchor=(0.5, -0.15), fontsize='small')
-    
+        ax.grid(True, axis='y', alpha=0.3)
+        ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)
+
+        style_handles = [Patch(facecolor='white', edgecolor='black', label='MAML', hatch=''),
+                         Patch(facecolor='white', edgecolor='black', label='Reptile', hatch='///'),
+                         Patch(facecolor='white', edgecolor='black', label='No Meta', alpha=0.6)]
+        parallel_handles = [Patch(facecolor='white', edgecolor='black', linewidth=1.5, label='Parallel'),
+                            Patch(facecolor='white', edgecolor='black', linewidth=0.8, label='Sequential')]
+        ax.legend(handles=style_handles + parallel_handles, fontsize=8, ncol=2)
+
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.2)
-    
+
     # Save accuracy figure
     filename_parts_acc = ['meta_methods_accuracy', dataset, metric]
     if include_20task:
@@ -1863,6 +1936,7 @@ def main() -> None:
     elif args.plot_type == 'compare_meta_methods':
         compare_meta_methods(
             dataset=args.dataset,
+            k_values=k_values,
             metric=args.metric,
             include_20task=args.include_20task
         )

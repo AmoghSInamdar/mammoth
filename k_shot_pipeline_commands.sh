@@ -122,11 +122,11 @@ python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improveme
 python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
 
-python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods
-python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type compare_meta_methods
-python results_for_paper.py --dataset struct-cifar100 --plot-type compare_meta_methods
-python results_for_paper.py --dataset seq-mnist --plot-type compare_meta_methods
-python results_for_paper.py --dataset smooth-rot-mnist --plot-type compare_meta_methods
+python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods --k-values 10
+python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type compare_meta_methods --k-values 10
+python results_for_paper.py --dataset struct-cifar100 --plot-type compare_meta_methods --k-values 10
+python results_for_paper.py --dataset seq-mnist --plot-type compare_meta_methods --k-values 10
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type compare_meta_methods --k-values 10
 
 
 # FULL TRAIN -> EVAL -> PLOT PIPELINES

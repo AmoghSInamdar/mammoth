@@ -1054,7 +1054,9 @@ def plot_meta_improvement(
     include_20task: bool = False,
     forward_only: bool = False,
     num_lookahead: int = 0,
-    do_avg: bool = False
+    do_avg: bool = False,
+    meta_method: str = 'maml',
+    meta_strategy: str = 'parallel'
 ) -> None:
     """Plot meta vs non-meta method comparison for backward, current, and forward tasks.
     
@@ -1078,6 +1080,8 @@ def plot_meta_improvement(
         forward_only: If True, only plot forward transfer column (default: False)
         num_lookahead: Number of tasks to skip ahead when computing forward accuracy (default: 0)
         do_avg: If True, average metrics across all selected k-values instead of using the last k-value.
+        meta_method: Meta learning method to match (e.g., 'maml', 'reptile') (default: 'maml')
+        meta_strategy: Meta learning strategy to match (e.g., 'parallel', 'sequential') (default: 'parallel')
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -1183,7 +1187,7 @@ def plot_meta_improvement(
         base = non_meta.split('_')[0]  # e.g., 'sgd', 'derpp', 'ewc'
         for meta in meta_methods:
             base = 'ewc' if base.startswith('ewc') else base
-            if meta == f'meta-{base}' or meta.startswith(f'meta-{base}_'):
+            if meta_method in meta and meta_strategy in meta and (meta == f'meta-{base}' or meta.startswith(f'meta-{base}_')):
                 method_pairs[non_meta] = meta
                 break
     
@@ -1355,9 +1359,9 @@ def plot_meta_improvement(
     
     # Build filename based on options
     if forward_only:
-        filename_parts = ['forward_meta_improvement', dataset, metric]
+        filename_parts = ['forward_meta_improvement', meta_method, meta_strategy, dataset, metric]
     else:
-        filename_parts = ['meta_improvement', dataset, metric]
+        filename_parts = ['meta_improvement', meta_method, meta_strategy, dataset, metric]
     if not with_meta:
         filename_parts.insert(1, 'no_meta')
     if include_20task:
@@ -1373,6 +1377,402 @@ def plot_meta_improvement(
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Saved meta improvement plot to {output_path}")
+
+
+def all_results_table(
+    dataset: str,
+    metric: str = 'accuracy',
+    results_dir: Path = RESULTS_DIR,
+    with_meta: bool = True,
+    include_20task: bool = False
+) -> None:
+    """Create a comprehensive results table for all methods and metrics.
+    
+    Produces a CSV with rows for each method and columns for:
+    - Average accuracy on backward, current, and forward tasks for each k-value > 0
+    - Average forgetting on backward tasks for each k-value > 0
+      (k-shot backward acc - 0-shot current acc for that task)
+    - Backward and forward AUAC (average accuracy across all evaluations)
+    - Backward and forward SAUCE
+    - Backward and forward Clipped AUAC (accuracy clipped to [0, 100])
+    - Backward and forward Clipped SAUCE (SAUCE clipped to [0, 1])
+    
+    Args:
+        dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
+        metric: Metric to use ('accuracy' or 'loss')
+        results_dir: Directory containing evaluation result CSVs
+        with_meta: If True, include CSVs containing 'meta' in the name
+        include_20task: If True, include CSVs with '20task' in the name
+    """
+    if not results_dir.exists():
+        print(f"Error: Results directory {results_dir} does not exist.")
+        return
+
+    # Find all CSV files for this dataset
+    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
+    
+    if not csv_files:
+        print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
+        return
+
+    # Filter by with_meta flag
+    if not with_meta:
+        csv_files = [f for f in csv_files if not (
+            f.name.startswith('evaluation_results_meta-') or 
+            '_meta_' in f.name
+        )]
+    
+    # Filter by include_20task flag
+    if not include_20task:
+        csv_files = [f for f in csv_files if '20task' not in f.name]
+    else:
+        csv_files = [f for f in csv_files if '20task' in f.name]
+    
+    if not csv_files:
+        print(f"No CSV files found after filtering for dataset '{dataset}'")
+        return
+
+    print(f"Found {len(csv_files)} CSV files for dataset '{dataset}'")
+
+    # Load all model results
+    model_results = {}
+    for csv_path in csv_files:
+        model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        results = load_evaluation_results(csv_path)
+        if results.empty:
+            print(f"Skipping empty CSV for {model_dataset}")
+            continue
+        results = results.copy()
+        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
+        model_results[model_dataset] = results
+        print(f"  Loaded {model_dataset}: {len(results)} rows")
+
+    if not model_results:
+        print("No valid results to plot.")
+        return
+
+    # Get available k-values
+    available_k_values = set()
+    for results in model_results.values():
+        available_k_values.update(results['k_value'].unique())
+    available_k_values = sorted(available_k_values)
+    k_values_for_table = available_k_values  #[k for k in available_k_values if k > 0]  # Only k > 0 for per-k metrics
+
+    # Build column names
+    columns = []
+    for k in k_values_for_table:
+        columns.extend([
+            f'backward_avg_acc_k{k}',
+            f'current_avg_acc_k{k}',
+            f'forward_avg_acc_k{k}',
+            f'forgetting_k{k}'
+        ])
+    columns.extend([
+        'backward_AUAC',
+        'forward_AUAC',
+        'backward_SAUCE',
+        'forward_SAUCE',
+        'backward_Clipped_AUAC',
+        'forward_Clipped_AUAC',
+        'backward_Clipped_SAUCE',
+        'forward_Clipped_SAUCE'
+    ])
+
+    # Compute data for each method
+    data = {}
+    for method, results in model_results.items():
+        row = []
+        
+        # Per-k metrics
+        for k in k_values_for_table:
+            k_subset = results[results['k_value'] == k]
+            if k_subset.empty:
+                row.extend([np.nan, np.nan, np.nan, np.nan])
+                continue
+            
+            backward = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
+            current = k_subset[k_subset['eval_task_id'] == k_subset['checkpoint_num']]
+            forward = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
+            
+            b_acc = backward[metric].mean() if not backward.empty else np.nan
+            c_acc = current[metric].mean() if not current.empty else np.nan
+            f_acc = forward[metric].mean() if not forward.empty else np.nan
+            
+            # Compute forgetting: average (k-shot backward acc - 0-shot current acc for that task)
+            task_to_0_acc = {}
+            zero_shot = results[results['k_value'] == 0]
+            for _, z_row in zero_shot.iterrows():
+                if z_row['eval_task_id'] == z_row['checkpoint_num']:
+                    task_to_0_acc[z_row['eval_task_id']] = z_row[metric]
+            
+            diffs = []
+            for _, b_row in backward.iterrows():
+                task = b_row['eval_task_id']
+                k_acc = b_row[metric]
+                base_acc = task_to_0_acc.get(task, np.nan)
+                if not np.isnan(base_acc):
+                    diffs.append(k_acc - base_acc)
+            
+            forgetting = np.mean(diffs) if diffs else np.nan
+            
+            row.extend([b_acc, c_acc, f_acc, forgetting])
+        
+        # Overall backward/forward metrics
+        backward_all = results[results['eval_task_id'] < results['checkpoint_num']]
+        forward_all = results[results['eval_task_id'] > results['checkpoint_num']]
+        
+        if 'AUAC' in results.columns:
+            b_auac= backward_all['AUAC'].mean() if not backward_all.empty else np.nan
+            f_auac = forward_all['AUAC'].mean() if not forward_all.empty else np.nan
+            b_clip_auac = backward_all['Clipped_AUAC'].mean() if not backward_all.empty else np.nan
+            f_clip_auac = forward_all['Clipped_AUAC'].mean() if not forward_all.empty else np.nan
+        else:
+            b_sauce = f_sauce = b_clip_sauce = f_clip_sauce = np.nan
+        
+        if 'SAUCE' in results.columns:
+            b_sauce = backward_all['SAUCE'].mean() if not backward_all.empty else np.nan
+            f_sauce = forward_all['SAUCE'].mean() if not forward_all.empty else np.nan
+            b_clip_sauce = backward_all['Clipped_SAUCE'].mean() if not backward_all.empty else np.nan
+            f_clip_sauce = forward_all['Clipped_SAUCE'].mean() if not forward_all.empty else np.nan
+        else:
+            b_sauce = f_sauce = b_clip_sauce = f_clip_sauce = np.nan
+        
+        row.extend([b_auac, f_auac, b_sauce, f_sauce, b_clip_auac, f_clip_auac, b_clip_sauce, f_clip_sauce])
+        
+        data[method] = row
+
+    # Create DataFrame
+    df = pd.DataFrame.from_dict(data, orient='index', columns=columns)
+    
+    # Save to CSV
+    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir.mkdir(exist_ok=True, parents=True)
+    output_path = plot_dir / 'all_results_table.csv'
+    df.to_csv(output_path)
+    print(f"Saved results table to {output_path}")
+
+
+def compare_meta_methods(
+    dataset: str,
+    metric: str = 'accuracy',
+    results_dir: Path = RESULTS_DIR,
+    include_20task: bool = False
+) -> None:
+    """Compare meta methods with SAUCE and k-shot accuracy plots.
+    
+    Creates two figures:
+    1. SAUCE values across checkpoints (backward and forward)
+    2. Average k-shot accuracy across checkpoints for each k > 0
+    
+    Args:
+        dataset: Dataset name (e.g., 'seq-cifar100', 'struct-cifar100')
+        metric: Metric to plot ('accuracy' or 'loss')
+        results_dir: Directory containing evaluation result CSVs
+        include_20task: If True, include CSVs with '20task' in the name
+    """
+    if not results_dir.exists():
+        print(f"Error: Results directory {results_dir} does not exist.")
+        return
+
+    # Find all CSV files for this dataset
+    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
+    
+    if not csv_files:
+        print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
+        return
+
+    # Filter to only meta methods
+    csv_files = [f for f in csv_files if (
+        f.name.startswith('evaluation_results_meta-') or 
+        '_meta_' in f.name
+        and 'parallel' in f.name  # only parallel for now
+    )]
+    
+    # Filter by include_20task flag
+    if not include_20task:
+        csv_files = [f for f in csv_files if '20task' not in f.name]
+    else:
+        csv_files = [f for f in csv_files if '20task' in f.name]
+    
+    if not csv_files:
+        print(f"No meta method CSV files found after filtering for dataset '{dataset}'")
+        return
+
+    print(f"Found {len(csv_files)} meta method CSV files for dataset '{dataset}'")
+
+    # Load all model results
+    model_results = {}
+    for csv_path in csv_files:
+        model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        results = load_evaluation_results(csv_path)
+        if results.empty:
+            print(f"Skipping empty CSV for {model_dataset}")
+            continue
+        results = results.copy()
+        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
+        model_results[model_dataset] = results
+        print(f"  Loaded {model_dataset}: {len(results)} rows")
+
+    if not model_results:
+        print("No valid meta method results to plot.")
+        return
+
+    # Get available k-values
+    available_k_values = set()
+    for results in model_results.values():
+        available_k_values.update(results['k_value'].unique())
+    available_k_values = sorted(available_k_values)
+    k_values_for_plot = [k for k in available_k_values if k > 0]
+
+    # Figure 1: SAUCE plots
+    nrows = 2
+    ncols = 1
+    fig1, axes1 = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
+    
+    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']
+    
+    # Plot SAUCE for each row
+    for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles)):
+        ax = axes1[row_idx, 0]
+        
+        for method_idx, (method, results) in enumerate(model_results.items()):
+            # Filter by direction
+            if direction == 'forward':
+                subset = results[results['eval_task_id'] > results['checkpoint_num']]
+            else:  # backward
+                subset = results[results['eval_task_id'] < results['checkpoint_num']]
+            
+            if subset.empty:
+                continue
+            
+            # Check if SAUCE column exists
+            if 'SAUCE' not in results.columns:
+                print(f"Warning: No SAUCE column in {method}. Skipping.")
+                continue
+            
+            # Group by checkpoint_num and compute mean SAUCE
+            plot_data = subset.groupby('checkpoint_num')[['SAUCE']].mean().reset_index()
+            if plot_data.empty:
+                continue
+            
+            plot_data = plot_data.sort_values('checkpoint_num')
+            color = get_method_color(method)
+            linewidth = 1.5
+            if 'maml' in method:
+                linewidth = 1.5
+                linestyle = 'solid'
+                alpha = 1
+            elif 'reptile' in method:
+                linewidth = 1
+                linestyle = 'dashed'
+                alpha = 0.8
+            else:
+                linewidth = 1
+                linestyle = 'dotted'
+                alpha = 0.6
+            ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
+                    marker='o', markersize=5, label=get_method_label(method), 
+                    color=color, linewidth=linewidth, linestyle=linestyle, alpha=alpha)
+        
+        ax.set_title(row_title)
+        ax.set_xlabel('Checkpoint Number')
+        ax.set_ylabel('SAUCE')
+        ax.grid(True)
+        ax.set_yscale('log')
+    
+    # Add legend
+    handles1, labels1 = axes1[0, 0].get_legend_handles_labels()
+    label_set = set()
+    plot_handles, plot_labels = [], []
+    for handle, label in zip(handles1, labels1):
+        label_print = '-'.join(label.split('-')[:2])
+        if label_print not in label_set:
+            label_set.add(label_print)
+            plot_handles.append(handle)
+            plot_labels.append(label_print)
+    if handles1:
+        fig1.legend(plot_handles, [LABEL_MAP.get(label, label) for label in plot_labels], 
+                   loc='lower center', ncols=5, bbox_to_anchor=(0.5, -0.1), fontsize='small')
+    
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.15)
+    
+    # Save SAUCE figure
+    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir.mkdir(exist_ok=True, parents=True)
+    
+    filename_parts = ['meta_methods_sauce', dataset, metric]
+    if include_20task:
+        filename_parts.append('20task')
+    output_path1 = plot_dir / f'{"_".join(filename_parts)}.png'
+    fig1.savefig(output_path1, dpi=300, bbox_inches='tight')
+    plt.close(fig1)
+    print(f"Saved meta methods SAUCE plot to {output_path1}")
+
+    # Figure 2: k-shot accuracy plots
+    nrows = 2
+    ncols = 1
+    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
+    
+    row_titles_acc = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']
+    
+    # Plot accuracy for each row
+    for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles_acc)):
+        ax = axes2[row_idx, 0]
+        
+        for method_idx, (method, results) in enumerate(model_results.items()):
+            color = get_method_color(method)
+            
+            for k_val in k_values_for_plot:
+                k_subset = results[results['k_value'] == k_val]
+                if k_subset.empty:
+                    continue
+                
+                if direction == 'forward':
+                    subset = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
+                else:  # backward
+                    subset = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
+                
+                if subset.empty:
+                    continue
+                
+                # Group by checkpoint_num and compute mean accuracy
+                plot_data = subset.groupby('checkpoint_num')[[metric]].mean().reset_index()
+                if plot_data.empty:
+                    continue
+                
+                plot_data = plot_data.sort_values('checkpoint_num')
+                
+                # Use different line styles for different k values
+                linestyle = '-' if k_val == k_values_for_plot[0] else '--' if k_val == k_values_for_plot[-1] else '-.'
+                label = f'{get_method_label(method)} (k={k_val})'
+                
+                ax.plot(plot_data['checkpoint_num'], plot_data[metric], 
+                        marker='o', markersize=4, label=label, 
+                        color=color, linestyle=linestyle, alpha=0.8)
+        
+        ax.set_title(row_title)
+        ax.set_xlabel('Checkpoint Number')
+        ax.set_ylabel(metric.capitalize())
+        ax.grid(True)
+    
+    # Add legend
+    handles2, labels2 = axes2[0, 0].get_legend_handles_labels()
+    if handles2:
+        fig2.legend(handles2, labels2, loc='lower center', ncols=2, 
+                   bbox_to_anchor=(0.5, -0.15), fontsize='small')
+    
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.2)
+    
+    # Save accuracy figure
+    filename_parts_acc = ['meta_methods_accuracy', dataset, metric]
+    if include_20task:
+        filename_parts_acc.append('20task')
+    output_path2 = plot_dir / f'{"_".join(filename_parts_acc)}.png'
+    fig2.savefig(output_path2, dpi=300, bbox_inches='tight')
+    plt.close(fig2)
+    print(f"Saved meta methods accuracy plot to {output_path2}")
 
 
 def main() -> None:
@@ -1393,8 +1793,12 @@ def main() -> None:
                         help='For meta_improvement plot type: number of tasks to skip ahead when computing forward accuracy (default: 0)')
     parser.add_argument('--do-avg', action='store_true',
                         help='Average metrics across all selected k-values for applicable plot types')
+    parser.add_argument('--meta-method', type=str, default='maml',
+                        help='For meta_improvement plot type: meta learning method to match (default: maml)')
+    parser.add_argument('--meta-strategy', type=str, default='parallel',
+                        help='For meta_improvement plot type: meta learning strategy to match (default: parallel)')
     parser.add_argument('--plot-type', type=str, default='stability',
-                        choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement'],
+                        choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement', 'all_results_table', 'compare_meta_methods'],
                         help='Type of plot to create (default: stability)')
     
     args = parser.parse_args()
@@ -1445,7 +1849,22 @@ def main() -> None:
             with_meta=not args.no_meta,
             include_20task=args.include_20task,
             forward_only=args.forward_only,
-            num_lookahead=args.num_lookahead
+            num_lookahead=args.num_lookahead,
+            meta_method=args.meta_method,
+            meta_strategy=args.meta_strategy
+        )
+    elif args.plot_type == 'all_results_table':
+        all_results_table(
+            dataset=args.dataset,
+            metric=args.metric,
+            with_meta=not args.no_meta,
+            include_20task=args.include_20task
+        )
+    elif args.plot_type == 'compare_meta_methods':
+        compare_meta_methods(
+            dataset=args.dataset,
+            metric=args.metric,
+            include_20task=args.include_20task
         )
 
 

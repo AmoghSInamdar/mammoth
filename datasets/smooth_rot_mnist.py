@@ -140,5 +140,5 @@ class MNISTSmoothRotation(SequentialMNIST):
 
     @set_default_from_args('n_epochs')
     def get_epochs(self):
-        return 5
+        return 10
     

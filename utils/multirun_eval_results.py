@@ -70,7 +70,14 @@ class MultirunEvaluationResults(EvaluationResults):
             'loss_std': ('loss', 'std'),
             'n_seeds': ('seed', 'count'),
         }
-        metadata_agg = {key: (key, 'mean') for key in all_metadata_keys}
+
+        # Include both mean and std for every metadata column (e.g. digit_0_acc,
+        # digit_1_acc, ..., digit_9_acc) so per-digit variance is directly readable
+        # in the aggregated CSV without a separate groupby step.
+        metadata_agg = {}
+        for key in all_metadata_keys:
+            metadata_agg[key] = (key, 'mean')
+            metadata_agg[f"{key}_std"] = (key, 'std')
 
         return df.groupby(['checkpoint_id', 'eval_task_id', 'k_value']).agg(
             **base_agg, **metadata_agg

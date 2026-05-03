@@ -41,7 +41,7 @@ sys.path.insert(0, mammoth_path)
 from datasets.utils.continual_dataset import ContinualDataset
 from utils import setup_logging
 from utils.checkpoints import mammoth_load_checkpoint
-from utils.few_shot import create_k_shot_loader, adapt_model, evaluate_adapted_model
+from utils.few_shot import create_k_shot_loader, adapt_model, evaluate_adapted_model, evaluate_per_digit
 from utils.eval_results import EvaluationResult, EvaluationResults
 from utils.args import add_experiment_args, add_management_args, add_initial_args, add_dynamic_parsable_args
 from utils.conf import get_device, get_checkpoint_path
@@ -384,9 +384,8 @@ def evaluate_checkpoint_multirun(checkpoint_path: str,
                     )
                     logging.info(f"Adapted model for task {eval_task_id} with k={k}, seed={seed}")
 
-                accuracy, loss = evaluate_adapted_model(
-                    adapted_model, dataset, eval_task_id, return_loss=True
-                )
+                accuracy, loss = evaluate_adapted_model(adapted_model, dataset, eval_task_id, return_loss=True)
+                per_digit = evaluate_per_digit(adapted_model, dataset, eval_task_id) 
 
                 result = MultirunEvaluationResult(
                     checkpoint_id=checkpoint_id,
@@ -398,6 +397,7 @@ def evaluate_checkpoint_multirun(checkpoint_path: str,
                     adapt_lr=eval_args.adapt_lr if k > 0 else None,
                     num_examples_used=len(k_shot_loader) * k_shot_loader.batch_size if k_shot_loader else 0,
                     seed=seed,
+                    metadata={f"digit_{d}_acc": acc for d, acc in per_digit.items()}, 
                 )
 
                 results.append(result)

@@ -302,3 +302,39 @@ def evaluate_adapted_model(model: ContinualModel,
         return (accuracy, loss) if return_loss else accuracy
     finally:
         task_dataset.test_loaders = original_test_loaders
+
+@torch.no_grad()
+def evaluate_per_digit(model: ContinualModel,
+                       dataset: ContinualDataset,
+                       task_id: int) -> dict:
+    """
+    Per-digit accuracy for a specific task, mirroring evaluate()'s logic exactly.
+    Returns {digit: accuracy} for digits present in the task's test loader.
+    """
+    from collections import defaultdict
+
+    task_dataset = create_k_shot_eval_dataset(dataset, task_id)
+    test_loader = task_dataset.test_loaders[task_id]
+    n_classes = dataset.get_offsets()[1]  # same cap as evaluate()
+
+    correct = defaultdict(int)
+    total = defaultdict(int)
+
+    model.net.eval()
+    for data in test_loader:
+        inputs, labels = data[0].to(model.device), data[1].to(model.device)
+
+        # Mirror evaluate()'s forward pass logic
+        if 'class-il' not in model.COMPATIBILITY and 'general-continual' not in model.COMPATIBILITY:
+            outputs = model(inputs, task_id)
+        else:
+            outputs = model(inputs)
+
+        _, preds = torch.max(outputs[:, :n_classes].data, 1)  # same n_classes cap
+
+        for label, pred in zip(labels, preds):
+            c = label.item()
+            total[c] += 1
+            correct[c] += int(pred.item() == c)
+
+    return {c: correct[c] / total[c] for c in sorted(total)}

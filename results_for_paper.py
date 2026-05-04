@@ -1823,7 +1823,7 @@ def compare_meta_methods(
         ax.set_xticks(base_centers_back + base_centers_fwd)
         ax.set_xticklabels(bases + bases, rotation=45, ha='right', fontsize=8)
 
-        ax.set_title(f'k={k_val}')
+        ax.set_title(f'{dataset.upper()} - k={k_val}')
         ax.set_ylabel(metric.capitalize())
         ax.grid(True, axis='y', alpha=0.3)
         ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)
@@ -1842,6 +1842,7 @@ def compare_meta_methods(
     filename_parts_acc = ['meta_methods_accuracy', dataset, metric]
     if include_20task:
         filename_parts_acc.append('20task')
+    filename_parts_acc.append('k' + '-'.join(str(k) for k in k_values_for_plot))
     output_path2 = plot_dir / f'{"_".join(filename_parts_acc)}.png'
     fig2.savefig(output_path2, dpi=300, bbox_inches='tight')
     plt.close(fig2)

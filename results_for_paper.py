@@ -1731,7 +1731,7 @@ def compare_meta_methods(
     # All subplots in one row
     nrows = 1
     ncols = n_k
-    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(8 * ncols, 4), squeeze=False)
+    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(6 * ncols, 3), squeeze=False)
 
     # Get unique base methods and their corresponding meta methods
     base_to_methods = {}
@@ -1756,9 +1756,10 @@ def compare_meta_methods(
         base_centers_back = []
 
         x_pos = 0.0
-        small_gap = 0.5
+        small_gap = 0.6
         large_gap = 1.0
         direction_gap = 1.5
+        bar_width = 0.5
 
         edge_lws = []
         for base in bases:
@@ -1813,17 +1814,17 @@ def compare_meta_methods(
         base_centers_fwd = [c + forward_offset for c in base_centers_back]
 
         for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(backward_x, backward_vals, colors, hatches, alphas, edge_lws)):
-            ax.bar(x, val, width=0.4, label='Backward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+            ax.bar(x, val, width=bar_width, label='Backward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
 
         for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(forward_x, forward_vals, colors, hatches, alphas, edge_lws)):
-            ax.bar(x, val, width=0.4, label='Forward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+            ax.bar(x, val, width=bar_width, label='Forward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
 
         ax.axvline(x=backward_x[-1] + direction_gap / 2.0, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
 
         ax.set_xticks(base_centers_back + base_centers_fwd)
         ax.set_xticklabels(bases + bases, rotation=45, ha='right', fontsize=8)
 
-        ax.set_title(f'{dataset.upper()} - k={k_val}')
+        ax.set_title(dataset.upper())
         ax.set_ylabel(metric.capitalize())
         ax.grid(True, axis='y', alpha=0.3)
         ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)

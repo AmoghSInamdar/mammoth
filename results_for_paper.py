@@ -23,6 +23,7 @@ METHOD_COLORS = {
     # Non-meta methods
     'sgd': '#1f77b4',       # blue
     'sgd_': '#1f77b4',      # blue variant
+    'er': "#b4871f",        # gold
     'derpp': '#ff7f0e',     # orange
     'ewc_on': '#2ca02c',    # green
     'ewc': '#2ca02c',       # green variant
@@ -35,6 +36,7 @@ METHOD_COLORS = {
     'finetune': '#17becf',  # cyan
     # Meta methods
     'meta_sgd': '#1f77b4',       # blue (same as sgd)
+    'meta_er': "#b4871f",        # gold (same as er)
     'meta_derpp': '#ff7f0e',    # orange (same as derpp)
     'meta_ewc': '#2ca02c',      # green (same as ewc)
     'meta_ewc_on': '#2ca02c',   # green (same as ewc_on)
@@ -48,6 +50,7 @@ METHOD_COLORS = {
 LABEL_MAP = {
     'sgd': 'SGD',
     'derpp': 'DER++',
+    'ewc-on': 'EWC',
     'ewc_on': 'EWC',
     'ewc': 'EWC',
     'agem': 'AGEM',
@@ -246,7 +249,7 @@ def plot_k_shot_stability(
     plot_k_values = [None] if average_over_k_values else k_values
     nrows = 1
     ncols = len(plot_k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5) if dataset != 'seq-mnist' else (5 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
     col_titles = ['avg'] if average_over_k_values else [f'k={k}' for k in k_values]
@@ -308,13 +311,19 @@ def plot_k_shot_stability(
                            label=f'{k_val}-shot', color=colors_kshot, alpha=0.9)
         
         # Add legend in top right of each subplot
-        ax.legend(loc='upper right', fontsize=8)
+        if dataset == 'seq-mnist':
+            handles, labels = ax.get_legend_handles_labels()
+            method_labels = sorted([LABEL_MAP.get(get_method_label(m), get_method_label(m)) for m in method_0shot])
+            ax.legend(handles+list(bars_0shot), labels+method_labels, loc='center right', ncols=1,
+                   bbox_to_anchor=(-0.2, 0.5), fontsize='small', labelspacing=1)
         
         # ax.set_xlabel('Method')
-        ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
-        ax.set_xticks(x_positions)
-        ax.set_xticklabels([get_method_label(m) for m in methods_with_data], 
-                          rotation=45, ha='right', fontsize=8)
+        if dataset == 'seq-mnist':
+            ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+        # ax.set_xticks(x_positions)
+        ax.set_xticks([])
+        # ax.set_xticklabels([get_method_label(m) for m in methods_with_data], 
+        #                   rotation=45, ha='right', fontsize=8)
         ax.grid(True, axis='y', alpha=0.3)
         ax.set_title(dataset.upper())
         
@@ -953,8 +962,9 @@ def plot_sauce(
     # Get sorted list of methods
     all_methods = sorted(model_results.keys())
     non_meta = [m for m in all_methods if not m.startswith('meta')]
-    meta = [m for m in all_methods if m.startswith('meta')]
+    meta = [m for m in all_methods if m.startswith('meta') and 'maml' in m and 'parallel' in m]
     sorted_methods = non_meta + meta
+    model_results = {m: model_results[m] for m in sorted_methods}
     
     # Use Dark2 colormap
     cmap = plt.cm.Dark2
@@ -997,9 +1007,9 @@ def plot_sauce(
             # Use bold line for meta methods
             linewidth = 1.5 if method.startswith('meta') else 1.0
             linestyle = '-' if not with_meta or method.startswith('meta') else '--'  
-            alpha = 1.0 if not with_meta or method.startswith('meta') else 0.7         
+            alpha = 1.0 if not with_meta or method.startswith('meta') else 0.6         
             line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                            marker='o',markersize=5, label=get_method_label(method), color=color,
+                            marker='o',markersize=3, label=get_method_label(method), color=color,
                             linewidth=linewidth, linestyle=linestyle, alpha=alpha)
             all_handles.append(line)
             all_labels.append(get_method_label(method))

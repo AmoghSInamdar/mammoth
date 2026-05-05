@@ -82,7 +82,7 @@ python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvem
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --k-values 5
 python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --k-values 5
-python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --k-values 5
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --k-values 10
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --k-values 5
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 10
@@ -103,11 +103,29 @@ python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improveme
 python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --meta-method reptile --meta-strategy sequential --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --meta-method reptile --meta-strategy sequential --k-values 5
 
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --num-lookahead 1 --k-values 1
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --num-lookahead 1 --k-values 2
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --num-lookahead 1 --k-values 5
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --num-lookahead 1 --k-values 10
 
+python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --num-lookahead 3 --k-values 1
+python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --num-lookahead 3 --k-values 2
+python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --num-lookahead 3 --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --num-lookahead 3 --k-values 10
+
+python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --num-lookahead 3 --k-values 1
+python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --num-lookahead 3 --k-values 2
+python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --num-lookahead 3 --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --num-lookahead 3 --k-values 10
+
+python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --num-lookahead 3  --k-values 1
+python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --num-lookahead 3  --k-values 2
+python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --num-lookahead 3  --k-values 5
 python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --num-lookahead 3  --k-values 10
-python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --num-lookahead 3 --k-values 10
+
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --num-lookahead 3 --k-values 1
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --num-lookahead 3 --k-values 2
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --num-lookahead 3 --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --num-lookahead 3 --k-values 10
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --forward-only --k-values 5
@@ -116,11 +134,7 @@ python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improveme
 python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --forward-only --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --forward-only --k-values 5
 
-python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
-python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
-python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement  --forward-only --num-lookahead 3 --k-values 5
-python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
-python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --forward-only --num-lookahead 3 --k-values 5
+## meta-cl Method Comparison
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type compare_meta_methods --k-values 5
@@ -600,9 +614,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     --skip_train \
     >outputs/lwf_smooth_mnist.out 2>outputs/lwf_smooth_mnist.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+CUDA_VISIBLE_DEVICES=6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model mer --lr 0.1 --beta 0.01 --gamma 0.03 --buffer_size 200 --minibatch_size 25 --n_epochs 1 \
-    --adapt_lr 0.003 --num_adapt_steps 10 \
+    --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     >outputs/mer_smooth_mnist.out 2>outputs/mer_smooth_mnist.err &
 

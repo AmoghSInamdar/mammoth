@@ -65,6 +65,19 @@ LABEL_MAP = {
     'meta_mer': 'Meta-MER',
 }
 
+DATASET_MAP = {
+    'seq-cifar100': 'SEQ-CIFAR100-10',
+    'struct-cifar100': 'STRUCT-CIFAR100-20',
+    'seq-mnist': 'SEQ-MNIST-5',
+    'smooth-rot-mnist': 'ROT-MNIST-20',
+}
+
+def get_dataset_name(dataset: str, include_20task: bool = False) -> str:
+    """Get consistent dataset name for labeling."""
+    if include_20task and dataset == 'seq-cifar100':
+        return 'SEQ-CIFAR100-20'
+    return DATASET_MAP.get(dataset, dataset)
+
 def get_method_color(method: str, cmap=plt.cm.Dark2) -> str:
     """Get consistent color for a method."""
     # Check for exact match first
@@ -320,12 +333,15 @@ def plot_k_shot_stability(
         # ax.set_xlabel('Method')
         if dataset == 'seq-mnist':
             ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+        if dataset != 'seq-mnist':
+            ax.yaxis.set_tick_params(length=0)
+            ax.set_yticklabels([])
         # ax.set_xticks(x_positions)
         ax.set_xticks([])
         # ax.set_xticklabels([get_method_label(m) for m in methods_with_data], 
         #                   rotation=45, ha='right', fontsize=8)
         ax.grid(True, axis='y', alpha=0.3)
-        ax.set_title(dataset.upper())
+        ax.set_title(get_dataset_name(dataset, include_20task), fontsize=10)
         
         # Set y-axis limits based on metric with extra headroom for labels
         if metric == 'accuracy':
@@ -604,7 +620,7 @@ def plot_forward_transfer(
         secax = ax.secondary_xaxis('top')
         secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["0-shot Current", f'{k_val}-shot Forward'])
         ax.axvline(x=(x_current[-1] + x_forward[0]) / 2, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
-        ax.set_title(dataset.upper())
+        ax.set_title(get_dataset_name(dataset, include_20task), fontsize=10)
         
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.grid(True, axis='y', alpha=0.3)
@@ -766,7 +782,8 @@ def plot_improvement(
     ncols = 1
     fig, axes = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
     
-    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
+    dataset_name = get_dataset_name(dataset, include_20task)
+    row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)']  #['Backward\n(eval_task_id < checkpoint_num)', 
                 #   'Forward\n(eval_task_id > checkpoint_num)']
     
     # Collect handles and labels for legend
@@ -832,7 +849,7 @@ def plot_improvement(
                 all_handles.append(line)
                 all_labels.append(get_method_label(method))
         
-        ax.set_title(row_title)
+        ax.set_title(row_title, fontsize=10)
         ax.set_xlabel('Checkpoint Number')
         ax.set_ylabel(metric.capitalize())
         ax.grid(True)
@@ -974,7 +991,8 @@ def plot_sauce(
     ncols = 1
     fig, axes = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
     
-    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)'] 
+    dataset_name = get_dataset_name(dataset, include_20task)
+    row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)'] 
     # row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
     #               'Forward SAUCE\n(eval_task_id > checkpoint_num)']
     
@@ -1014,7 +1032,7 @@ def plot_sauce(
             all_handles.append(line)
             all_labels.append(get_method_label(method))
         
-        ax.set_title(row_title)
+        ax.set_title(row_title, fontsize=10)
         ax.set_xlabel('Checkpoint Number')
         ax.set_ylabel('SAUCE')
         ax.grid(True)
@@ -1214,7 +1232,7 @@ def plot_meta_improvement(
     # Determine columns to plot
     if forward_only:
         directions = ['forward']
-        col_titles = [dataset.upper()]
+        col_titles = [get_dataset_name(dataset, include_20task)]  #f'{dataset_name} (Forward)']
     else:
         directions = ['backward', 'current', 'forward']
         col_titles = ['Backward', 'Current', 'Forward']
@@ -1333,7 +1351,7 @@ def plot_meta_improvement(
         
         # ax.set_xlabel('Method Pair')
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
-        ax.set_title(col_title)
+        ax.set_title(col_title, fontsize=10)
         ax.set_xticks(x_positions)
         ax.set_xticklabels([get_xticklabel(p['non_meta'], p['meta']) for p in pair_data], 
                           rotation=45, ha='right', fontsize=8)
@@ -1652,7 +1670,8 @@ def compare_meta_methods(
     ncols = 1
     fig1, axes1 = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
     
-    row_titles = [f'{dataset.upper()} (Backward)', f'{dataset.upper()} (Forward)']
+    dataset_name = get_dataset_name(dataset, include_20task)
+    row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)']
     
     # Plot SAUCE for each row
     for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles)):
@@ -1697,7 +1716,7 @@ def compare_meta_methods(
                     marker='o', markersize=2, label=get_method_label(method), 
                     color=color, linewidth=linewidth, linestyle=linestyle, alpha=alpha)
         
-        ax.set_title(row_title)
+        ax.set_title(row_title, fontsize=10)
         ax.set_xlabel('Checkpoint Number')
         ax.set_ylabel('SAUCE')
         ax.grid(True)

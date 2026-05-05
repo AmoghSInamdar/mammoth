@@ -25,6 +25,7 @@ METHOD_COLORS = {
     'sgd_': '#1f77b4',      # blue variant
     'er': "#b4871f",        # gold
     'derpp': '#ff7f0e',     # orange
+    'ewc-on': '#2ca02c',    # green
     'ewc_on': '#2ca02c',    # green
     'ewc': '#2ca02c',       # green variant
     'agem': '#d62728',      # red
@@ -35,16 +36,13 @@ METHOD_COLORS = {
     'icarl': '#bcbd22',     # yellow-green
     'finetune': '#17becf',  # cyan
     # Meta methods
-    'meta_sgd': '#1f77b4',       # blue (same as sgd)
-    'meta_er': "#b4871f",        # gold (same as er)
-    'meta_derpp': '#ff7f0e',    # orange (same as derpp)
-    'meta_ewc': '#2ca02c',      # green (same as ewc)
-    'meta_ewc_on': '#2ca02c',   # green (same as ewc_on)
-    'meta_agem': '#d62728',     # red (same as agem)
-    'meta_mer': '#9467bd',      # purple (same as mer)
-    'meta_maml': '#8c564b',     # brown
-    'meta_reptile': '#e377c2',  # pink
-    'meta_no': '#7f7f7f',       # gray
+    'meta-sgd': '#1f77b4',       # blue (same as sgd)
+    'meta-er': "#b4871f",        # gold (same as er)
+    'meta-derpp': '#ff7f0e',    # orange (same as derpp)
+    'meta-ewc': '#2ca02c',      # green (same as ewc)
+    'meta-ewc_on': '#2ca02c',   # green (same as ewc_on)
+    'meta-agem': '#d62728',     # red (same as agem)
+    'meta-mer': '#9467bd',      # purple (same as mer)
 }
 
 LABEL_MAP = {
@@ -1242,9 +1240,6 @@ def plot_meta_improvement(
         return
 
     print(f"Found {len(method_pairs)} method pairs: {method_pairs}")
-
-    # Use Dark2 colormap (same as plot_plasticity)
-    cmap = plt.cm.Dark2
     
     # Determine columns to plot
     if forward_only:
@@ -1266,7 +1261,6 @@ def plot_meta_improvement(
         
         # Collect data for each method pair
         pair_data = []
-        color_idx = 0
         
         for non_meta, meta in method_pairs.items():
             non_meta_results = model_results.get(non_meta)
@@ -1274,10 +1268,6 @@ def plot_meta_improvement(
             
             if non_meta_results is None or meta_results is None:
                 continue
-            
-            # Get color for this pair
-            color = get_method_color(non_meta)
-            color_idx += 1
             
             # Compute performance for each k-value
             non_meta_values = []
@@ -1324,6 +1314,8 @@ def plot_meta_improvement(
                 non_meta_val = non_meta_values[-1] if non_meta_values else 0
                 meta_val = meta_values[-1] if meta_values else 0
             
+            # Get color for this pair
+            color = get_method_color(non_meta.split('_')[0])
             pair_data.append({
                 'non_meta': non_meta,
                 'meta': meta,
@@ -1341,17 +1333,18 @@ def plot_meta_improvement(
         x_positions = np.arange(n_pairs)
         bar_width = 0.35
         
+        pair_data = sorted(pair_data, key=lambda x: x['non_meta'])  # Sort by method base name for consistent coloring
+        colors = [p['color'] for p in pair_data]
+
         # Non-meta bars (lower opacity)
         non_meta_vals = [p['non_meta_val'] for p in pair_data]
-        colors_non_meta = [p['color'] for p in pair_data]
         bars_non_meta = ax.bar(x_positions - bar_width/2, non_meta_vals, bar_width, 
-                               label='Base', color=colors_non_meta, alpha=0.5)
+                               label='Base', color=colors, alpha=0.5)
         
         # Meta bars (full opacity)
         meta_vals = [p['meta_val'] for p in pair_data]
-        colors_meta = [p['color'] for p in pair_data]
         bars_meta = ax.bar(x_positions + bar_width/2, meta_vals, bar_width, 
-                          label='+Meta', color=colors_meta, alpha=0.9)
+                          label='+Meta', color=colors, alpha=0.9)
         
         # Add legend
         if direction == 'backward':

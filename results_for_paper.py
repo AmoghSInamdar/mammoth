@@ -1004,7 +1004,7 @@ def plot_sauce(
     # Create figure with 2 rows (backward, forward) and one column
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     
     dataset_name = get_dataset_name(dataset, include_20task)
     row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)'] 
@@ -1042,13 +1042,19 @@ def plot_sauce(
             linestyle = '-' if not with_meta or method.startswith('meta') else '--'  
             alpha = 1.0 if not with_meta or method.startswith('meta') else 0.6         
             line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                            marker='o',markersize=3, label=get_method_label(method), color=color,
+                            marker='o',markersize=5, label=get_method_label(method), color=color,
                             linewidth=linewidth, linestyle=linestyle, alpha=alpha)
             all_handles.append(line)
             all_labels.append(get_method_label(method))
-        
+            
+            num_checkpoints = plot_data['checkpoint_num'].nunique()
+            if direction == 'forward':
+                ax.set_xticks(ticks=range(num_checkpoints), labels=range(1,num_checkpoints+1), fontsize=8)
+                ax.set_xlabel('Checkpoint Number', fontsize=8)
+            else:
+                ax.set_xticks(ticks=range(1, num_checkpoints+1), labels=range(2, num_checkpoints+2), fontsize=8)
+    
         ax.set_title(row_title, fontsize=10)
-        ax.set_xlabel('Checkpoint Number')
         ax.set_ylabel('SAUCE')
         ax.grid(True)
         ax.set_yscale('log')
@@ -1065,7 +1071,7 @@ def plot_sauce(
     
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='lower center', ncols=5,
+        fig.legend(handles, labels, loc='lower center', ncols=4,
                    bbox_to_anchor=(0.5, -0.1), fontsize='small')
                 #    title='Method', title_fontsize='small')
     

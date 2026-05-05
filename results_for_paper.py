@@ -325,10 +325,11 @@ def plot_k_shot_stability(
         
         # Add legend in top right of each subplot
         if dataset == 'seq-mnist':
-            handles, labels = ax.get_legend_handles_labels()
+            legend_1 = ax.legend(loc="center right", bbox_to_anchor=(-0.17, 0.9), ncols=1)
+            ax.add_artist(legend_1)  # Add first legend to axes
             method_labels = sorted([LABEL_MAP.get(get_method_label(m), get_method_label(m)) for m in method_0shot])
-            ax.legend(handles+list(bars_0shot), labels+method_labels, loc='center right', ncols=1,
-                   bbox_to_anchor=(-0.2, 0.5), fontsize='small', labelspacing=1)
+            ax.legend(bars_0shot, method_labels, loc='lower right', ncols=1,
+                   bbox_to_anchor=(-0.2, 0.05), fontsize='small', labelspacing=1)
         
         # ax.set_xlabel('Method')
         if dataset == 'seq-mnist':
@@ -351,20 +352,20 @@ def plot_k_shot_stability(
             ax.set_ylim(0, 1.1)
         
         # Add value labels on bars
-        for bar, val in zip(bars_0shot, values_0shot):
-            if val > 0:
-                ax.annotate(f'{val:.1f}',
-                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                           xytext=(0, 3),
-                           textcoords="offset points",
-                           ha='center', va='bottom', fontsize=6, rotation=90)
-        for bar, val in zip(bars_kshot, values_kshot):
-            if val > 0:
-                ax.annotate(f'{val:.1f}',
-                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                           xytext=(0, 3),
-                           textcoords="offset points",
-                           ha='center', va='bottom', fontsize=6, rotation=90)
+        # for bar, val in zip(bars_0shot, values_0shot):
+        #     if val > 0:
+        #         ax.annotate(f'{val:.1f}',
+        #                    xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+        #                    xytext=(0, 3),
+        #                    textcoords="offset points",
+        #                    ha='center', va='bottom', fontsize=6, rotation=90)
+        # for bar, val in zip(bars_kshot, values_kshot):
+        #     if val > 0:
+        #         ax.annotate(f'{val:.1f}',
+        #                    xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+        #                    xytext=(0, 3),
+        #                    textcoords="offset points",
+        #                    ha='center', va='bottom', fontsize=6, rotation=90)
     
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.2)
@@ -887,8 +888,8 @@ def plot_improvement(
     
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='lower center', ncols=5,
-                   bbox_to_anchor=(0.5, -0.1), fontsize='small') #, 
+        fig.legend(handles, labels, loc='lower center', ncols=6,
+                   bbox_to_anchor=(0.45, -0.05), fontsize='small') #, 
                 #    title='Method', title_fontsize='small')
     
     plt.tight_layout()
@@ -1256,16 +1257,7 @@ def plot_meta_improvement(
     # Create figure with 1 row and N columns
     nrows = 1
     ncols = len(directions)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(2 * ncols, 3), squeeze=False)
-    
-    def get_xticklabel(non_meta: str, meta: str) -> str:
-        """Create xticklabel: non-meta base + meta with + prefix."""
-        # Non-meta: just the base technique
-        non_meta_label = LABEL_MAP.get(non_meta.split('_')[0], non_meta.split('_')[0])
-        # Meta: last 2 segments prefixed by '+'
-        meta_parts = meta.split('_')
-        meta_label = '+' + '_'.join(meta_parts[-2:]) if len(meta_parts) >= 2 else '+' + meta
-        return f"{non_meta_label}" #/{meta_label}"
+    fig, axes = plt.subplots(nrows, ncols, figsize=(2 * ncols, 3), squeeze=False, sharey=True)
     
     # Plot each column
     for col_idx, (direction, col_title) in enumerate(zip(
@@ -1353,24 +1345,30 @@ def plot_meta_improvement(
         non_meta_vals = [p['non_meta_val'] for p in pair_data]
         colors_non_meta = [p['color'] for p in pair_data]
         bars_non_meta = ax.bar(x_positions - bar_width/2, non_meta_vals, bar_width, 
-                               label='Non-meta', color=colors_non_meta, alpha=0.5)
+                               label='Base', color=colors_non_meta, alpha=0.5)
         
         # Meta bars (full opacity)
         meta_vals = [p['meta_val'] for p in pair_data]
         colors_meta = [p['color'] for p in pair_data]
         bars_meta = ax.bar(x_positions + bar_width/2, meta_vals, bar_width, 
-                          label='Meta', color=colors_meta, alpha=0.9)
+                          label='+Meta', color=colors_meta, alpha=0.9)
         
         # Add legend
+        if direction == 'backward':
+            method_labels = sorted([LABEL_MAP.get(get_method_label(p['non_meta']), p['non_meta']) for p in pair_data])
+            ax.legend(bars_non_meta, method_labels, loc='upper left', ncols=5,
+                   bbox_to_anchor=(0.1, 0), fontsize='small')
         if direction == 'forward':
-            ax.legend(loc='upper right', fontsize=8)
+            legend_1 = ax.legend(loc="upper right", ncols=1, fontsize='small')
+            ax.add_artist(legend_1)  # Add first legend to axes
         
         # ax.set_xlabel('Method Pair')
         ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
-        ax.set_title(col_title, fontsize=10)
-        ax.set_xticks(x_positions)
-        ax.set_xticklabels([get_xticklabel(p['non_meta'], p['meta']) for p in pair_data], 
-                          rotation=45, ha='right', fontsize=8)
+        ax.set_title(col_title, fontsize=8, pad=-2)
+        ax.set_xticks([])
+        # ax.set_xticks(x_positions)
+        # ax.set_xticklabels([get_xticklabel(p['non_meta'], p['meta']) for p in pair_data], 
+        #                   rotation=45, ha='right', fontsize=8)
         ax.grid(True, axis='y', alpha=0.3)
         
         # Set y-axis limits based on metric
@@ -1380,21 +1378,22 @@ def plot_meta_improvement(
             ax.set_ylim(0, 1.1)
         
         # Add value labels on bars
-        for bar, val in zip(bars_non_meta, non_meta_vals):
-            if val > 0:
-                ax.annotate(f'{val:.1f}',
-                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                           xytext=(0, 3),
-                           textcoords="offset points",
-                           ha='center', va='bottom', fontsize=6, rotation=90)
-        for bar, val in zip(bars_meta, meta_vals):
-            if val > 0:
-                ax.annotate(f'{val:.1f}',
-                           xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                           xytext=(0, 3),
-                           textcoords="offset points",
-                           ha='center', va='bottom', fontsize=6, rotation=90)
+        # for bar, val in zip(bars_non_meta, non_meta_vals):
+        #     if val > 0:
+        #         ax.annotate(f'{val:.1f}',
+        #                    xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+        #                    xytext=(0, 3),
+        #                    textcoords="offset points",
+        #                    ha='center', va='bottom', fontsize=6, rotation=90)
+        # for bar, val in zip(bars_meta, meta_vals):
+        #     if val > 0:
+        #         ax.annotate(f'{val:.1f}',
+        #                    xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+        #                    xytext=(0, 3),
+        #                    textcoords="offset points",
+        #                    ha='center', va='bottom', fontsize=6, rotation=90)
     
+    fig.suptitle(get_dataset_name(dataset, include_20task), fontsize=10)
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.2)
     

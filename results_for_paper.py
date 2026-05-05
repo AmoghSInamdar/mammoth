@@ -562,7 +562,7 @@ def plot_forward_transfer(
     # Create figure with one column per k-value
     nrows = 1
     ncols = len(plot_k_values)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5), squeeze=False)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5) if dataset != 'seq-mnist' else (5 * ncols, 3.5), squeeze=False)
     axes_flat = axes.flatten()
     
     # Plot each k-value
@@ -611,19 +611,34 @@ def plot_forward_transfer(
         colors_current = [get_method_color(m) for m in methods_with_data]
         colors_forward = [get_method_color(m) for m in methods_with_data]
 
-        ax.bar(x_current, current_values, width=bar_width, alpha=0.4, color=colors_current)
-        ax.bar(x_forward, forward_values, width=bar_width, alpha=0.9, color=colors_forward)
+        bars_0shot = ax.bar(x_current, current_values, width=bar_width, alpha=0.4, color=colors_current)
+        bars_kshot = ax.bar(x_forward, forward_values, width=bar_width, alpha=0.9, color=colors_forward)
+
+        # Add legend in top right of each subplot
+        if dataset == 'seq-mnist':
+            handles, labels = ax.get_legend_handles_labels()
+            method_labels = sorted([LABEL_MAP.get(get_method_label(m), get_method_label(m)) for m in method_current])
+            ax.legend(handles+list(bars_0shot), labels+method_labels, loc='center right', ncols=1,
+                   bbox_to_anchor=(-0.2, 0.5), fontsize='small', labelspacing=1)
+            
+            ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+            ax.set_yticklabels([0,20,40,60,80,100], va='bottom')
+
+        if dataset != 'seq-mnist':
+            ax.yaxis.set_tick_params(length=0)
+            ax.set_yticklabels([])
 
         all_labels = [get_method_label(m) for m in methods_with_data] * 2
         tick_positions = x_current + x_forward
-        ax.set_xticks(tick_positions)
-        ax.set_xticklabels(all_labels, rotation=45, ha='right', fontsize=8)
+        # ax.set_xticks(tick_positions)
+        ax.set_xticks([])
+        # ax.set_xticklabels(all_labels, rotation=45, ha='right', fontsize=8)
         secax = ax.secondary_xaxis('top')
-        secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["0-shot Current", f'{k_val}-shot Forward'])
+        secax.set_xticks([sum(x_current)//len(x_current), 1+sum(x_forward)//len(x_forward)], labels=["0-shot Cur", f'{k_val}-shot Fwd'])
         ax.axvline(x=(x_current[-1] + x_forward[0]) / 2, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
         ax.set_title(get_dataset_name(dataset, include_20task), fontsize=10)
         
-        ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+        # ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.grid(True, axis='y', alpha=0.3)
         
         # Set y-axis limits based on metric with extra headroom

@@ -333,6 +333,7 @@ def plot_k_shot_stability(
         # ax.set_xlabel('Method')
         if dataset == 'seq-mnist':
             ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+            ax.set_yticklabels([0,20,40,60,80,100], va='bottom')
         if dataset != 'seq-mnist':
             ax.yaxis.set_tick_params(length=0)
             ax.set_yticklabels([])

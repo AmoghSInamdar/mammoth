@@ -136,6 +136,18 @@ python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvem
 
 ## meta-cl Method Comparison
 
+python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods --k-values 1
+python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type compare_meta_methods --k-values 1
+python results_for_paper.py --dataset struct-cifar100 --plot-type compare_meta_methods --k-values 1
+python results_for_paper.py --dataset seq-mnist --plot-type compare_meta_methods --k-values 1
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type compare_meta_methods --k-values 1
+
+python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods --k-values 2
+python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type compare_meta_methods --k-values 2
+python results_for_paper.py --dataset struct-cifar100 --plot-type compare_meta_methods --k-values 2
+python results_for_paper.py --dataset seq-mnist --plot-type compare_meta_methods --k-values 2
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type compare_meta_methods --k-values 2
+
 python results_for_paper.py --dataset seq-cifar100 --plot-type compare_meta_methods --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type compare_meta_methods --k-values 5
 python results_for_paper.py --dataset struct-cifar100 --plot-type compare_meta_methods --k-values 5

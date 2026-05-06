@@ -1774,7 +1774,7 @@ def compare_meta_methods(
     # All subplots in one row
     nrows = 1
     ncols = n_k
-    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(6 * ncols, 3), squeeze=False)
+    fig2, axes2 = plt.subplots(nrows, ncols, figsize=(8 * ncols, 3), squeeze=False)
 
     # Get unique base methods and their corresponding meta methods
     base_to_methods = {}
@@ -1799,10 +1799,10 @@ def compare_meta_methods(
         base_centers_back = []
 
         x_pos = 0.0
-        small_gap = 0.6
-        large_gap = 1.0
-        direction_gap = 1.5
-        bar_width = 0.5
+        small_gap = 0.8
+        large_gap = 1.5
+        direction_gap = 2
+        bar_width = 0.6
 
         edge_lws = []
         for base in bases:
@@ -1834,12 +1834,12 @@ def compare_meta_methods(
                     alphas.append(1.0)
                 else:  # 'no' or others
                     hatches.append(None)
-                    alphas.append(0.6)
+                    alphas.append(0.5)
 
-                if 'parallel' in method:
-                    edge_lws.append(1.5)
+                if 'parallel' in method and not 'no_meta' in method:
+                    edge_lws.append(1)
                 else:
-                    edge_lws.append(0.8)
+                    edge_lws.append(0)
 
                 backward_x.append(x_pos)
                 x_pos += small_gap
@@ -1856,28 +1856,41 @@ def compare_meta_methods(
         forward_x = [x + forward_offset for x in backward_x]
         base_centers_fwd = [c + forward_offset for c in base_centers_back]
 
-        for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(backward_x, backward_vals, colors, hatches, alphas, edge_lws)):
-            ax.bar(x, val, width=bar_width, label='Backward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+        method_handles = []
 
+        for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(backward_x, backward_vals, colors, hatches, alphas, edge_lws)):
+            handle = ax.bar(x, val, width=bar_width, label='Backward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
+            if hatch is None and alpha == 1.0 and lw == 1.0:
+                method_handles.append(handle)
         for i, (x, val, color, hatch, alpha, lw) in enumerate(zip(forward_x, forward_vals, colors, hatches, alphas, edge_lws)):
             ax.bar(x, val, width=bar_width, label='Forward' if i == 0 else "", color=color, alpha=alpha, hatch=hatch, edgecolor='black', linewidth=lw)
 
         ax.axvline(x=backward_x[-1] + direction_gap / 2.0, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
 
-        ax.set_xticks(base_centers_back + base_centers_fwd)
-        ax.set_xticklabels(bases + bases, rotation=45, ha='right', fontsize=8)
+        # ax.set_xticks(base_centers_back + base_centers_fwd)
+        ax.set_xticks([])
+        # ax.set_xticklabels(bases + bases, rotation=45, ha='right', fontsize=8)
 
         ax.set_title(dataset.upper())
         ax.set_ylabel(metric.capitalize())
         ax.grid(True, axis='y', alpha=0.3)
         ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)
 
-        style_handles = [Patch(facecolor='white', edgecolor='black', label='MAML', hatch=''),
-                         Patch(facecolor='white', edgecolor='black', label='Reptile', hatch='///'),
-                         Patch(facecolor='white', edgecolor='black', label='No Meta', alpha=0.6)]
-        parallel_handles = [Patch(facecolor='white', edgecolor='black', linewidth=1.5, label='Parallel'),
-                            Patch(facecolor='white', edgecolor='black', linewidth=0.8, label='Sequential')]
-        ax.legend(handles=style_handles + parallel_handles, fontsize=8, ncol=2)
+        method_legend = ax.legend(method_handles, [LABEL_MAP.get(get_method_label(m.split('-')[1]), m) for m in labels if 'maml' in m and 'parallel' in m],
+                                  loc='upper right', ncol=5, fontsize=8)
+        ax.add_artist(method_legend)
+
+        style_handles = [Patch(facecolor='grey', edgecolor='black', label='MAML', hatch=''),
+                         Patch(facecolor='grey', edgecolor='black', label='Reptile', hatch='///'),
+                         Patch(facecolor='grey', edgecolor='black', label='No Meta', alpha=0.5)]
+        meta_legend = ax.legend(handles=style_handles, fontsize=8, ncol=5, 
+                  loc='upper left', bbox_to_anchor=(-0.01, -0.05))
+        ax.add_artist(meta_legend)
+        
+        parallel_handles = [Patch(facecolor='grey', edgecolor='black', linewidth=1, label='Parallel'),
+                            Patch(facecolor='grey', edgecolor='black', linewidth=0.1, label='Sequential')]
+        ax.legend(handles=parallel_handles, fontsize=8, ncol=5, 
+                  loc='upper right', bbox_to_anchor=(1, -0.05))
 
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.2)

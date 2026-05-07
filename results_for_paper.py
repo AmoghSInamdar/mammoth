@@ -1392,7 +1392,7 @@ def plot_meta_improvement(
 
         if (forward_only or backward_only) and dataset == 'seq-mnist':
             ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
-            
+
             legend_1 = ax.legend(loc="center right", ncols=1, fontsize=8, bbox_to_anchor=(-0.2, 0.9))
             ax.add_artist(legend_1)
             ax.legend(bars_non_meta, method_labels, loc='upper right', ncols=1,
@@ -1652,9 +1652,9 @@ def compare_meta_methods(
 
     # Filter to only meta methods
     csv_files = [f for f in csv_files if (
-        f.name.startswith('evaluation_results_meta-') or 
-        '_meta_' in f.name
-        and 'parallel' in f.name  # only parallel for now
+        (f.name.startswith('evaluation_results_meta-') or 
+        '_meta_' in f.name)
+        # and ('agem' in f.name or 'derpp' in f.name or 'sgd' in f.name)
     )]
     
     # Filter by include_20task flag
@@ -1706,7 +1706,7 @@ def compare_meta_methods(
     # Figure 1: SAUCE plots
     nrows = 2
     ncols = 1
-    fig1, axes1 = plt.subplots(nrows, ncols, figsize=(6, 5), squeeze=False)
+    fig1, axes1 = plt.subplots(nrows, ncols, figsize=(6, 3), squeeze=False)
     
     dataset_name = get_dataset_name(dataset, include_20task)
     row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)']
@@ -1898,7 +1898,7 @@ def compare_meta_methods(
         ax.set_title(dataset.upper())
         ax.set_ylabel(metric.capitalize())
         ax.grid(True, axis='y', alpha=0.3)
-        ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)
+        # ax.set_ylim(0, 110 if metric == 'accuracy' else 1.1)
 
         method_legend = ax.legend(method_handles, [LABEL_MAP.get(get_method_label(m.split('-')[1]), m) for m in labels if 'maml' in m and 'parallel' in m],
                                   loc='upper right', ncol=5, fontsize=8)

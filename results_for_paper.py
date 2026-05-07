@@ -1103,6 +1103,7 @@ def plot_meta_improvement(
     with_meta: bool = True,
     include_20task: bool = False,
     forward_only: bool = False,
+    backward_only: bool = False,
     num_lookahead: int = 0,
     do_avg: bool = False,
     meta_method: str = 'maml',
@@ -1248,9 +1249,16 @@ def plot_meta_improvement(
     print(f"Found {len(method_pairs)} method pairs: {method_pairs}")
     
     # Determine columns to plot
+    dataset_name = get_dataset_name(dataset, include_20task)
+    dataset_offset = len(dataset_name) // 2
     if forward_only:
         directions = ['forward']
-        col_titles = [get_dataset_name(dataset, include_20task)]  #f'{dataset_name} (Forward)']
+        dataset_offset -= 5
+        col_titles = [f"{dataset_name}\n{' ' * dataset_offset}(Forward)"]
+    elif backward_only:
+        directions = ['backward']
+        dataset_offset -= 6
+        col_titles = [f"{dataset_name}\n{' ' * dataset_offset}(Backward)"]
     else:
         directions = ['backward', 'current', 'forward']
         col_titles = ['Backward', 'Current', 'Forward']
@@ -1258,7 +1266,10 @@ def plot_meta_improvement(
     # Create figure with 1 row and N columns
     nrows = 1
     ncols = len(directions)
-    fig, axes = plt.subplots(nrows, ncols, figsize=(2 * ncols, 3), squeeze=False, sharey=True)
+    if backward_only or forward_only:
+        fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3.5) if dataset != 'seq-mnist' else (5 * ncols, 3.5), squeeze=False)
+    else:
+        fig, axes = plt.subplots(nrows, ncols, figsize=(2 * ncols, 3), squeeze=False, sharey=True)
     
     # Plot each column
     for col_idx, (direction, col_title) in enumerate(zip(
@@ -1352,29 +1363,41 @@ def plot_meta_improvement(
         bars_meta = ax.bar(x_positions + bar_width/2, meta_vals, bar_width, 
                           label='+Meta', color=colors, alpha=0.9)
         
-        # Add legend
-        if direction == 'backward':
-            method_labels = sorted([LABEL_MAP.get(get_method_label(p['non_meta']), p['non_meta']) for p in pair_data])
-            ax.legend(bars_non_meta, method_labels, loc='upper left', ncols=5,
-                   bbox_to_anchor=(0.1, 0), fontsize='small')
-        if direction == 'forward':
-            legend_1 = ax.legend(loc="upper right", ncols=1, fontsize='small')
-            ax.add_artist(legend_1)  # Add first legend to axes
-        
         # ax.set_xlabel('Method Pair')
-        ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
         ax.set_title(col_title, fontsize=8, pad=-2)
         ax.set_xticks([])
         # ax.set_xticks(x_positions)
         # ax.set_xticklabels([get_xticklabel(p['non_meta'], p['meta']) for p in pair_data], 
         #                   rotation=45, ha='right', fontsize=8)
         ax.grid(True, axis='y', alpha=0.3)
-        
-        # Set y-axis limits based on metric
-        if metric == 'accuracy':
-            ax.set_ylim(0, 110)
-        else:
-            ax.set_ylim(0, 1.1)
+
+        method_labels = sorted([LABEL_MAP.get(get_method_label(p['non_meta']), p['non_meta']) for p in pair_data])        
+
+        if not (forward_only or backward_only):
+            if metric == 'accuracy':
+                ax.set_ylim(0, 110)
+            else:
+                ax.set_ylim(0, 1.1)
+
+            ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+            fig.suptitle(get_dataset_name(dataset, include_20task), fontsize=10)
+
+            # Add legend
+            if direction == 'backward':
+                ax.legend(bars_non_meta, method_labels, loc='upper left', ncols=5,
+                    bbox_to_anchor=(0.2, 0), fontsize='small')
+            if direction == 'forward':
+                legend_1 = ax.legend(loc="upper right", ncols=1, fontsize=5)
+                ax.add_artist(legend_1)  # Add first legend to axes
+
+        if (forward_only or backward_only) and dataset == 'seq-mnist':
+            ax.set_ylabel(metric.capitalize() if col_idx == 0 else '')
+            
+            legend_1 = ax.legend(loc="center right", ncols=1, fontsize=8, bbox_to_anchor=(-0.2, 0.9))
+            ax.add_artist(legend_1)
+            ax.legend(bars_non_meta, method_labels, loc='upper right', ncols=1,
+                      bbox_to_anchor=(-0.2, 0.5), fontsize=8)
+
         
         # Add value labels on bars
         # for bar, val in zip(bars_non_meta, non_meta_vals):
@@ -1392,7 +1415,6 @@ def plot_meta_improvement(
         #                    textcoords="offset points",
         #                    ha='center', va='bottom', fontsize=6, rotation=90)
     
-    fig.suptitle(get_dataset_name(dataset, include_20task), fontsize=10)
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.2)
     
@@ -1403,6 +1425,8 @@ def plot_meta_improvement(
     # Build filename based on options
     if forward_only:
         filename_parts = ['forward_meta_improvement', meta_method, meta_strategy, dataset, metric]
+    elif backward_only:
+        filename_parts = ['backward_meta_improvement', meta_method, meta_strategy, dataset, metric]
     else:
         filename_parts = ['meta_improvement', meta_method, meta_strategy, dataset, metric]
     if not with_meta:
@@ -1920,6 +1944,8 @@ def main() -> None:
                         help='Include 20-task variant CSVs')
     parser.add_argument('--forward-only', action='store_true',
                         help='For meta_improvement plot type: only plot forward transfer column')
+    parser.add_argument('--backward-only', action='store_true',
+                        help='For meta_improvement plot type: only plot backward transfer column')
     parser.add_argument('--num-lookahead', type=int, default=0,
                         help='For meta_improvement plot type: number of tasks to skip ahead when computing forward accuracy (default: 0)')
     parser.add_argument('--do-avg', action='store_true',
@@ -1980,6 +2006,7 @@ def main() -> None:
             with_meta=not args.no_meta,
             include_20task=args.include_20task,
             forward_only=args.forward_only,
+            backward_only=not args.forward_only and args.backward_only,
             num_lookahead=args.num_lookahead,
             meta_method=args.meta_method,
             meta_strategy=args.meta_strategy

@@ -55,7 +55,7 @@ class MultirunEvaluationResults(EvaluationResults):
         return pd.DataFrame(rows)
 
     def to_aggregated_dataframe(self) -> pd.DataFrame:
-        """Aggregate results across seeds by computing mean and std."""
+        """Aggregate results across seeds by computing mean and ste."""
         df = self.to_dataframe()
 
         all_metadata_keys = set()
@@ -64,20 +64,20 @@ class MultirunEvaluationResults(EvaluationResults):
                 all_metadata_keys.update(r.metadata.keys())
 
         base_agg = {
-            'accuracy': ('accuracy', 'mean'),
-            'accuracy_std': ('accuracy', 'std'),
-            'loss': ('loss', 'mean'),
-            'loss_std': ('loss', 'std'),
-            'n_seeds': ('seed', 'count'),
+            'accuracy':     ('accuracy', 'mean'),
+            'accuracy_ste': ('accuracy', 'sem'),
+            'loss':         ('loss', 'mean'),
+            'loss_ste':     ('loss', 'sem'),
+            'n_seeds':      ('seed', 'count'),
         }
 
-        # Include both mean and std for every metadata column (e.g. digit_0_acc,
+        # Include both mean and ste for every metadata column (e.g. digit_0_acc,
         # digit_1_acc, ..., digit_9_acc) so per-digit variance is directly readable
         # in the aggregated CSV without a separate groupby step.
         metadata_agg = {}
         for key in all_metadata_keys:
-            metadata_agg[key] = (key, 'mean')
-            metadata_agg[f"{key}_std"] = (key, 'std')
+            metadata_agg[key]          = (key, 'mean')
+            metadata_agg[f"{key}_ste"] = (key, 'sem')
 
         return df.groupby(['checkpoint_id', 'eval_task_id', 'k_value']).agg(
             **base_agg, **metadata_agg

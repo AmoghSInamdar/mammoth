@@ -1138,9 +1138,9 @@ def plot_sauce(
             plot_data = plot_data.sort_values('checkpoint_num')
             aggregated_sauce[direction][method] = plot_data['SAUCE'].mean()
 
-    fig_avg, axes_avg = plt.subplots(nrows, ncols, figsize=(max(8, len(paired_bases) * 0.7), 7), squeeze=False)
+    fig_avg, axes_avg = plt.subplots(nrows, ncols, figsize=(3 * ncols, 7), squeeze=False)
     bar_width = 0.35
-    group_gap = 0.6
+    group_gap = 0.3
 
     bars, meta_bars = [], []
 
@@ -1177,17 +1177,17 @@ def plot_sauce(
     if dataset == 'seq-mnist':
         method_labels = sorted([LABEL_MAP.get(get_method_label(b[0]), get_method_label(b[0])) for b in paired_bases])
         method_legend = fig_avg.legend(bars, method_labels, loc='center right', ncols=1,
-                        bbox_to_anchor=(-0.01, 0.55), labelspacing=2)
+                        bbox_to_anchor=(-0.01, 0.5), labelspacing=1.5)
         fig_avg.add_artist(method_legend)
 
 
-    legend_handles = [
-        Patch(facecolor='gray', edgecolor='black', alpha=0.6, label='Non-meta'),
-        Patch(facecolor='gray', edgecolor='black', alpha=1.0, label='Meta'),
-    ]
-    fig_avg.legend(legend_handles, ['Non-meta', 'Meta'], loc='upper right', 
-                   ncols=1, bbox_to_anchor=(0.96, 0.95))
-    
+        legend_handles = [
+            Patch(facecolor='gray', edgecolor='black', alpha=0.6, label='Non-meta'),
+            Patch(facecolor='gray', edgecolor='black', alpha=1.0, label='Meta'),
+        ]
+        fig_avg.legend(legend_handles, ['Non-meta', 'Meta'], loc='center right', 
+                    ncols=1, bbox_to_anchor=(0.04, 0.9), labelspacing=1.5)
+        
     
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.18)

@@ -921,7 +921,8 @@ def plot_sauce(
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
     with_meta: bool = True,
-    include_20task: bool = False
+    include_20task: bool = False,
+    only_last_20: bool = False
 ) -> None:
     """Plot SAUCE values (plasticity metric) for backward and forward directions.
     
@@ -937,6 +938,8 @@ def plot_sauce(
         results_dir: Directory containing evaluation result CSVs
         with_meta: If True, include CSVs containing 'meta' in the name
         include_20task: If True, include CSVs with '20task' in the name
+        only_last_20: If True, for average SAUCE plot, use only first 20% of tasks for backward
+                      and last 20% of tasks for forward
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -991,75 +994,90 @@ def plot_sauce(
         print("No valid results to plot.")
         return
 
-    # Get sorted list of methods
+    # Get sorted list of methods and preserve non-meta / meta ordering
     all_methods = sorted(model_results.keys())
     non_meta = [m for m in all_methods if not m.startswith('meta')]
     meta = [m for m in all_methods if m.startswith('meta') and 'maml' in m and 'parallel' in m]
     sorted_methods = non_meta + meta
     model_results = {m: model_results[m] for m in sorted_methods}
-    
-    # Use Dark2 colormap
-    cmap = plt.cm.Dark2
-    
-    # Create figure with 2 rows (backward, forward) and one column
+
+    def get_base_method(method: str) -> str:
+        name = method
+        if name.startswith('meta-'):
+            name = name[len('meta-'):]
+        elif name.startswith('meta_'):
+            name = name[len('meta_'):]
+        # Normalize separators and take base token (e.g., 'ewc-on' -> 'ewc')
+        name = name.replace('-', '_')
+        return name.split('_')[0]
+
+    base_methods = []
+    for method in sorted_methods:
+        base = get_base_method(method)
+        if base not in base_methods:
+            base_methods.append(base)
+
+    # Determine base method pairs for average SAUCE plotting
+    meta_by_base = {}
+    for method in meta:
+        base = get_base_method(method)
+        meta_by_base[base] = method
+
+    paired_bases = []
+    for method in non_meta:
+        base = get_base_method(method)
+        if base in meta_by_base:
+            paired_bases.append((method, meta_by_base[base]))
+
+    # Original SAUCE-over-time plot
     nrows = 2
     ncols = 1
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
-    
+    fig_time, axes_time = plt.subplots(nrows, ncols, figsize=(5, 5), squeeze=False)
     dataset_name = get_dataset_name(dataset, include_20task)
-    row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)'] 
-    # row_titles = ['Backward SAUCE\n(eval_task_id < checkpoint_num)', 
-    #               'Forward SAUCE\n(eval_task_id > checkpoint_num)']
-    
-    # Collect handles and labels for legend
+    row_titles = [f'{dataset_name} (Backward)', f'{dataset_name} (Forward)']
     all_handles = []
     all_labels = []
-    
-    # Plot each row
-    for row_idx, (direction, row_title) in enumerate(zip(
-        ['backward', 'forward'], row_titles)):
-        ax = axes[row_idx, 0]
-        
-        for method_idx, (method, results) in enumerate(model_results.items()):
-            # Filter by direction
+
+    for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles)):
+        ax = axes_time[row_idx, 0]
+
+        for method, results in model_results.items():
             if direction == 'forward':
                 subset = results[results['eval_task_id'] > results['checkpoint_num']]
-            else:  # backward
+            else:
                 subset = results[results['eval_task_id'] < results['checkpoint_num']]
-            
+
             if subset.empty:
                 continue
-            
-            # Group by checkpoint_num and compute mean SAUCE
+
             plot_data = subset.groupby('checkpoint_num')[['SAUCE']].mean().reset_index()
             if plot_data.empty:
                 continue
-            
+
             plot_data = plot_data.sort_values('checkpoint_num')
             color = get_method_color(method)
-            # Use bold line for meta methods
             linewidth = 1.5 if method.startswith('meta') else 1.0
-            linestyle = '-' if not with_meta or method.startswith('meta') else '--'  
-            alpha = 1.0 if not with_meta or method.startswith('meta') else 0.6         
-            line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'], 
-                            marker='o',markersize=5, label=get_method_label(method), color=color,
+            linestyle = '-' if not with_meta or method.startswith('meta') else '--'
+            alpha = 1.0 if not with_meta or method.startswith('meta') else 0.6
+
+            line, = ax.plot(plot_data['checkpoint_num'], plot_data['SAUCE'],
+                            marker='o', markersize=5, label=get_method_label(method), color=color,
                             linewidth=linewidth, linestyle=linestyle, alpha=alpha)
             all_handles.append(line)
             all_labels.append(get_method_label(method))
-            
+
             num_checkpoints = plot_data['checkpoint_num'].nunique()
             if direction == 'forward':
-                ax.set_xticks(ticks=range(num_checkpoints), labels=range(1,num_checkpoints+1), fontsize=8)
+                ax.set_xticks(ticks=range(num_checkpoints), labels=range(1, num_checkpoints + 1), fontsize=8)
                 ax.set_xlabel('Checkpoint Number', fontsize=8)
             else:
-                ax.set_xticks(ticks=range(1, num_checkpoints+1), labels=range(2, num_checkpoints+2), fontsize=8)
-    
+                ax.set_xticks(ticks=range(1, num_checkpoints + 1), labels=range(2, num_checkpoints + 2), fontsize=8)
+
         ax.set_title(row_title, fontsize=10)
         ax.set_ylabel('SAUCE')
         ax.grid(True)
         ax.set_yscale('log')
-    
-    # Add single legend outside the subplots to the right
+
     unique_pairs = []
     seen_labels = set()
     for handle, label in zip(all_handles, all_labels):
@@ -1068,31 +1086,142 @@ def plot_sauce(
         if label not in seen_labels:
             unique_pairs.append((handle, LABEL_MAP.get(label, label)))
             seen_labels.add(label)
-    
+
     if unique_pairs:
         handles, labels = zip(*unique_pairs)
-        fig.legend(handles, labels, loc='lower center', ncols=4,
-                   bbox_to_anchor=(0.5, -0.1), fontsize='small')
-                #    title='Method', title_fontsize='small')
-    
+        fig_time.legend(handles, labels, loc='lower center', ncols=4,
+                        bbox_to_anchor=(0.5, -0.1), fontsize='small')
+
     plt.tight_layout()
     plt.subplots_adjust(right=0.88)
+
+    # Average SAUCE plot
+    aggregated_sauce = {'backward': {}, 'forward': {}}
+    for method, results in model_results.items():
+        for direction in ['backward', 'forward']:
+            if direction == 'forward':
+                subset = results[results['eval_task_id'] > results['checkpoint_num']]
+            else:
+                subset = results[results['eval_task_id'] < results['checkpoint_num']]
+
+            if subset.empty:
+                continue
+
+            # Filter to first/last 20% of tasks per checkpoint if only_last_20 is True
+            if only_last_20:
+                filtered_rows = []
+                for checkpoint_num, group in subset.groupby('checkpoint_num'):
+                    eval_tasks = group['eval_task_id'].values
+                    if direction == 'forward':
+                        # Keep only last 20% of forward tasks
+                        num_tasks = len(eval_tasks)
+                        num_keep = max(1, int(np.ceil(num_tasks * 0.2)))
+                        cutoff = np.sort(eval_tasks)[-num_keep]
+                        group = group[group['eval_task_id'] >= cutoff]
+                    else:  # backward
+                        # Keep only first 20% of backward tasks
+                        num_tasks = len(eval_tasks)
+                        num_keep = max(1, int(np.ceil(num_tasks * 0.2)))
+                        cutoff = np.sort(eval_tasks)[num_keep - 1]
+                        group = group[group['eval_task_id'] <= cutoff]
+                    if not group.empty:
+                        filtered_rows.append(group)
+                if filtered_rows:
+                    subset = pd.concat(filtered_rows, ignore_index=True)
+                else:
+                    continue
+
+            plot_data = subset.groupby('checkpoint_num')[['SAUCE']].mean().reset_index()
+            if plot_data.empty:
+                continue
+
+            plot_data = plot_data.sort_values('checkpoint_num')
+            aggregated_sauce[direction][method] = plot_data['SAUCE'].mean()
+
+    fig_avg, axes_avg = plt.subplots(nrows, ncols, figsize=(max(8, len(paired_bases) * 0.7), 7), squeeze=False)
+    bar_width = 0.35
+    group_gap = 0.6
+
+    bars, meta_bars = [], []
+
+    for row_idx, (direction, row_title) in enumerate(zip(['backward', 'forward'], row_titles)):
+        ax = axes_avg[row_idx, 0]
+        group_centers = []
+        x_pos = 0.0
+
+        for non_name, meta_name in paired_bases:
+            non_val = aggregated_sauce[direction].get(non_name, 0.0)
+            meta_val = aggregated_sauce[direction].get(meta_name, 0.0)
+            color = get_method_color(get_base_method(non_name))
+
+            bars.append(ax.bar(x_pos, non_val, bar_width,
+                        label='Non-meta' if x_pos == 0 else '', color=color, alpha=0.6,
+                        edgecolor='black', linewidth=0.))
+            meta_bars.append(ax.bar(x_pos + bar_width, meta_val, bar_width,
+                             label='Meta' if x_pos == 0 else '', color=color, alpha=1.0,
+                             edgecolor='black', linewidth=0.))
+
+            group_centers.append(x_pos + bar_width / 2)
+            x_pos += 2 * bar_width + group_gap
+
+        ax.set_xticks([])
+        # ax.set_xticklabels([get_method_label(non_name) for non_name, _ in paired_bases], rotation=45, ha='right', fontsize=8)
+        ax.set_title(row_title, fontsize=10)
+        if dataset == 'seq-mnist':
+            ax.set_ylabel('Average SAUCE')
+        ax.grid(True, axis='y', alpha=0.3)
+        # ax.set_ylim(bottom=0)
+        plt.setp(ax.get_yticklabels(), va="bottom")
+
+    # Add legend in top right of each subplot
+    if dataset == 'seq-mnist':
+        method_labels = sorted([LABEL_MAP.get(get_method_label(b[0]), get_method_label(b[0])) for b in paired_bases])
+        method_legend = fig_avg.legend(bars, method_labels, loc='center right', ncols=1,
+                        bbox_to_anchor=(-0.01, 0.55), labelspacing=2)
+        fig_avg.add_artist(method_legend)
+
+
+    legend_handles = [
+        Patch(facecolor='gray', edgecolor='black', alpha=0.6, label='Non-meta'),
+        Patch(facecolor='gray', edgecolor='black', alpha=1.0, label='Meta'),
+    ]
+    fig_avg.legend(legend_handles, ['Non-meta', 'Meta'], loc='upper right', 
+                   ncols=1, bbox_to_anchor=(0.96, 0.95))
     
+    
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.18)
+
     # Save to dataset-specific directory
     plot_dir = PLOTS_DIR / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
-    
-    # Build filename based on options
+
+    # Original filename based on options
     filename_parts = ['sauce', dataset, metric]
     if not with_meta:
         filename_parts.insert(1, 'no_meta')
     if include_20task:
         filename_parts.append('20task')
-    output_path = plot_dir / f'{"_".join(filename_parts)}.png'
-    
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close(fig)
-    print(f"Saved SAUCE plot to {output_path}")
+    output_path_time = plot_dir / f'{"_".join(filename_parts)}.png'
+
+    plt.figure(fig_time.number)
+    fig_time.savefig(output_path_time, dpi=300, bbox_inches='tight')
+    plt.close(fig_time)
+    print(f"Saved SAUCE plot to {output_path_time}")
+
+    avg_filename_parts = ['sauce', 'avg', dataset, metric]
+    if not with_meta:
+        avg_filename_parts.insert(1, 'no_meta')
+    if include_20task:
+        avg_filename_parts.append('20task')
+    if only_last_20:
+        avg_filename_parts.append('only_last_20')
+    output_path_avg = plot_dir / f'{"_".join(avg_filename_parts)}.png'
+
+    plt.figure(fig_avg.number)
+    fig_avg.savefig(output_path_avg, dpi=300, bbox_inches='tight')
+    plt.close(fig_avg)
+    print(f"Saved average SAUCE plot to {output_path_avg}")
 
 
 def plot_meta_improvement(
@@ -1957,7 +2086,9 @@ def main() -> None:
     parser.add_argument('--plot-type', type=str, default='stability',
                         choices=['stability', 'forward_transfer', 'improvement', 'sauce', 'meta_improvement', 'all_results_table', 'compare_meta_methods'],
                         help='Type of plot to create (default: stability)')
-    
+    parser.add_argument('--only-last-20', action='store_true',
+                        help='For sauce plot type: only plot the last 20 tasks')
+
     args = parser.parse_args()
     
     k_values = [k.strip() for k in args.k_values.split(',')]
@@ -1996,7 +2127,8 @@ def main() -> None:
             dataset=args.dataset,
             metric=args.metric,
             with_meta=not args.no_meta,
-            include_20task=args.include_20task
+            include_20task=args.include_20task,
+            only_last_20=args.only_last_20
         )
     elif args.plot_type == 'meta_improvement':
         plot_meta_improvement(

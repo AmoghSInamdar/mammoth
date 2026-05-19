@@ -65,6 +65,13 @@ python results_for_paper.py --dataset struct-cifar100 --plot-type sauce
 python results_for_paper.py --dataset seq-mnist --plot-type sauce
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type sauce
 
+python results_for_paper.py --dataset seq-cifar100 --plot-type sauce --only-last-20
+python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type sauce --only-last-20
+python results_for_paper.py --dataset struct-cifar100 --plot-type sauce --only-last-20
+python results_for_paper.py --dataset seq-mnist --plot-type sauce --only-last-20
+python results_for_paper.py --dataset smooth-rot-mnist --plot-type sauce --only-last-20
+
+
 ## meta-cl improvement
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 1

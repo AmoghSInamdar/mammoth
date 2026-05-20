@@ -1138,7 +1138,7 @@ def plot_sauce(
             plot_data = plot_data.sort_values('checkpoint_num')
             aggregated_sauce[direction][method] = plot_data['SAUCE'].mean()
 
-    fig_avg, axes_avg = plt.subplots(nrows, ncols, figsize=(3 * ncols, 7) if dataset != 'seq-mnist' else (5 * ncols, 7), squeeze=False)
+    fig_avg, axes_avg = plt.subplots(nrows, ncols, figsize=(3 * ncols, 7) if dataset != 'seq-mnist' else (3.5 * ncols, 7), squeeze=False)
     bar_width = 0.35
     group_gap = 0.3
 

@@ -1748,6 +1748,33 @@ def all_results_table(
     print(f"Saved results table to {output_path}")
 
 
+def sort_meta_methods(method: str) -> tuple:
+    """Sort key for meta methods: (meta_type_order, strategy_order, method_name).
+    
+    Meta method order: no_meta (0), reptile (1), maml (2)
+    Strategy order: sequential (0), parallel (1)
+    """
+    # Extract meta method type
+    if 'no_meta' in method or 'no-meta' in method:
+        meta_type_order = 0
+    elif 'reptile' in method:
+        meta_type_order = 1
+    elif 'maml' in method:
+        meta_type_order = 2
+    else:
+        meta_type_order = 3  # Unknown types go last
+    
+    # Extract strategy
+    if 'sequential' in method:
+        strategy_order = 0
+    elif 'parallel' in method:
+        strategy_order = 1
+    else:
+        strategy_order = 2  # Unknown strategies go last
+    
+    return (meta_type_order, strategy_order, method)
+
+
 def compare_meta_methods(
     dataset: str,
     k_values: List[int] = None,
@@ -1937,7 +1964,7 @@ def compare_meta_methods(
             base_to_methods.setdefault(base, []).append(method)
     bases = sorted(base_to_methods.keys())
     for base in bases:
-        base_to_methods[base].sort()
+        base_to_methods[base].sort(key=sort_meta_methods)
 
     for idx, k_val in enumerate(k_values_for_plot):
         ax = axes2[0, idx]

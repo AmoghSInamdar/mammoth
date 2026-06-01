@@ -1190,7 +1190,7 @@ def plot_sauce(
         
     
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.18)
+    plt.subplots_adjust(bottom=0.1, hspace=0.15)
 
     # Save to dataset-specific directory
     plot_dir = PLOTS_DIR / "paper_plots" / dataset

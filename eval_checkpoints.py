@@ -90,6 +90,27 @@ def parse_eval_args() -> argparse.Namespace:
                            help='num of random seeds for evaluation')
     eval_group.add_argument('--multirun_temp_csv_dir', type=str, default='eval_results_multirun',
                             help='Directory to save temp multirun evaluation results csv')
+    eval_group.add_argument('--icl_backend', type=str, default=None,
+                            choices=['clip', 'dinov2', 'vit', 'vlm', 'qwen2vl', 'llava'],
+                            help='If set, measure SAUCE via in-context few-shot classification '
+                                 'instead of gradient-descent adaptation of a checkpoint. The k '
+                                 'shots become in-context examples. clip/dinov2/vit = frozen-feature '
+                                 'few-shot; qwen2vl/llava = local open-source VLMs (true ICL); '
+                                 'vlm = Claude API (true ICL). Requires --dataset (or '
+                                 '--eval_dataset); no checkpoint is loaded.')
+    eval_group.add_argument('--vlm_max_queries', type=int, default=50,
+                            help='Max query images scored per (task,k,seed) for the generative VLM '
+                                 'backends (vlm/qwen2vl/llava) — generation/API cost control.')
+    eval_group.add_argument('--icl_anonymize', action='store_true',
+                            help='Generative-VLM backends only: replace class names with abstract '
+                                 'indices in the prompt, so the model must learn the label mapping '
+                                 'purely from the in-context examples (ICL ablation vs zero-shot). '
+                                 'Output files are suffixed "-anon" to avoid overwriting named runs.')
+    eval_group.add_argument('--icl_vlm_batch_size', type=int, default=1,
+                            help='Queries scored per forward for the generative VLM backends. '
+                                 '>1 amortizes the (dominant) demonstration-token compute across '
+                                 'the batch on CUDA/A100 (numerically identical results); keep at 1 '
+                                 'on MPS/CPU where batching gives no speedup. Try 8-16 on an A100.')
 
     # Stage 3: Experiment args (reuse from training)
     add_experiment_args(parser)
@@ -98,6 +119,27 @@ def parse_eval_args() -> argparse.Namespace:
     add_management_args(parser)
 
     args = parser.parse_args()
+
+    # In-context (transformer) mode: no checkpoint is loaded. The k shots are fed
+    # as in-context examples to a foundation model. We only need a dataset.
+    if args.icl_backend is not None:
+        if not (args.dataset or args.eval_dataset):
+            parser.error("--icl_backend requires --dataset (or --eval_dataset)")
+        args.checkpoint_paths = []  # sentinel: handled by the in-context branch in main()
+        # Parse eval_tasks / k_values / seeds and return early (skip checkpoint glob).
+        if args.eval_tasks == 'all':
+            args.eval_tasks = None
+        else:
+            try:
+                args.eval_tasks = [int(x.strip()) for x in args.eval_tasks.split(',')]
+            except ValueError:
+                parser.error("--eval_tasks must be 'all' or comma-separated integers")
+        try:
+            args.k_values = [int(x.strip()) for x in args.k_values.split(',')]
+        except ValueError:
+            parser.error("--k_values must be comma-separated integers")
+        args.seeds = list(range(args.n_seeds))
+        return args
 
     # Auto-discover checkpoints if not provided
     if not args.checkpoint_paths:
@@ -406,6 +448,64 @@ def evaluate_checkpoint_multirun(checkpoint_path: str,
     return results
 
 
+def icl_group_tag(backend: str, anonymize: bool) -> str:
+    """Backend tag used in checkpoint_id and output filename. The '-anon' suffix
+    keeps anonymized-label runs from overwriting the named-label run's CSV."""
+    return f"{backend}-anon" if anonymize else backend
+
+
+def evaluate_in_context_multirun(eval_args: argparse.Namespace,
+                                 dataset: 'ContinualDataset') -> List[MultirunEvaluationResult]:
+    """
+    In-context (transformer) analogue of ``evaluate_checkpoint_multirun``.
+
+    No checkpoint is loaded and there is NO gradient descent: for each
+    (eval_task, k, seed) the k support examples per class are fed to the chosen
+    foundation model as in-context examples, and accuracy/loss are read off in
+    the exact scale ``utils.evaluate.evaluate`` uses (percent, argmax over the
+    cumulative ``get_offsets()[1]`` label set). Results carry a single constant
+    ``checkpoint_id`` per (backend, dataset) ending in ``_0`` so the SAUCE
+    groupby and the plotting's checkpoint-index parsing stay well-formed.
+    """
+    from utils.in_context_eval import evaluate_in_context
+
+    backend = eval_args.icl_backend
+    anonymize = getattr(eval_args, 'icl_anonymize', False)
+    dataset_name = eval_args.eval_dataset or eval_args.dataset
+    tag = icl_group_tag(backend, anonymize)          # e.g. 'qwen2vl-anon'
+    checkpoint_id = f"icl-{tag}_{dataset_name}_0"
+
+    results: List[MultirunEvaluationResult] = []
+    for eval_task_id in eval_args.eval_tasks:
+        logging.info(f"[icl:{tag}] evaluating task {eval_task_id}")
+        for k in eval_args.k_values:
+            for seed in eval_args.seeds:
+                accuracy, loss, per_class = evaluate_in_context(
+                    dataset=dataset,
+                    task_id=eval_task_id,
+                    k=k,
+                    backend=backend,
+                    seed=seed,
+                    device=eval_args.device,
+                    vlm_max_queries=eval_args.vlm_max_queries,
+                    anonymize=anonymize,
+                    vlm_batch_size=getattr(eval_args, 'icl_vlm_batch_size', 1),
+                )
+                results.append(MultirunEvaluationResult(
+                    checkpoint_id=checkpoint_id,
+                    eval_task_id=eval_task_id,
+                    k_value=k,
+                    accuracy=accuracy,
+                    loss=loss,
+                    num_adapt_steps=0,          # no gradient steps in the ICL path
+                    adapt_lr=None,
+                    num_examples_used=k,        # k in-context examples per class
+                    seed=seed,
+                    metadata={f"digit_{d}_acc": acc for d, acc in per_class.items()},
+                ))
+    return results
+
+
 def get_results_group_name(checkpoint_paths: List[str]) -> str:
     """Derive a representative group name from checkpoint stems."""
     checkpoint_ids = [Path(path).stem for path in checkpoint_paths]
@@ -430,6 +530,38 @@ def main():
     # Set device
     args.device = get_device(args.device)
     is_multirun = len(args.seeds) > 1
+
+    # ----- In-context (transformer) branch: no checkpoint, no gradient descent ----- #
+    if args.icl_backend is not None:
+        # In-context results are always written as multirun so the aggregated CSV
+        # (with accuracy_std) is produced and plasticity runs on it, exactly like
+        # the ResNet multirun path. A single seed still yields a valid 1-seed file.
+        is_multirun = True
+        output_dir = Path(args.multirun_temp_csv_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        dataset = setup_evaluation_dataset(args, args)  # builds dataset from args alone
+        dataset.get_data_loaders()                      # sets up test_loaders
+        if args.eval_tasks is None:
+            args.eval_tasks = list(range(dataset.N_TASKS))
+
+        all_results = MultirunEvaluationResults()
+        all_results.add_results(evaluate_in_context_multirun(args, dataset))
+
+        dataset_name = args.eval_dataset or args.dataset
+        checkpoint_group_name = f"icl-{icl_group_tag(args.icl_backend, getattr(args, 'icl_anonymize', False))}_{dataset_name}"
+        csv_path = output_dir / f"evaluation_results_{checkpoint_group_name}.csv"
+        agg_path = output_dir / 'aggregated' / f"evaluation_results_{checkpoint_group_name}.csv"
+        agg_path.parent.mkdir(parents=True, exist_ok=True)
+
+        all_results.save_to_csv(csv_path)
+        try:
+            add_plasticity_scores_to_csv(agg_path, metric_for_sauce='accuracy')
+            logging.info(f"Plasticity scores added to {agg_path}")
+        except Exception as e:
+            logging.warning(f"Failed to compute plasticity scores: {e}")
+        logging.info(f"In-context evaluation complete. Results saved to {output_dir}")
+        return
 
     # Create output directory
     output_dir = Path(args.multirun_temp_csv_dir) if is_multirun else Path(args.output_dir)

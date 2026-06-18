@@ -290,6 +290,13 @@ def parse_args() -> argparse.Namespace:
                         help='Directory where multirun evaluation result files should be saved')
     parser.add_argument('--adapt_settings_file', type=str, default=str(ADAPT_SETTINGS_FILE),
                         help='Path to the JSON file containing model-specific adaptation settings')
+    parser.add_argument('--n_seeds', type=int, default=1,
+                        help='Number of random seeds for sampling support sets (>1 enables multirun)')
+    parser.add_argument('--icl_backend', type=str, default=None,
+                        choices=['clip', 'dinov2', 'vit', 'vlm'],
+                        help='If set, measure in-context (transformer) SAUCE instead of '
+                             'gradient-descent checkpoint adaptation. No checkpoints are loaded; '
+                             'k shots become in-context examples. Runs once per (backend, dataset).')
     args = parser.parse_args()
 
     if args.models:
@@ -309,8 +316,65 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
+def run_icl_evaluation(
+    backend: str,
+    dataset: str,
+    k_values_csv: str,
+    n_seeds: int,
+    output_dir: Path,
+    gpu_id: str,
+) -> None:
+    """Run eval_checkpoints.py in in-context mode for one (backend, dataset).
+
+    eval_checkpoints.py itself loops over tasks/k/seeds and writes the raw +
+    aggregated CSVs (with SAUCE columns) directly into ``output_dir``, so there
+    is nothing to merge afterwards (no per-checkpoint fan-out).
+    """
+    env = os.environ.copy()
+    env['CUDA_VISIBLE_DEVICES'] = gpu_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    command = [
+        sys.executable,
+        'eval_checkpoints.py',
+        '--icl_backend', backend,
+        '--dataset', dataset,
+        '--eval_dataset', dataset,
+        '--lr', '0.0',
+        '--k_values', k_values_csv,
+        '--n_seeds', str(n_seeds),
+        '--output_dir', str(output_dir),
+        '--multirun_temp_csv_dir', str(output_dir),
+    ]
+    print(f"In-context eval: backend={backend}, dataset={dataset}, gpu={gpu_id}, "
+          f"k_values={k_values_csv}, n_seeds={n_seeds}")
+    subprocess.run(command, check=True, env=env)
+    print(f"Wrote evaluation_results_icl-{backend}_{dataset}.csv (+ aggregated) to {output_dir}")
+
+
+def run_all_icl(args: argparse.Namespace) -> None:
+    """Run in-context SAUCE evaluation for the chosen backend over all datasets."""
+    is_multirun = args.n_seeds > 1
+    output_dir = Path(args.multirun_output_dir) if is_multirun else Path(args.output_dir)
+    k_values_csv = ','.join(str(k) for k in args.k_values)
+    gpus = get_available_gpus()
+    for idx, dataset in enumerate(args.datasets):
+        run_icl_evaluation(
+            backend=args.icl_backend,
+            dataset=dataset,
+            k_values_csv=k_values_csv,
+            n_seeds=args.n_seeds,
+            output_dir=output_dir,
+            gpu_id=gpus[idx % len(gpus)],
+        )
+
+
 def run_all(args: argparse.Namespace) -> None:
     """Run few-shot evaluation for each model/dataset combination."""
+    if args.icl_backend is not None:
+        run_all_icl(args)
+        return
+
     adapt_settings = load_adapt_settings(args.adapt_settings_file)
     is_multirun = args.n_seeds > 1
     temp_csv_dir = Path('results/temp_csvs_multirun') if is_multirun else Path('results/temp_csvs')

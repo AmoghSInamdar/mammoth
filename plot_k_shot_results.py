@@ -49,15 +49,46 @@ def get_dataset_name_from_model(model: str) -> str:
             return token
     return tokens[-1]
 
-
-def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
+def plot_multirun_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
     """Plot results for a single checkpoint."""
-    # Get unique k_values and sort
     k_values = sorted(results['k_value'].unique())
 
     for k_val in k_values:
         subset = results[results['k_value'] == k_val].sort_values('eval_task_id')
-        plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        std_col = f'{metric}_std'
+        line, = plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        if std_col in results.columns:
+            plt.fill_between(
+                subset['eval_task_id'],
+                subset[metric] - subset[std_col],
+                subset[metric] + subset[std_col],
+                alpha=0.15,
+                color=line.get_color()
+            )
+
+    plt.xlabel('Evaluation Task ID')
+    plt.ylabel(metric.capitalize())
+    plt.title(f'Checkpoint: {int(checkpoint_id.split("_")[-1])+1}')
+    if checkpoint_id.endswith("_0"):
+        plt.legend()
+    plt.grid(True)
+
+def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: str = 'accuracy') -> None:
+    """Plot results for a single checkpoint."""
+    k_values = sorted(results['k_value'].unique())
+
+    for k_val in k_values:
+        subset = results[results['k_value'] == k_val].sort_values('eval_task_id')
+        std_col = f'{metric}_std'
+        line, = plt.plot(subset['eval_task_id'], subset[metric], marker='o', label=f'k={k_val}')
+        if std_col in results.columns:
+            plt.fill_between(
+                subset['eval_task_id'],
+                subset[metric] - subset[std_col],
+                subset[metric] + subset[std_col],
+                alpha=0.15,
+                color=line.get_color()
+            )
 
     plt.xlabel('Evaluation Task ID')
     plt.ylabel(metric.capitalize())
@@ -67,7 +98,7 @@ def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: s
     plt.grid(True)
 
 
-def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
+def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy', is_multirun: bool = False) -> None:
     """Plot results from CSV file with one subplot per checkpoint."""
     results = load_evaluation_results(csv_path)
     grouped_results = group_results_by_checkpoint(results)
@@ -85,7 +116,10 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
 
     for i, (checkpoint_id, ckpt_results) in enumerate(grouped_results.items()):
         plt.sca(axes_flat[int(checkpoint_id.split('_')[-1])])  # Use checkpoint number for subplot index
-        plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
+        if is_multirun:
+            plot_multirun_checkpoint_results(checkpoint_id, ckpt_results, metric)
+        else:
+            plot_checkpoint_results(checkpoint_id, ckpt_results, metric)
         plt.xticks(ticks=range(num_checkpoints), labels=range(1, num_checkpoints+1))
         plt.axvline(x=int(checkpoint_id.split('_')[-1]), color='green', linestyle='--', alpha=0.5)
 
@@ -103,7 +137,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     print(f"Plot saved to {output_path}")
 
 
-def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: str = 'accuracy') -> None:
+def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR) -> None:
     """Plot average plasticity scores for a given model across all checkpoints and tasks, including forward and backward splits."""
     csv_path = results_dir / f'evaluation_results_{model}.csv'
     if not csv_path.exists():
@@ -168,7 +202,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     ax2.legend()
     ax2.grid(True)
     plt.tight_layout()
-    output_path = plot_dir / f'plasticity_{metric}_{model}.png'
+    output_path = plot_dir / f'plasticity_{model}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close(fig)
     print(f"Overall plasticity plot saved to {output_path}")
@@ -192,7 +226,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'forward_plasticity_{metric}_{model}.png'
+        output_path = plot_dir / f'forward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Forward plasticity plot saved to {output_path}")
@@ -218,7 +252,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         ax2.legend()
         ax2.grid(True)
         plt.tight_layout()
-        output_path = plot_dir / f'backward_plasticity_{metric}_{model}.png'
+        output_path = plot_dir / f'backward_plasticity_{model}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
         print(f"Backward plasticity plot saved to {output_path}")
@@ -413,140 +447,172 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
         return base_method
     
     # Helper function to plot a single subplot
+def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10], metric: str = 'accuracy', 
+                            results_dir: Path = RESULTS_DIR) -> None:
+    if not results_dir.exists():
+        print(f"Error: Results directory {results_dir} does not exist.")
+        return
+
+    csv_files = [f for f in results_dir.glob('*.csv') if dataset in f.name]
+    if not csv_files:
+        print(f"No CSV files found for dataset '{dataset}' in {results_dir}")
+        return
+
+    print(f"Found {len(csv_files)} CSV files for dataset '{dataset}'")
+
+    def extract_checkpoint_num(ckpt_id: str) -> int:
+        parts = ckpt_id.rsplit('_', 1)
+        return int(parts[1]) if len(parts) == 2 and parts[1].isdigit() else 0
+
+    model_results = {}
+    for csv_path in csv_files:
+        model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        results = load_evaluation_results(csv_path)
+        if results.empty:
+            print(f"Skipping empty CSV for {model_dataset}")
+            continue
+        results = results.copy()
+        results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
+        model_results[model_dataset] = results
+        print(f"  Loaded {model_dataset}: {len(results)} rows")
+
+    if not model_results:
+        print("No valid results to plot.")
+        return
+
+    available_k_values = []
+    for model, results in model_results.items():
+        available_k_values.extend(results['k_value'].unique())
+    available_k_values = sorted(set(available_k_values))
+    k_values = [k for k in k_values if k in available_k_values]
+    if not k_values:
+        print(f"None of the requested k-values {k_values} found in data. Available: {available_k_values}")
+        return
+
+    print(f"Plotting for k-values: {k_values}")
+
+    nrows = len(k_values) + 1
+    ncols = 3
+    fig, axes = plt.subplots(nrows, ncols, figsize=(15, 4 * nrows), squeeze=False)
+
+    col_titles = ['Backward\n(task_id < checkpoint_id)', 
+                  'Current\n(task_id == checkpoint_id)', 
+                  'Forward\n(task_id > checkpoint_id)']
+
+    cmap = plt.cm.Dark2
+
+    def get_method_label(method: str) -> str:
+        parts = method.split('_')
+        base_method = parts[0]
+        if base_method.startswith('meta') and len(parts) > 1:
+            meta_parts = []
+            for part in parts[1:]:
+                if part in ['maml', 'reptile', 'no', 'meta']:
+                    meta_parts.append(part)
+                elif part in ['sequential', 'parallel']:
+                    meta_parts.append(part)
+            if meta_parts:
+                return f"{base_method}-{'-'.join(meta_parts)}"
+            return base_method
+        return base_method
+
     def plot_subplot(ax, method_values, col_title, show_ylabel=True):
         if not method_values:
             ax.text(0.5, 0.5, 'No data', ha='center', va='center', transform=ax.transAxes)
             ax.set_title(col_title)
             return
-        
-        # Separate non-meta and meta methods, then sort each group
+
         methods = list(method_values.keys())
-        non_meta = [m for m in methods if not m.startswith('meta')]
-        meta = [m for m in methods if m.startswith('meta')]
-        non_meta.sort()
-        meta.sort()
+        non_meta = sorted([m for m in methods if not m.startswith('meta')])
+        meta = sorted([m for m in methods if m.startswith('meta')])
         sorted_methods = non_meta + meta
-        
-        # Calculate x positions - use continuous positions for bars
-        # but add extra space between non-meta and meta groups
+
         n_non_meta = len(non_meta)
         n_meta = len(meta)
-        
-        # Create x positions: non-meta at 0,1,2... then meta with offset
+
         if n_meta > 0 and n_non_meta > 0:
-            # Add 0.5 gap between groups
             x_positions = list(range(n_non_meta)) + [n_non_meta + i + 0.5 for i in range(n_meta)]
         else:
             x_positions = list(range(len(sorted_methods)))
-        
+
         bar_width = 0.8
-        means = [np.mean(method_values[m]) for m in sorted_methods]
-        
-        bars = ax.bar(x_positions, means, bar_width, 
-                     color=[cmap(method_idx / max(len(sorted_methods) - 1, 1)) for method_idx in range(len(sorted_methods))],
-                     alpha=0.85)
-        
+        # Read mean and ste directly from aggregated CSV values
+        means = [method_values[m]['mean'] for m in sorted_methods]
+        stes = [method_values[m]['ste'] for m in sorted_methods]
+
+        bars = ax.bar(x_positions, means, bar_width,
+                      color=[cmap(i / max(len(sorted_methods) - 1, 1)) for i in range(len(sorted_methods))],
+                      alpha=0.85, yerr=stes, capsize=3, error_kw={'elinewidth': 1, 'ecolor': 'black'})
+
         ax.set_xticks(x_positions)
         ax.set_xticklabels([get_method_label(m) for m in sorted_methods], rotation=45, ha='right', fontsize=8)
         ax.set_ylabel(metric.capitalize() if show_ylabel else '')
         ax.set_title(col_title)
         ax.grid(True, axis='y', alpha=0.3)
-        
-        # Add vertical dotted line between non-meta and meta groups
+
         if n_non_meta > 0 and n_meta > 0:
             ax.axvline(x=n_non_meta - 0.5 + 0.25, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
-        
-        # Set shared y-axis limits based on metric
+
         if metric == 'accuracy':
             ax.set_ylim(0, 100)
         else:
             ax.set_ylim(0, 1)
-        
-        # Add value labels on bars
+
         for bar, mean in zip(bars, means):
             height = bar.get_height()
             ax.annotate(f'{mean:.3f}',
-                       xy=(bar.get_x() + bar.get_width() / 2, height),
-                       xytext=(0, 3),
-                       textcoords="offset points",
-                       ha='center', va='bottom', fontsize=7)
-    
-    # First, compute average across all k-values for each method and direction
-    avg_method_values = {}  # method -> direction -> list of metric values
-    for method, results in model_results.items():
-        avg_method_values[method] = {}
-        for direction in ['backward', 'current', 'forward']:
-            if direction == 'backward':
-                subset = results[results['eval_task_id'] < results['checkpoint_num']]
-            elif direction == 'current':
-                subset = results[results['eval_task_id'] == results['checkpoint_num']]
-            else:  # forward
-                subset = results[results['eval_task_id'] > results['checkpoint_num']]
-            
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom', fontsize=7)
+
+    def collect_method_values(results, k_val, direction):
+        """Collect {mean, ste} per method from aggregated CSV columns."""
+        method_values = {}
+        ste_col = f'{metric}_std'
+        for method, df in results.items():
+            subset = df[df['k_value'] == k_val] if k_val is not None else df
             if subset.empty:
                 continue
-            
-            avg_method_values[method][direction] = subset[metric].values
-    
-    # Plot each k-value row
+            if direction == 'backward':
+                subset = subset[subset['eval_task_id'] < subset['checkpoint_num']]
+            elif direction == 'current':
+                subset = subset[subset['eval_task_id'] == subset['checkpoint_num']]
+            else:
+                subset = subset[subset['eval_task_id'] > subset['checkpoint_num']]
+            if subset.empty:
+                continue
+            method_values[method] = {
+                'mean': subset[metric].mean(),
+                'ste': subset[ste_col].mean() if ste_col in subset.columns else 0.0,
+            }
+        return method_values
+
+    # Plot k-value rows
     for row_idx, k_val in enumerate(k_values):
-        for col_idx, (direction, col_title) in enumerate(zip(
-            ['backward', 'current', 'forward'], col_titles)):
+        for col_idx, (direction, col_title) in enumerate(zip(['backward', 'current', 'forward'], col_titles)):
             ax = axes[row_idx, col_idx]
-            
-            # Collect data for histogram
-            method_values = {}  # method -> list of metric values
-            
-            for method_idx, (method, results) in enumerate(model_results.items()):
-                # Filter by k_value
-                k_subset = results[results['k_value'] == k_val]
-                if k_subset.empty:
-                    continue
-                
-                if direction == 'backward':
-                    subset = k_subset[k_subset['eval_task_id'] < k_subset['checkpoint_num']]
-                elif direction == 'current':
-                    subset = k_subset[k_subset['eval_task_id'] == k_subset['checkpoint_num']]
-                else:  # forward
-                    subset = k_subset[k_subset['eval_task_id'] > k_subset['checkpoint_num']]
-                
-                if subset.empty:
-                    continue
-                
-                method_values[method] = subset[metric].values
-            
-            # Use helper function - show ylabel only on last k-value row
+            method_values = collect_method_values(model_results, k_val, direction)
             show_ylabel = (row_idx == len(k_values) - 1)
             plot_subplot(ax, method_values, col_title, show_ylabel)
-    
-    # Add row labels for k-values on the left
-    for row_idx, k_val in enumerate(k_values):
-        axes[row_idx, 0].annotate(f'k={k_val}', xy=(-0.15, 0.5), 
-                                   xycoords='axes fraction', fontsize=12, 
+
+        axes[row_idx, 0].annotate(f'k={k_val}', xy=(-0.15, 0.5),
+                                   xycoords='axes fraction', fontsize=12,
                                    fontweight='bold', va='center', ha='right')
-    
-    # Plot the average row (last row)
+
+    # Average row
     avg_row_idx = len(k_values)
-    for col_idx, (direction, col_title) in enumerate(zip(
-        ['backward', 'current', 'forward'], col_titles)):
+    for col_idx, (direction, col_title) in enumerate(zip(['backward', 'current', 'forward'], col_titles)):
         ax = axes[avg_row_idx, col_idx]
-        
-        method_values = {}
-        for method_idx, (method, direction_data) in enumerate(avg_method_values.items()):
-            if direction in direction_data:
-                method_values[method] = direction_data[direction]
-        
-        # Use helper function - always show ylabel for average row
+        method_values = collect_method_values(model_results, None, direction)
         plot_subplot(ax, method_values, col_title, show_ylabel=True)
-    
-    # Add "Average" label for the last row
-    axes[avg_row_idx, 0].annotate('Average', xy=(-0.15, 0.5), 
-                                   xycoords='axes fraction', fontsize=12, 
+
+    axes[avg_row_idx, 0].annotate('Average', xy=(-0.15, 0.5),
+                                   xycoords='axes fraction', fontsize=12,
                                    fontweight='bold', va='center', ha='right')
-    
+
     plt.tight_layout()
-    
-    # Save to dataset-specific directory
+
     plot_dir = PLOTS_DIR / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'k_shot_comparison_{dataset}_{metric}.png'
@@ -775,8 +841,8 @@ def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     print(f"Saved k-shot improvement plot to {output_path}")
 
 
-def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None) -> None:
-    """Plot all CSV files in RESULTS_DIR, skipping any with errors."""
+def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None, is_multirun=False) -> None:
+    """Plot all CSV files in results_dir, skipping any with errors."""
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
         return
@@ -790,11 +856,11 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
     for csv_path in csv_files:
         try:
             print(f"Plotting {csv_path.name}...", end=' ')
-            plot_k_shot_results(csv_path, metric)
+            plot_k_shot_results(csv_path, metric, is_multirun)
             if plot_plasticity:
                 # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
                 model = csv_path.stem.replace('evaluation_results_', '')
-                plot_plasticity_scores(model, results_dir=results_dir, metric=metric)
+                plot_plasticity_scores(model, results_dir=results_dir)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 
@@ -817,32 +883,41 @@ def main() -> None:
                         help='Plot forward/backward k-shot performance as checkpoint_id increases')
     parser.add_argument('--k-values', type=str, default='0,1,2,5,10',
                         help='Comma-separated k-values for comparison plot (default: 0,1,2,5,10)')
+    parser.add_argument('--n_seeds', type=int, default=1,
+                        help='num of random seeds for evaluation')
+    parser.add_argument('--multirun_output_dir', type=str, default='results/k_shot_evaluation_multirun',
+                        help='Directory to save multirun evaluation results csv')
+
     args = parser.parse_args()
+
+    is_multirun = args.n_seeds > 1
+    parent_result_dir = Path(args.multirun_output_dir)
+    parent_result_dir.mkdir(parents=True, exist_ok=True)
+    results_dir = Path(f'{args.multirun_output_dir}/aggregated') if is_multirun else RESULTS_DIR
 
     if args.plot_k_shot_improvement:
         if not args.dataset:
             parser.error("--plot-k-shot-improvement requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_improvement(args.dataset, k_values, args.metric)
+        plot_k_shot_improvement(args.dataset, k_values, args.metric, results_dir=results_dir)
     elif args.plot_k_shot_comparisons:
         if not args.dataset:
             parser.error("--plot-k-shot-comparisons requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_comparisons(args.dataset, k_values, args.metric)
+        plot_k_shot_comparisons(args.dataset, k_values, args.metric, results_dir=results_dir)
     elif args.plot_plasticity_comparisons:
-        plot_plasticity_comparisons(dataset=args.dataset)
+        plot_plasticity_comparisons(dataset=args.dataset, results_dir=results_dir)
     elif args.plot_all:
-        plot_all('accuracy')
-        plot_all('loss')
+        plot_all('accuracy', results_dir=results_dir)
+        plot_all('loss', results_dir=results_dir)
     elif args.csv_file:
-        csv_path = Path(os.path.join(RESULTS_DIR, args.csv_file))
+        csv_path = Path(os.path.join(results_dir, args.csv_file))
         if not csv_path.exists():
             print(f"Error: CSV file {csv_path} does not exist.")
             return
-        plot_k_shot_results(csv_path, args.metric)
+        plot_k_shot_results(csv_path, args.metric, is_multirun)
     else:
         parser.error("Either provide a CSV file, use --plot-all, --plot-plasticity-comparisons, --plot-k-shot-comparisons, or --plot-k-shot-improvement")
-
 
 if __name__ == '__main__':
     main()

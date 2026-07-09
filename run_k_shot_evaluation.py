@@ -122,6 +122,7 @@ def run_checkpoint_evaluation(
     model: str,
     dataset: str,
     k_values_csv: str,
+    n_seeds: int,
     adapt_lr: Optional[float],
     num_adapt_steps: Optional[int],
     output_dir: Path,
@@ -145,18 +146,22 @@ def run_checkpoint_evaluation(
         '0.0',
         '--k_values',
         k_values_csv,
+        '--n_seeds',
+        str(n_seeds),
         '--adapt_lr',
         str(adapt_lr),
         '--num_adapt_steps',
         str(num_adapt_steps),
         '--output_dir',
         str(output_dir),
+        '--multirun_temp_csv_dir',
+        str(output_dir),
     ]
 
     checkpoint_name = Path(checkpoint_path).stem
     print(
         f"Evaluating checkpoint={checkpoint_name}, model={model}, dataset={dataset}, "
-        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}"
+        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}, n_seeds={n_seeds}"
     )
     subprocess.run(command, check=True, env=env)
     return output_dir / f"evaluation_results_{checkpoint_name}.csv"
@@ -168,6 +173,7 @@ def _merge_temp_csvs(final_csv_path: Path, temp_csv_paths: List[Path]) -> None:
         raise ValueError("No temporary CSV files found to merge.")
 
     final_csv_path.parent.mkdir(parents=True, exist_ok=True)
+
     header_written = False
     with final_csv_path.open('w', newline='', encoding='utf-8') as out_file:
         writer = csv.writer(out_file)
@@ -190,7 +196,9 @@ def evaluate_checkpoints_for_k(
     dataset: str,
     k_values: Sequence[int],
     adapt_settings: Dict[str, Any],
+    n_seeds: int = 1,
     output_dir: Path = OUTPUT_DIR,
+    temp_csv_dir: Path = TEMP_OUTPUT_DIR,
     max_subprocesses: int = 10,
 ) -> None:
     """Evaluate the matching checkpoints for a model/dataset over all requested k values.
@@ -210,17 +218,17 @@ def evaluate_checkpoints_for_k(
     tasks = []
     for idx, checkpoint_path in enumerate(checkpoint_paths):
         gpu_id = gpus[idx % len(gpus)]
-        temp_dir = TEMP_OUTPUT_DIR / model / dataset / Path(checkpoint_path).stem
-        tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id))
+        checkpoint_temp_dir = temp_csv_dir / model / dataset / Path(checkpoint_path).stem
+        tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, checkpoint_temp_dir, gpu_id))
 
     pool_map = []
     pools = {gpu: mp.Pool(processes=max_subprocesses) for gpu in gpus}
     try:
         for task in tasks:
-            checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id = task
+            checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, csv_temp_dir, gpu_id = task
             pool_map.append(pools[gpu_id].apply_async(
                 run_checkpoint_evaluation,
-                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id)
+                args=(checkpoint_path, model, dataset, k_values_csv, n_seeds, adapt_lr, num_adapt_steps, csv_temp_dir, gpu_id)
             ))
 
         for pool in pools.values():
@@ -239,6 +247,16 @@ def evaluate_checkpoints_for_k(
     out_filename = "_".join(Path(checkpoint_paths[0]).stem.split('_')[:-1])
     final_csv_path = output_dir / f"evaluation_results_{out_filename}.csv"
     _merge_temp_csvs(final_csv_path, temp_csv_paths)
+
+    is_multirun = n_seeds > 1
+
+    if is_multirun:
+        agg_output_dir = output_dir / 'aggregated'
+        if not agg_output_dir.exists():
+            agg_output_dir.mkdir(parents=True)
+        agg_temp_csv_paths = [p.parent / 'aggregated' / p.name for p in temp_csv_paths]
+        agg_final_csv_path = agg_output_dir / f"evaluation_results_{out_filename}.csv"
+        _merge_temp_csvs(agg_final_csv_path, agg_temp_csv_paths)
 
     # Clean up temporary directories after merging results
     for temp_csv_path in temp_csv_paths:
@@ -268,6 +286,8 @@ def parse_args() -> argparse.Namespace:
                         help='Directory containing checkpoint files')
     parser.add_argument('--output_dir', type=str, default=str(OUTPUT_DIR),
                         help='Directory where evaluation result files should be saved')
+    parser.add_argument('--multirun_output_dir', type=str, default='results/k_shot_evaluation',
+                        help='Directory where multirun evaluation result files should be saved')
     parser.add_argument('--adapt_settings_file', type=str, default=str(ADAPT_SETTINGS_FILE),
                         help='Path to the JSON file containing model-specific adaptation settings')
     args = parser.parse_args()
@@ -292,6 +312,11 @@ def parse_args() -> argparse.Namespace:
 def run_all(args: argparse.Namespace) -> None:
     """Run few-shot evaluation for each model/dataset combination."""
     adapt_settings = load_adapt_settings(args.adapt_settings_file)
+    is_multirun = args.n_seeds > 1
+    temp_csv_dir = Path('results/temp_csvs_multirun') if is_multirun else Path('results/temp_csvs')
+    temp_csv_dir.mkdir(exist_ok=True, parents=True)
+
+    output_dir = args.multirun_output_dir if is_multirun else args.output_dir
     for model in args.models:
         model_settings = get_adapt_settings(model, adapt_settings, args.adapt_lr, args.num_adapt_steps)
         for dataset in args.datasets:
@@ -308,7 +333,9 @@ def run_all(args: argparse.Namespace) -> None:
                             dataset,
                             args.k_values,
                             model_settings,
-                            output_dir=args.output_dir,
+                            n_seeds=args.n_seeds,
+                            temp_csv_dir=temp_csv_dir,
+                            output_dir=output_dir,
                             max_subprocesses=args.max_subprocesses,
                         )
             else:
@@ -319,7 +346,9 @@ def run_all(args: argparse.Namespace) -> None:
                     dataset,
                     args.k_values,
                     model_settings,
-                    output_dir=args.output_dir,
+                    n_seeds=args.n_seeds,
+                    temp_csv_dir=temp_csv_dir,
+                    output_dir=output_dir,
                     max_subprocesses=args.max_subprocesses,
                 )
 

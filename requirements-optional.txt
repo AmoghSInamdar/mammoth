@@ -9,9 +9,11 @@ pandas
 timm==0.9.8
 clip @ git+https://github.com/openai/CLIP.git
 scikit-learn
+scikit-image
 decorator
 accelerate
 transformers
+open-flamingo
 kmeans_pytorch
 -i https://pypi.org/simple
 bitsandbytes

@@ -16,6 +16,7 @@ python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type 
 python results_for_paper.py --dataset struct-cifar100 --plot-type stability --no-meta  --k-values 5
 python results_for_paper.py --dataset seq-mnist --plot-type stability --no-meta  --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type stability --no-meta  --k-values 5
+python results_for_paper.py --dataset seq-tinyimg --plot-type stability --no-meta  --k-values 5
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type stability --no-meta  --k-values 10
 python results_for_paper.py --dataset seq-cifar100 --include-20task --plot-type stability --no-meta  --k-values 10
@@ -30,6 +31,7 @@ python results_for_paper.py --dataset seq-cifar100 --include-20task --no-meta --
 python results_for_paper.py --dataset struct-cifar100 --no-meta --plot-type forward_transfer --k-values 10
 python results_for_paper.py --dataset seq-mnist --no-meta --plot-type forward_transfer --k-values 10
 python results_for_paper.py --dataset smooth-rot-mnist --no-meta --plot-type forward_transfer --k-values 10
+python results_for_paper.py --dataset seq-tinyimg --no-meta --plot-type forward_transfer --k-values 10
 
 python results_for_paper.py --dataset seq-cifar100 --no-meta --plot-type forward_transfer --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task --no-meta --plot-type forward_transfer --k-values 5
@@ -44,6 +46,7 @@ python results_for_paper.py --dataset seq-cifar100 --include-20task --no-meta --
 python results_for_paper.py --dataset struct-cifar100 --no-meta --plot-type improvement --k-values 5
 python results_for_paper.py --dataset seq-mnist --no-meta --plot-type improvement --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --no-meta --plot-type improvement --k-values 5
+python results_for_paper.py --dataset seq-tinyimg --no-meta --plot-type improvement --k-values 5
 
 python results_for_paper.py --dataset seq-cifar100 --no-meta --plot-type improvement --k-values 10
 python results_for_paper.py --dataset seq-cifar100 --include-20task --no-meta --plot-type improvement --k-values 10
@@ -89,7 +92,7 @@ python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvem
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 5
 python results_for_paper.py --dataset seq-cifar100 --include-20task  --plot-type meta_improvement --k-values 5
 python results_for_paper.py --dataset struct-cifar100 --plot-type meta_improvement --k-values 5
-python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --k-values 10
+python results_for_paper.py --dataset seq-mnist --plot-type meta_improvement --k-values 5
 python results_for_paper.py --dataset smooth-rot-mnist --plot-type meta_improvement --k-values 5
 
 python results_for_paper.py --dataset seq-cifar100 --plot-type meta_improvement --k-values 10
@@ -270,21 +273,21 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 \
 
 ## Non-meta baselines
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+CUDA_VISIBLE_DEVICES=4,5,6,7 \
     python run_pipeline_full.py --dataset seq-cifar100 --model sgd  --lr 0.1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     --skip_train \
     >outputs/sgd_seq_cifar100.out 2>outputs/sgd_seq_cifar100.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=4,5,6 \
     python run_pipeline_full.py --dataset seq-cifar100 --model er --buffer_size 500 --lr 0.1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
     --skip_train \
     >outputs/er_seq_cifar100.out 2>outputs/er_seq_cifar100.err &
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
+CUDA_VISIBLE_DEVICES=4,5,6 \
     python run_pipeline_full.py --dataset seq-cifar100 --model derpp --lr 0.03 --buffer_size 500 --alpha 0.3 --beta 0.5 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
@@ -632,18 +635,21 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model derpp --lr 0.03 --buffer_size 500 --alpha 0.3 --beta 0.5 \
     --adapt_lr 0.003 --num_adapt_steps 10 \
     --savecheck task \
+    --skip_train \
     >outputs/derpp_smooth_mnist.out 2>outputs/derpp_smooth_mnist.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model ewc_on --lr 0.1 --e_lambda 10 --gamma 1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
+    --skip_train \
     >outputs/ewc_smooth_mnist.out 2>outputs/ewc_smooth_mnist.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model agem --buffer_size 500 --lr 0.03 \
     --adapt_lr 0.003 --num_adapt_steps 10 \
     --savecheck task \
+    --skip_train \
     >outputs/agem_smooth_mnist.out 2>outputs/agem_smooth_mnist.err &
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 \
@@ -657,6 +663,7 @@ CUDA_VISIBLE_DEVICES=6,7 \
     python run_pipeline_full.py --dataset smooth-rot-mnist --model mer --lr 0.1 --beta 0.01 --gamma 0.03 --buffer_size 200 --minibatch_size 25 --n_epochs 1 \
     --adapt_lr 0.1 --num_adapt_steps 10 \
     --savecheck task \
+    --skip_train \
     >outputs/mer_smooth_mnist.out 2>outputs/mer_smooth_mnist.err &
 
 ## Meta learning

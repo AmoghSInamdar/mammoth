@@ -31,6 +31,7 @@ class EvaluationResult:
     loss: Optional[float] = None
     num_adapt_steps: Optional[int] = None
     adapt_lr: Optional[float] = None
+    layer_min: Optional[int] = None
     num_examples_used: Optional[int] = None
     metadata: Optional[Dict[str, Any]] = None
 
@@ -81,7 +82,7 @@ class EvaluationResults:
 
         # Define CSV columns
         base_columns = ['checkpoint_id', 'eval_task_id', 'k_value', 'accuracy', 'loss',
-                       'num_adapt_steps', 'adapt_lr', 'num_examples_used']
+                       'num_adapt_steps', 'adapt_lr', 'layer_min', 'num_examples_used']
         metadata_columns = sorted(list(all_metadata_keys))
         columns = base_columns + metadata_columns
 
@@ -98,6 +99,7 @@ class EvaluationResults:
                     'loss': result.loss,
                     'num_adapt_steps': result.num_adapt_steps,
                     'adapt_lr': result.adapt_lr,
+                    'layer_min': result.layer_min,
                     'num_examples_used': result.num_examples_used,
                 }
 
@@ -184,7 +186,7 @@ class EvaluationResults:
 
                 # Extract metadata fields (everything beyond base columns)
                 base_columns = {'checkpoint_id', 'eval_task_id', 'k_value', 'accuracy', 'loss',
-                               'num_adapt_steps', 'adapt_lr', 'num_examples_used'}
+                               'num_adapt_steps', 'adapt_lr', 'layer_min', 'num_examples_used'}
 
                 for key, value in row.items():
                     if key not in base_columns and value.strip():
@@ -199,6 +201,8 @@ class EvaluationResults:
                     loss=float(row['loss']) if row['loss'] and row['loss'].strip() else None,
                     num_adapt_steps=int(row['num_adapt_steps']) if row['num_adapt_steps'] and row['num_adapt_steps'].strip() else None,
                     adapt_lr=float(row['adapt_lr']) if row['adapt_lr'] and row['adapt_lr'].strip() else None,
+                    # layer_min may be absent in CSVs written before it was introduced
+                    layer_min=int(row['layer_min']) if row.get('layer_min') and row['layer_min'].strip() else None,
                     num_examples_used=int(row['num_examples_used']) if row['num_examples_used'] and row['num_examples_used'].strip() else None,
                     metadata=metadata if metadata else None
                 )

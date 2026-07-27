@@ -15,8 +15,7 @@ from matplotlib.patches import Patch
 import numpy as np
 import pandas as pd
 
-RESULTS_DIR = Path('results/k_shot_evaluation')
-PLOTS_DIR = Path('plots')
+from utils.eval_paths import RESULTS_DIR, PLOTS_DIR, get_output_dir, get_plots_dir
 
 # Consistent color scheme for each method across all plots
 METHOD_COLORS = {
@@ -148,6 +147,7 @@ def plot_k_shot_stability(
     k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
     do_avg: bool = False
@@ -369,7 +369,7 @@ def plot_k_shot_stability(
     plt.subplots_adjust(bottom=0.2)
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     # Build filename based on options
@@ -396,6 +396,7 @@ def plot_forward_transfer(
     k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
     do_avg: bool = False
@@ -650,7 +651,7 @@ def plot_forward_transfer(
     plt.subplots_adjust(bottom=0.2)
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     # Build filename based on options
@@ -677,6 +678,7 @@ def plot_improvement(
     k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
     do_avg: bool = False
@@ -894,7 +896,7 @@ def plot_improvement(
     plt.subplots_adjust(right=0.88)
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     # Build filename based on options
@@ -920,6 +922,7 @@ def plot_sauce(
     dataset: str,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
     only_last_20: bool = False
@@ -1193,7 +1196,7 @@ def plot_sauce(
     plt.subplots_adjust(bottom=0.1, hspace=0.15)
 
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
 
     # Original filename based on options
@@ -1229,6 +1232,7 @@ def plot_meta_improvement(
     k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False,
     forward_only: bool = False,
@@ -1548,7 +1552,7 @@ def plot_meta_improvement(
     plt.subplots_adjust(bottom=0.2)
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     # Build filename based on options
@@ -1579,6 +1583,7 @@ def all_results_table(
     dataset: str,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     with_meta: bool = True,
     include_20task: bool = False
 ) -> None:
@@ -1741,7 +1746,7 @@ def all_results_table(
     df = pd.DataFrame.from_dict(data, orient='index', columns=columns)
     
     # Save to CSV
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / 'all_results_table.csv'
     df.to_csv(output_path)
@@ -1780,6 +1785,7 @@ def compare_meta_methods(
     k_values: List[int] = None,
     metric: str = 'accuracy',
     results_dir: Path = RESULTS_DIR,
+    plots_dir: Path = PLOTS_DIR,
     include_20task: bool = False
 ) -> None:
     """Compare meta methods with SAUCE and k-shot accuracy plots.
@@ -1934,7 +1940,7 @@ def compare_meta_methods(
     plt.subplots_adjust(bottom=0.15)
     
     # Save SAUCE figure
-    plot_dir = PLOTS_DIR / "paper_plots" / dataset
+    plot_dir = plots_dir / "paper_plots" / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     
     filename_parts = ['meta_methods_sauce', dataset, metric]
@@ -2116,8 +2122,14 @@ def main() -> None:
     parser.add_argument('--only-last-20', action='store_true',
                         help='For sauce plot type: only plot the last 20 tasks')
 
+    parser.add_argument('--layer_min', type=int, default=0,
+                        help='Plot the results of a partial-adaptation run: reads from '
+                             'results/k_shot_evaluation_<layer_min> and writes to plots/layer_min_<layer_min>')
     args = parser.parse_args()
-    
+
+    results_dir = get_output_dir(args.layer_min)
+    plots_dir = get_plots_dir(args.layer_min)
+
     k_values = [k.strip() for k in args.k_values.split(',')]
     # Convert to int where possible, keep 'avg' as string
     k_values = [int(k) if k != 'avg' else k for k in k_values]
@@ -2125,6 +2137,8 @@ def main() -> None:
     if args.plot_type == 'stability':
         plot_k_shot_stability(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
@@ -2134,6 +2148,8 @@ def main() -> None:
     elif args.plot_type == 'forward_transfer':
         plot_forward_transfer(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
@@ -2143,6 +2159,8 @@ def main() -> None:
     elif args.plot_type == 'improvement':
         plot_improvement(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
@@ -2152,6 +2170,8 @@ def main() -> None:
     elif args.plot_type == 'sauce':
         plot_sauce(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             metric=args.metric,
             with_meta=not args.no_meta,
             include_20task=args.include_20task,
@@ -2160,6 +2180,8 @@ def main() -> None:
     elif args.plot_type == 'meta_improvement':
         plot_meta_improvement(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             k_values=k_values,
             metric=args.metric,
             with_meta=not args.no_meta,
@@ -2173,6 +2195,8 @@ def main() -> None:
     elif args.plot_type == 'all_results_table':
         all_results_table(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             metric=args.metric,
             with_meta=not args.no_meta,
             include_20task=args.include_20task
@@ -2180,6 +2204,8 @@ def main() -> None:
     elif args.plot_type == 'compare_meta_methods':
         compare_meta_methods(
             dataset=args.dataset,
+            results_dir=results_dir,
+            plots_dir=plots_dir,
             k_values=k_values,
             metric=args.metric,
             include_20task=args.include_20task

@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-RESULTS_DIR = Path('results/k_shot_evaluation')
-PLOTS_DIR = Path('plots')
+from utils.eval_paths import RESULTS_DIR, PLOTS_DIR, get_output_dir, get_plots_dir  # noqa: F401
 
 
 def load_evaluation_results(csv_path: Path) -> pd.DataFrame:
@@ -67,7 +66,7 @@ def plot_checkpoint_results(checkpoint_id: str, results: pd.DataFrame, metric: s
     plt.grid(True)
 
 
-def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
+def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy', plots_dir: Path = PLOTS_DIR) -> None:
     """Plot results from CSV file with one subplot per checkpoint."""
     results = load_evaluation_results(csv_path)
     grouped_results = group_results_by_checkpoint(results)
@@ -95,7 +94,7 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
 
     plt.tight_layout()
     dataset_name = get_dataset_name_from_csv_path(csv_path)
-    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir = plots_dir / dataset_name
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'{metric}_{csv_path.stem.replace("evaluation_results_", "")}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -103,7 +102,8 @@ def plot_k_shot_results(csv_path: Path, metric: str = 'accuracy') -> None:
     print(f"Plot saved to {output_path}")
 
 
-def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: str = 'accuracy') -> None:
+def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: str = 'accuracy',
+                           plots_dir: Path = PLOTS_DIR) -> None:
     """Plot average plasticity scores for a given model across all checkpoints and tasks, including forward and backward splits."""
     csv_path = results_dir / f'evaluation_results_{model}.csv'
     if not csv_path.exists():
@@ -147,7 +147,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         avg_plasticity_backward = None
 
     dataset_name = get_dataset_name_from_model(model)
-    plot_dir = PLOTS_DIR / dataset_name
+    plot_dir = plots_dir / dataset_name
     plot_dir.mkdir(exist_ok=True, parents=True)
 
     # Plot overall
@@ -226,7 +226,8 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
         print(f"No backward plasticity data for {model}")
 
 
-def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Optional[str] = None) -> None:
+def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Optional[str] = None,
+                                plots_dir: Path = PLOTS_DIR) -> None:
     """Plot forward/backward plasticity comparisons for each metric across all models.
     
     Args:
@@ -265,6 +266,12 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
     for csv_path in csv_files:
         dataset_name = get_dataset_name_from_csv_path(csv_path)
         model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        # Exact dataset match (avoid e.g. 'seq-cifar100' also matching 'seq-cifar100-20task')
+        if get_dataset_name_from_model(model_dataset) != dataset:
+            continue
+        # Optionally restrict to non-meta methods
+        if not include_meta and model_dataset.startswith('meta'):
+            continue
         results = load_evaluation_results(csv_path)
         if results.empty:
             print(f"Skipping empty CSV for {model_dataset}")
@@ -274,7 +281,7 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
         datasets.setdefault(dataset_name, []).append((model_dataset, results))
 
     for dataset_name, model_results in datasets.items():
-        fig_base = PLOTS_DIR / dataset_name
+        fig_base = plots_dir / dataset_name
         fig_base.mkdir(exist_ok=True, parents=True)
 
         for direction in ['forward', 'backward', 'overall']:
@@ -317,8 +324,9 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
             print(f"Saved aggregate {direction} plasticity comparison for {dataset_name} to {output_path}")
 
 
-def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10], metric: str = 'accuracy', 
-                            results_dir: Path = RESULTS_DIR) -> None:
+def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10], metric: str = 'accuracy',
+                            results_dir: Path = RESULTS_DIR, plots_dir: Path = PLOTS_DIR,
+                            include_meta: bool = True) -> None:
     """Plot k-shot comparison histograms across methods for a given dataset.
     
     Creates a plot with 3 columns and one row per k-value:
@@ -356,6 +364,12 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     model_results = {}
     for csv_path in csv_files:
         model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        # Exact dataset match (avoid e.g. 'seq-cifar100' also matching 'seq-cifar100-20task')
+        if get_dataset_name_from_model(model_dataset) != dataset:
+            continue
+        # Optionally restrict to non-meta methods
+        if not include_meta and model_dataset.startswith('meta'):
+            continue
         results = load_evaluation_results(csv_path)
         if results.empty:
             print(f"Skipping empty CSV for {model_dataset}")
@@ -547,7 +561,7 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     plt.tight_layout()
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / dataset
+    plot_dir = plots_dir / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'k_shot_comparison_{dataset}_{metric}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -555,8 +569,9 @@ def plot_k_shot_comparisons(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     print(f"Saved k-shot comparison plot to {output_path}")
 
 
-def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10], metric: str = 'accuracy', 
-                            results_dir: Path = RESULTS_DIR) -> None:
+def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10], metric: str = 'accuracy',
+                            results_dir: Path = RESULTS_DIR, plots_dir: Path = PLOTS_DIR,
+                            include_meta: bool = True) -> None:
     """Plot forward/backward k-shot performance as checkpoint_id increases.
     
     Creates a plot with one subplot per k-value, showing forward and backward
@@ -590,6 +605,12 @@ def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     model_results = {}
     for csv_path in csv_files:
         model_dataset = csv_path.stem.replace('evaluation_results_', '')
+        # Exact dataset match (avoid e.g. 'seq-cifar100' also matching 'seq-cifar100-20task')
+        if get_dataset_name_from_model(model_dataset) != dataset:
+            continue
+        # Optionally restrict to non-meta methods
+        if not include_meta and model_dataset.startswith('meta'):
+            continue
         results = load_evaluation_results(csv_path)
         if results.empty:
             print(f"Skipping empty CSV for {model_dataset}")
@@ -767,7 +788,7 @@ def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     plt.subplots_adjust(right=0.88)  # Make room for legend
     
     # Save to dataset-specific directory
-    plot_dir = PLOTS_DIR / dataset
+    plot_dir = plots_dir / dataset
     plot_dir.mkdir(exist_ok=True, parents=True)
     output_path = plot_dir / f'k_shot_improvement_{dataset}_{metric}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
@@ -775,7 +796,8 @@ def plot_k_shot_improvement(dataset: str, k_values: List[int] = [0, 1, 2, 5, 10]
     print(f"Saved k-shot improvement plot to {output_path}")
 
 
-def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None) -> None:
+def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_plasticity=False, dataset=None,
+             plots_dir: Path = PLOTS_DIR) -> None:
     """Plot all CSV files in RESULTS_DIR, skipping any with errors."""
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -790,11 +812,11 @@ def plot_all(metric: str = 'accuracy', results_dir: Path = RESULTS_DIR, plot_pla
     for csv_path in csv_files:
         try:
             print(f"Plotting {csv_path.name}...", end=' ')
-            plot_k_shot_results(csv_path, metric)
+            plot_k_shot_results(csv_path, metric, plots_dir=plots_dir)
             if plot_plasticity:
                 # Extract model name from CSV filename, e.g., 'evaluation_results_der_seq-cifar100.csv' -> 'der_seq-cifar100'
                 model = csv_path.stem.replace('evaluation_results_', '')
-                plot_plasticity_scores(model, results_dir=results_dir, metric=metric)
+                plot_plasticity_scores(model, results_dir=results_dir, metric=metric, plots_dir=plots_dir)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 
@@ -817,29 +839,35 @@ def main() -> None:
                         help='Plot forward/backward k-shot performance as checkpoint_id increases')
     parser.add_argument('--k-values', type=str, default='0,1,2,5,10',
                         help='Comma-separated k-values for comparison plot (default: 0,1,2,5,10)')
+    parser.add_argument('--layer_min', type=int, default=0,
+                        help='Plot the results of a partial-adaptation run: reads from '
+                             'results/k_shot_evaluation_<layer_min> and writes to plots/layer_min_<layer_min>')
     args = parser.parse_args()
+
+    results_dir = get_output_dir(args.layer_min)
+    plots_dir = get_plots_dir(args.layer_min)
 
     if args.plot_k_shot_improvement:
         if not args.dataset:
             parser.error("--plot-k-shot-improvement requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_improvement(args.dataset, k_values, args.metric)
+        plot_k_shot_improvement(args.dataset, k_values, args.metric, results_dir=results_dir, plots_dir=plots_dir)
     elif args.plot_k_shot_comparisons:
         if not args.dataset:
             parser.error("--plot-k-shot-comparisons requires --dataset argument")
         k_values = [int(k.strip()) for k in args.k_values.split(',')]
-        plot_k_shot_comparisons(args.dataset, k_values, args.metric)
+        plot_k_shot_comparisons(args.dataset, k_values, args.metric, results_dir=results_dir, plots_dir=plots_dir)
     elif args.plot_plasticity_comparisons:
-        plot_plasticity_comparisons(dataset=args.dataset)
+        plot_plasticity_comparisons(results_dir=results_dir, dataset=args.dataset, plots_dir=plots_dir)
     elif args.plot_all:
-        plot_all('accuracy')
-        plot_all('loss')
+        plot_all('accuracy', results_dir=results_dir, plots_dir=plots_dir)
+        plot_all('loss', results_dir=results_dir, plots_dir=plots_dir)
     elif args.csv_file:
-        csv_path = Path(os.path.join(RESULTS_DIR, args.csv_file))
+        csv_path = Path(os.path.join(results_dir, args.csv_file))
         if not csv_path.exists():
             print(f"Error: CSV file {csv_path} does not exist.")
             return
-        plot_k_shot_results(csv_path, args.metric)
+        plot_k_shot_results(csv_path, args.metric, plots_dir=plots_dir)
     else:
         parser.error("Either provide a CSV file, use --plot-all, --plot-plasticity-comparisons, --plot-k-shot-comparisons, or --plot-k-shot-improvement")
 

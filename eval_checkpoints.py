@@ -79,6 +79,15 @@ def parse_eval_args() -> argparse.Namespace:
                            help='Number of gradient steps for k-shot adaptation')
     eval_group.add_argument('--adapt_lr', type=float, default=0.1,
                            help='Learning rate for k-shot adaptation')
+    eval_group.add_argument('--layer_min', type=int, default=0,
+                           help='Only adapt weight layers with (1-indexed, registration-order) '
+                                'index >= this value, freezing everything earlier (0 = adapt the '
+                                'whole network; e.g. 16 adapts layer4 + classifier of a ResNet-18)')
+    eval_group.add_argument('--kshot_from_test_split', action=argparse.BooleanOptionalAction, default=True,
+                           help='Draw the k-shot support set from the held-out test split (a support '
+                                'pool disjoint from the query pool used for evaluation) instead of from '
+                                'the training data. Ensures adaptation uses examples the checkpoint never '
+                                'trained on. Use --no-kshot_from_test_split for the legacy train-sourced behavior.')
     eval_group.add_argument('--output_dir', type=str, default='eval_results',
                            help='Directory to save evaluation results')
     eval_group.add_argument('--custom_metric_module', type=str,
@@ -302,10 +311,11 @@ def evaluate_checkpoint(checkpoint_path: str,
             logging.info(f"\nk={k} adaptation")
 
             # Create k-shot loader (if k > 0)
+            batch_size = 32 if model.NAME != 'mer' else 1  # MER only supports a batch size of 1
             k_shot_loader, adapted_model = None, copy.deepcopy(model)
             if k > 0:
-                batch_size = 32 if model.NAME != 'mer' else 1  # MER only supports a batch size of 1
-                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size)
+                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size,
+                                                     from_test_split=eval_args.kshot_from_test_split)
                 if k_shot_loader is None:
                     logging.warning(f"Could not create {k}-shot loader for task {eval_task_id}, skipping")
                     continue
@@ -316,13 +326,17 @@ def evaluate_checkpoint(checkpoint_path: str,
                     k_shot_loader=k_shot_loader,
                     num_steps=eval_args.num_adapt_steps if k > 0 else 0,
                     learning_rate=eval_args.adapt_lr,
-                    task_id=eval_task_id
+                    task_id=eval_task_id,
+                    layer_min=eval_args.layer_min
                 )
                 logging.info(f"Adapted model for task {eval_task_id} with k={k}")
 
-            # Evaluate adapted model on the task
+            # Evaluate adapted model on the task. When sampling support from the test
+            # split, evaluate on the disjoint query pool (same for all k) so the k-shot
+            # support examples are never scored on.
             accuracy, loss = evaluate_adapted_model(
-                adapted_model, dataset, eval_task_id, return_loss=True
+                adapted_model, dataset, eval_task_id, return_loss=True,
+                from_test_split=eval_args.kshot_from_test_split, batch_size=batch_size
             )
 
             # Create result
@@ -334,6 +348,7 @@ def evaluate_checkpoint(checkpoint_path: str,
                 loss=loss,
                 num_adapt_steps=eval_args.num_adapt_steps if k > 0 else 0,
                 adapt_lr=eval_args.adapt_lr if k > 0 else None,
+                layer_min=eval_args.layer_min if k > 0 else None,
                 num_examples_used=len(k_shot_loader) * k_shot_loader.batch_size if k_shot_loader else 0
             )
 

@@ -21,6 +21,7 @@ mammoth_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, mammoth_path)
 
 from run_k_shot_evaluation import run_all as run_eval_all, parse_args as parse_eval_args
+from utils.eval_paths import get_output_dir, get_plots_dir
 from plot_k_shot_results import plot_all, plot_k_shot_comparisons, plot_k_shot_improvement, plot_plasticity_comparisons
 from utils.per_shot_plasticity import add_plasticity_scores_to_all_csvs
 
@@ -102,18 +103,20 @@ def run_evaluation(
     k_values: str = '0,1,2,5,10',
     adapt_lr: float = 0.01,
     num_adapt_steps: int = 5,
+    layer_min: int = 0,
     max_subprocesses: int = 10,
     meta_method: Optional[str] = None,
     meta_strategy: Optional[str] = None
 ) -> None:
     """Run k-shot evaluation on trained checkpoints.
-    
+
     Args:
         models: Comma-separated list of model names (e.g., 'der,meta_sgd')
         datasets: Comma-separated list of dataset names (e.g., 'seq-cifar100')
         k_values: Comma-separated list of k-values for adaptation
         adapt_lr: Adaptation learning rate
         num_adapt_steps: Number of adaptation steps
+        layer_min: Minimum weight-layer index to adapt (0 = whole network)
         max_subprocesses: Max concurrent evaluations per GPU
     """
     try:
@@ -129,9 +132,10 @@ def run_evaluation(
         args.k_values = k_values
         args.adapt_lr = adapt_lr
         args.num_adapt_steps = num_adapt_steps
+        args.layer_min = layer_min
         args.max_subprocesses = max_subprocesses
         args.checkpoint_dir = Path('checkpoints')
-        args.output_dir = Path('results/k_shot_evaluation')
+        args.output_dir = get_output_dir(layer_min)
         args.adapt_settings_file = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
         if meta_method is not None:
             args.meta_method = meta_method
@@ -152,16 +156,19 @@ def run_evaluation(
         raise
 
 
-def compute_plasticity(metric: str = 'loss', dataset: Optional[str] = None) -> None:
+def compute_plasticity(metric: str = 'loss', dataset: Optional[str] = None,
+                       layer_min: int = 0) -> None:
     """Compute plasticity metrics on evaluation results.
-    
+
     Args:
         metric: Metric to use for SAUCE computation ('accuracy' or 'loss')
         dataset: Optional dataset name to filter results
+        layer_min: Selects which results directory to read (see get_output_dir)
     """
     try:
         logging.info("Computing plasticity metrics...")
-        add_plasticity_scores_to_all_csvs(metric_for_sauce=metric, dataset=dataset)
+        add_plasticity_scores_to_all_csvs(results_dir=get_output_dir(layer_min),
+                                          metric_for_sauce=metric, dataset=dataset)
         logging.info("Plasticity metrics computed successfully")
     except Exception as e:
         logging.error(f"Plasticity computation failed: {e}")
@@ -170,31 +177,36 @@ def compute_plasticity(metric: str = 'loss', dataset: Optional[str] = None) -> N
 
 def run_plotting(
     dataset: Optional[str] = None,
+    layer_min: int = 0,
 ) -> None:
     """Generate plots for evaluation results.
-    
+
     Args:
         metric: Metric to plot ('accuracy' or 'loss')
         dataset: Optional dataset name to filter plots
+        layer_min: Selects which results/plots directories to use (see get_output_dir/get_plots_dir)
     """
     try:
         logging.info("Generating plots...")
-        
+
+        results_dir = get_output_dir(layer_min)
+        plots_dir = get_plots_dir(layer_min)
+
         # Plot k-shot results
-        plot_all(metric='accuracy', dataset=dataset)
-        plot_all(metric='loss', dataset=dataset)
-        plot_k_shot_comparisons(dataset=dataset, metric='accuracy')
-        plot_k_shot_comparisons(dataset=dataset, metric='loss')
-        plot_k_shot_improvement(dataset=dataset, metric='accuracy')
-        plot_k_shot_improvement(dataset=dataset, metric='loss')
+        plot_all(metric='accuracy', dataset=dataset, results_dir=results_dir, plots_dir=plots_dir)
+        plot_all(metric='loss', dataset=dataset, results_dir=results_dir, plots_dir=plots_dir)
+        plot_k_shot_comparisons(dataset=dataset, metric='accuracy', results_dir=results_dir, plots_dir=plots_dir)
+        plot_k_shot_comparisons(dataset=dataset, metric='loss', results_dir=results_dir, plots_dir=plots_dir)
+        plot_k_shot_improvement(dataset=dataset, metric='accuracy', results_dir=results_dir, plots_dir=plots_dir)
+        plot_k_shot_improvement(dataset=dataset, metric='loss', results_dir=results_dir, plots_dir=plots_dir)
 
         # Plot plasticity comparisons
         if dataset:
             logging.info(f"Plotting plasticity comparisons for {dataset}...")
-            plot_plasticity_comparisons(dataset=dataset)
+            plot_plasticity_comparisons(results_dir=results_dir, dataset=dataset, plots_dir=plots_dir)
         else:
             logging.info("Plotting plasticity comparisons for all datasets...")
-            plot_plasticity_comparisons()
+            plot_plasticity_comparisons(results_dir=results_dir, plots_dir=plots_dir)
         
         logging.info("Plotting completed successfully")
     except Exception as e:
@@ -219,6 +231,7 @@ def run_pipeline(
     k_values: str = '0,1,2,5,10',
     adapt_lr: float = 0.01,
     num_adapt_steps: int = 5,
+    layer_min: int = 0,
     max_subprocesses: int = 10,
     # Plotting args
     plot_metric: str = 'accuracy',
@@ -243,6 +256,7 @@ def run_pipeline(
         k_values: K-values for few-shot evaluation
         adapt_lr: Adaptation learning rate
         num_adapt_steps: Adaptation steps
+        layer_min: Minimum weight-layer index to adapt (0 = whole network)
         max_subprocesses: Max concurrent GPU evaluations
         plot_metric: Metric to plot
         plasticity_metric: Metric for plasticity computation
@@ -282,6 +296,7 @@ def run_pipeline(
                 k_values=k_values,
                 adapt_lr=adapt_lr,
                 num_adapt_steps=num_adapt_steps,
+                layer_min=layer_min,
                 max_subprocesses=max_subprocesses,
                 meta_method=kwargs['meta_method'] if 'meta' in model else None,
                 meta_strategy=kwargs['meta_strategy'] if 'meta' in model else None
@@ -290,7 +305,7 @@ def run_pipeline(
             
             # Compute plasticity
             logger.info(f"Step 2b/3: Computing plasticity metrics")
-            compute_plasticity(metric=plasticity_metric, dataset=dataset)
+            compute_plasticity(metric=plasticity_metric, dataset=dataset, layer_min=layer_min)
             logger.info("✓ Plasticity computation completed")
         else:
             logger.info("Step 2/3: Skipping evaluation")
@@ -298,7 +313,7 @@ def run_pipeline(
         # Step 3: Plotting
         if do_plot:
             logger.info(f"Step 3/3: Plotting results")
-            run_plotting(dataset=dataset)
+            run_plotting(dataset=dataset, layer_min=layer_min)
             logger.info("✓ Plotting completed")
         else:
             logger.info("Step 3/3: Skipping plotting")
@@ -359,6 +374,10 @@ def main() -> None:
                         help='Adaptation learning rate')
     parser.add_argument('--num_adapt_steps', type=int, default=5,
                         help='Number of adaptation steps')
+    parser.add_argument('--layer_min', type=int, default=0,
+                        help='Only adapt weight layers with index >= this value, freezing everything '
+                             'earlier (0 = adapt the whole network; e.g. 16 adapts layer4 + classifier '
+                             'of a ResNet-18)')
     parser.add_argument('--max_subprocesses', type=int, default=10,
                         help='Max concurrent evaluations per GPU')
     
@@ -418,6 +437,7 @@ def main() -> None:
         k_values=args.k_values,
         adapt_lr=args.adapt_lr,
         num_adapt_steps=args.num_adapt_steps,
+        layer_min=args.layer_min,
         max_subprocesses=args.max_subprocesses,
         plot_metric=args.plot_metric,
         plasticity_metric=args.plasticity_metric,

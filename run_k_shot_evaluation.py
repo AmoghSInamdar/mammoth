@@ -22,6 +22,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
+from utils.eval_paths import RESULTS_DIR, get_output_dir
+
 CONTINUAL_MODELS: List[str] = [
     # 'meta-sgd',
     'meta-er',
@@ -57,7 +59,7 @@ CONTINUAL_DATASETS: List[str] = [
 K_VALUES: List[int] = [0, 1, 2, 5, 10]
 
 CHECKPOINT_DIR = Path('checkpoints')
-OUTPUT_DIR = Path('results/k_shot_evaluation')
+OUTPUT_DIR = RESULTS_DIR
 TEMP_OUTPUT_DIR = Path('results/temp_csvs')
 ADAPT_SETTINGS_FILE = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
 
@@ -75,19 +77,23 @@ def get_adapt_settings(
     settings: Dict[str, Any],
     adapt_lr: Optional[float] = None,
     num_adapt_steps: Optional[int] = None,
+    layer_min: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Return adaptation settings for a specific model, with CLI overrides."""
-    default_settings = settings.get('default', {'adapt_lr': 0.01, 'num_adapt_steps': 5})
+    default_settings = settings.get('default', {'adapt_lr': 0.01, 'num_adapt_steps': 5, 'layer_min': 0})
     model_settings = settings.get(model, default_settings)
 
     if adapt_lr is not None:
         model_settings['adapt_lr'] = adapt_lr
     if num_adapt_steps is not None:
         model_settings['num_adapt_steps'] = num_adapt_steps
+    if layer_min is not None:
+        model_settings['layer_min'] = layer_min
 
     return {
         'adapt_lr': model_settings.get('adapt_lr', default_settings['adapt_lr']),
         'num_adapt_steps': model_settings.get('num_adapt_steps', default_settings['num_adapt_steps']),
+        'layer_min': model_settings.get('layer_min', default_settings.get('layer_min', 0)),
     }
 
 
@@ -124,6 +130,7 @@ def run_checkpoint_evaluation(
     k_values_csv: str,
     adapt_lr: Optional[float],
     num_adapt_steps: Optional[int],
+    layer_min: Optional[int],
     output_dir: Path,
     gpu_id: str,
 ) -> Path:
@@ -149,6 +156,8 @@ def run_checkpoint_evaluation(
         str(adapt_lr),
         '--num_adapt_steps',
         str(num_adapt_steps),
+        '--layer_min',
+        str(layer_min),
         '--output_dir',
         str(output_dir),
     ]
@@ -156,7 +165,8 @@ def run_checkpoint_evaluation(
     checkpoint_name = Path(checkpoint_path).stem
     print(
         f"Evaluating checkpoint={checkpoint_name}, model={model}, dataset={dataset}, "
-        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}"
+        f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}, "
+        f"layer_min={layer_min}"
     )
     subprocess.run(command, check=True, env=env)
     return output_dir / f"evaluation_results_{checkpoint_name}.csv"
@@ -206,21 +216,22 @@ def evaluate_checkpoints_for_k(
     k_values_csv = ','.join(str(k) for k in k_values)
     adapt_lr = adapt_settings.get('adapt_lr')
     num_adapt_steps = adapt_settings.get('num_adapt_steps')
+    layer_min = adapt_settings.get('layer_min', 0)
 
     tasks = []
     for idx, checkpoint_path in enumerate(checkpoint_paths):
         gpu_id = gpus[idx % len(gpus)]
         temp_dir = TEMP_OUTPUT_DIR / model / dataset / Path(checkpoint_path).stem
-        tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id))
+        tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id))
 
     pool_map = []
     pools = {gpu: mp.Pool(processes=max_subprocesses) for gpu in gpus}
     try:
         for task in tasks:
-            checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id = task
+            checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id = task
             pool_map.append(pools[gpu_id].apply_async(
                 run_checkpoint_evaluation,
-                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, temp_dir, gpu_id)
+                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id)
             ))
 
         for pool in pools.values():
@@ -262,12 +273,15 @@ def parse_args() -> argparse.Namespace:
                         help='Override adaptation learning rate from the command line')
     parser.add_argument('--num_adapt_steps', type=int, default=5,
                         help='Override number of adaptation steps from the command line')
+    parser.add_argument('--layer_min', type=int, default=0,
+                        help='Override the minimum weight-layer index to adapt (0 = whole network)')
     parser.add_argument('--max_subprocesses', type=int, default=10,
                         help='Maximum number of checkpoints to evaluate per subprocess chunk')
     parser.add_argument('--checkpoint_dir', type=str, default=str(CHECKPOINT_DIR),
                         help='Directory containing checkpoint files')
-    parser.add_argument('--output_dir', type=str, default=str(OUTPUT_DIR),
-                        help='Directory where evaluation result files should be saved')
+    parser.add_argument('--output_dir', type=str, default=None,
+                        help='Directory where evaluation result files should be saved '
+                             f'(defaults to {OUTPUT_DIR}, suffixed with _<layer_min> when layer_min > 0)')
     parser.add_argument('--adapt_settings_file', type=str, default=str(ADAPT_SETTINGS_FILE),
                         help='Path to the JSON file containing model-specific adaptation settings')
     args = parser.parse_args()
@@ -284,7 +298,7 @@ def parse_args() -> argparse.Namespace:
 
     args.k_values = [int(k.strip()) for k in args.k_values.split(',') if k.strip()]
     args.checkpoint_dir = Path(args.checkpoint_dir)
-    args.output_dir = Path(args.output_dir)
+    args.output_dir = Path(args.output_dir) if args.output_dir else get_output_dir(args.layer_min)
     args.adapt_settings_file = Path(args.adapt_settings_file)
     return args
 
@@ -293,7 +307,8 @@ def run_all(args: argparse.Namespace) -> None:
     """Run few-shot evaluation for each model/dataset combination."""
     adapt_settings = load_adapt_settings(args.adapt_settings_file)
     for model in args.models:
-        model_settings = get_adapt_settings(model, adapt_settings, args.adapt_lr, args.num_adapt_steps)
+        model_settings = get_adapt_settings(model, adapt_settings, args.adapt_lr, args.num_adapt_steps,
+                                            getattr(args, 'layer_min', None))
         for dataset in args.datasets:
             if model.startswith('meta'):
                 eval_methods = [args.meta_method] if hasattr(args, 'meta_method') else META_CL_METHODS

@@ -88,6 +88,12 @@ def parse_eval_args() -> argparse.Namespace:
                                 'pool disjoint from the query pool used for evaluation) instead of from '
                                 'the training data. Ensures adaptation uses examples the checkpoint never '
                                 'trained on. Use --no-kshot_from_test_split for the legacy train-sourced behavior.')
+    eval_group.add_argument('--kshot_full_batch', action=argparse.BooleanOptionalAction, default=False,
+                           help='Adapt on the whole k-shot support set as a single batch, so that each adaptation '
+                                'step is exactly one gradient update for every k. By default the support set is '
+                                'split into batches of 32 and each step is one pass over them, which gives larger '
+                                'k more updates per step and can end each pass on a very small batch (e.g. 4 '
+                                'examples for 10 classes x 10 shots). Ignored for MER (batch size 1).')
     eval_group.add_argument('--output_dir', type=str, default='eval_results',
                            help='Directory to save evaluation results')
     eval_group.add_argument('--custom_metric_module', type=str,
@@ -310,11 +316,17 @@ def evaluate_checkpoint(checkpoint_path: str,
         for k in eval_args.k_values:
             logging.info(f"\nk={k} adaptation")
 
-            # Create k-shot loader (if k > 0)
-            batch_size = 32 if model.NAME != 'mer' else 1  # MER only supports a batch size of 1
+            # Create k-shot loader (if k > 0). MER's observe() only supports a batch size of 1; the
+            # query loader below is unaffected (evaluation in eval mode does not depend on the batch size).
+            if model.NAME == 'mer':
+                support_batch_size = 1
+            elif eval_args.kshot_full_batch:
+                support_batch_size = sys.maxsize  # create_k_shot_loader caps it at the support-set size
+            else:
+                support_batch_size = 32
             k_shot_loader, adapted_model = None, copy.deepcopy(model)
             if k > 0:
-                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=batch_size,
+                k_shot_loader = create_k_shot_loader(dataset, eval_task_id, k, batch_size=support_batch_size,
                                                      from_test_split=eval_args.kshot_from_test_split)
                 if k_shot_loader is None:
                     logging.warning(f"Could not create {k}-shot loader for task {eval_task_id}, skipping")
@@ -336,7 +348,7 @@ def evaluate_checkpoint(checkpoint_path: str,
             # support examples are never scored on.
             accuracy, loss = evaluate_adapted_model(
                 adapted_model, dataset, eval_task_id, return_loss=True,
-                from_test_split=eval_args.kshot_from_test_split, batch_size=batch_size
+                from_test_split=eval_args.kshot_from_test_split, batch_size=32
             )
 
             # Create result
@@ -419,7 +431,7 @@ def main():
     # all_results.save_to_json(json_path)
 
     try:
-        add_plasticity_scores_to_csv(csv_path, metric_for_sauce='accuracy')
+        add_plasticity_scores_to_csv(csv_path)
         logging.info(f"Plasticity scores added to {csv_path}")
     except Exception as e:
         logging.warning(f"Failed to compute plasticity scores: {e}")

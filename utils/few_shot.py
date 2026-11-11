@@ -12,6 +12,8 @@ via gradient descent, then evaluate it, while preserving the original model stat
 
 import copy
 import logging
+import os
+from pathlib import Path
 from typing import List, Optional, Tuple, Union
 import torch
 import numpy as np
@@ -23,56 +25,92 @@ from datasets.utils.continual_dataset import ContinualDataset
 from models.utils.continual_model import ContinualModel
 
 
-def create_k_shot_eval_dataset(dataset: ContinualDataset, task_id: int) -> ContinualDataset:
+def _snapshot_dataset_state(dataset: ContinualDataset) -> ContinualDataset:
     """
-    Create a fresh dataset instance for k-shot evaluation for the specified task.
-
-    This function also caches per-task fresh datasets so that repeated calls
-    for different k values do not reload the dataset repeatedly.
+    Shallow-copy a dataset together with its own containers (lists/dicts/sets), so that
+    advancing the original with further get_data_loaders() calls leaves the snapshot in
+    the state it was copied in. The (large) data arrays and the loaders are shared.
     """
-    if not hasattr(dataset, '_k_shot_eval_cache'):
-        dataset._k_shot_eval_cache = {}
+    snapshot = copy.copy(dataset)
+    for name, value in vars(dataset).items():
+        if isinstance(value, (list, dict, set)):
+            setattr(snapshot, name, copy.copy(value))
+    return snapshot
 
-    if task_id in dataset._k_shot_eval_cache:
-        return dataset._k_shot_eval_cache[task_id]
 
+def _build_k_shot_eval_datasets(dataset: ContinualDataset) -> dict:
+    """
+    Build the k-shot evaluation dataset of every task in a single pass over the task sequence.
+
+    A fresh dataset is advanced one task at a time; after the i-th get_data_loaders() call
+    (which yields task i, verified for both class-IL and domain-IL) its state is snapshotted
+    as the evaluation dataset of task i, and that task's training examples are collected.
+    This costs N_TASKS get_data_loaders() calls in total, instead of rebuilding the dataset
+    from scratch for every task (which is quadratic in the number of tasks and dominated
+    evaluation time).
+
+    Each returned dataset also carries all training examples across tasks, together with the
+    task each example belongs to. The latter is essential for domain-IL datasets (e.g.
+    smooth-rot-mnist), where every task shares the same classes and only the input
+    distribution (e.g. rotation) changes: class-based sampling alone would draw examples
+    from arbitrary tasks/domains, so sampling must be restricted to the requested task.
+    """
     from datasets import get_dataset_class
     dataset_args = dataset.args
-    dataset_class = get_dataset_class(dataset_args)
+    builder = get_dataset_class(dataset_args)(dataset_args)
 
-    # Create a fresh dataset for evaluation and advance it to the requested task
-    task_dataset = dataset_class(dataset_args)
-    for _ in range(task_id + 1):
-        task_dataset.get_data_loaders()
-
-    # Create a second fresh dataset to collect all training examples across tasks.
-    # We also record which task each example belongs to. This is essential for
-    # domain-IL datasets (e.g. smooth-rot-mnist), where every task shares the same
-    # classes and only the input distribution (e.g. rotation) changes: class-based
-    # sampling alone would draw examples from arbitrary tasks/domains, so we must
-    # restrict sampling to the requested task's examples. The i-th call to
-    # get_data_loaders() yields task i (verified for both class-IL and domain-IL).
-    collect_dataset = dataset_class(dataset_args)
+    task_datasets = {}
     all_data = []
     all_targets = []
     all_task_ids = []
-    for collected_task_id in range(collect_dataset.N_TASKS):
-        train_loader, _ = collect_dataset.get_data_loaders()
+    for task_id in range(builder.N_TASKS):
+        train_loader, _ = builder.get_data_loaders()
+        task_datasets[task_id] = _snapshot_dataset_state(builder)
         wrapped_dataset = train_loader.dataset
         if hasattr(wrapped_dataset, 'data'):
             chunk = wrapped_dataset.data.copy() if isinstance(wrapped_dataset.data, np.ndarray) else np.array(wrapped_dataset.data)
             all_data.append(chunk)
             all_targets.extend(list(wrapped_dataset.targets))
-            all_task_ids.extend([collected_task_id] * len(chunk))
+            all_task_ids.extend([task_id] * len(chunk))
 
     if not all_data:
-        raise RuntimeError(f"Could not collect any training data for task {task_id}")
+        raise RuntimeError("Could not collect any training data for k-shot evaluation")
 
-    task_dataset._k_shot_all_data = np.vstack(all_data)
-    task_dataset._k_shot_all_targets = np.array(all_targets)
-    task_dataset._k_shot_all_task_ids = np.array(all_task_ids)
-    dataset._k_shot_eval_cache[task_id] = task_dataset
-    return task_dataset
+    # Image datasets store pixel arrays (N,H,W[,C]) -> vstack; path-based datasets
+    # (e.g. seq-imagenet-r) store 1-D arrays of file paths -> concatenate.
+    all_data = np.concatenate(all_data) if all_data[0].ndim == 1 else np.vstack(all_data)
+    all_targets = np.array(all_targets)
+    all_task_ids = np.array(all_task_ids)
+
+    for task_dataset in task_datasets.values():
+        task_dataset._k_shot_all_data = all_data
+        task_dataset._k_shot_all_targets = all_targets
+        task_dataset._k_shot_all_task_ids = all_task_ids
+
+        # Some datasets expose train examples that were deliberately EXCLUDED from
+        # training (e.g. seq-imagenet-r with IMAGENET_R_TRAIN_CAP): unseen by every
+        # checkpoint, they are the preferred k-shot support source, freeing the whole
+        # test set for evaluation. The arrays cover all classes; per-task filtering
+        # happens at sampling time via get_offsets.
+        if hasattr(wrapped_dataset, 'heldout_data'):
+            task_dataset._k_shot_heldout_data = np.asarray(wrapped_dataset.heldout_data)
+            task_dataset._k_shot_heldout_targets = np.asarray(wrapped_dataset.heldout_targets)
+
+    return task_datasets
+
+
+def create_k_shot_eval_dataset(dataset: ContinualDataset, task_id: int) -> ContinualDataset:
+    """
+    Return a dataset instance for k-shot evaluation, advanced to the specified task.
+
+    The per-task datasets of the whole sequence are built once (see
+    :func:`_build_k_shot_eval_datasets`) and cached on ``dataset``, so repeated calls for
+    different tasks and k values do not reload the dataset.
+    """
+    if not hasattr(dataset, '_k_shot_eval_cache'):
+        dataset._k_shot_eval_cache = _build_k_shot_eval_datasets(dataset)
+
+    return dataset._k_shot_eval_cache[task_id]
 
 
 # Number of each class's held-out TEST examples reserved as the support pool, from
@@ -129,7 +167,10 @@ def get_test_support_query_split(task_dataset: ContinualDataset,
     for class_id in range(start_class, end_class):
         class_indices = np.where(targets == class_id)[0]
         perm = rng.permutation(class_indices)
-        n_support = min(KSHOT_SUPPORT_POOL_SIZE, len(perm))
+        # Cap support at half the class's test examples so that classes with few test
+        # images (e.g. 8 ImageNet-R classes have <=10) still contribute to the query
+        # set instead of being silently excluded from evaluation.
+        n_support = min(KSHOT_SUPPORT_POOL_SIZE, len(perm) // 2)
         support_pool[class_id] = perm[:n_support]  # reserved for support, already shuffled
         query_pool.extend(perm[n_support:].tolist())  # everything else -> evaluation
 
@@ -183,7 +224,27 @@ def create_k_shot_loader(dataset: ContinualDataset,
     logging.info(f"Sampling for task {task_id}, classes {start_class}-{end_class - 1} "
                  f"(source={'test-support' if from_test_split else 'train'}): {task_classes}")
 
-    if from_test_split:
+    if from_test_split and hasattr(dataset, '_k_shot_heldout_data'):
+        # Preferred source: train examples deliberately EXCLUDED from training (e.g.
+        # via IMAGENET_R_TRAIN_CAP). Unseen by the checkpoint, and their use leaves
+        # the entire test set for evaluation. Deterministic shuffle + prefix keeps
+        # draws nested across k, mirroring the other support sources.
+        source_data = dataset._k_shot_heldout_data
+        source_targets = dataset._k_shot_heldout_targets
+        logging.info(f"Task {task_id}: sampling k-shot support from held-out (excluded-from-train) pool "
+                     f"({len(source_targets)} examples total)")
+
+        rng = np.random.RandomState(sampling_seed)
+        sampled_indices = []
+        for class_id in task_classes:
+            class_indices = rng.permutation(np.where(source_targets == class_id)[0])
+            pool = class_indices[:KSHOT_SUPPORT_POOL_SIZE]
+            num_to_sample = min(num_samples_per_class, len(pool))
+            if num_to_sample < num_samples_per_class:
+                logging.warning(f"Task {task_id} class {class_id}: held-out pool has only {len(pool)} "
+                                f"examples, requested {num_samples_per_class}")
+            sampled_indices.extend(pool[:num_to_sample].tolist())
+    elif from_test_split:
         # Draw support from the held-out test split's support pool (disjoint from the
         # query pool used for evaluation), restricted to this task's own test data.
         support_pool, _ = get_test_support_query_split(dataset, task_id, sampling_seed)
@@ -241,6 +302,12 @@ def create_k_shot_loader(dataset: ContinualDataset,
             img = self.data[idx]
             target = self.targets[idx]
 
+            # Path-based datasets (e.g. seq-imagenet-r) store file paths; load to an
+            # array so the transform pipeline (which starts with ToPILImage) works.
+            from_path = isinstance(img, (str, np.str_))
+            if from_path:
+                img = np.array(Image.open(img).convert('RGB'))
+
             if self.transform:
                 img_aug = self.transform(img)
             else:
@@ -248,9 +315,18 @@ def create_k_shot_loader(dataset: ContinualDataset,
                 img_aug = transforms.ToTensor()(pil_img)
 
             pil_img = Image.fromarray(img.astype(np.uint8))
-            img_noaug = transforms.Compose([
-                transforms.ToTensor(),
-            ])(pil_img)
+            if from_path:
+                # Variable-size source images: resize the not-aug copy to the augmented
+                # size so the DataLoader can collate the batch.
+                size = img_aug.shape[-2:] if hasattr(img_aug, 'shape') else (224, 224)
+                img_noaug = transforms.Compose([
+                    transforms.Resize(tuple(size)),
+                    transforms.ToTensor(),
+                ])(pil_img)
+            else:
+                img_noaug = transforms.Compose([
+                    transforms.ToTensor(),
+                ])(pil_img)
 
             return img_aug, target, img_noaug
 
@@ -458,6 +534,45 @@ def adapt_model(model: ContinualModel,
     return adapted_model
 
 
+def _cached_test_loader(task_dataset: ContinualDataset, task_id: int, batch_size: int = 32) -> DataLoader:
+    """
+    A DataLoader over the task's test set with all transforms pre-applied, cached
+    in-process (reused across k values) and on disk (reused across the parallel
+    per-checkpoint eval processes). Valid because test transforms are deterministic.
+    Falls back to the live loader if materialization fails.
+    """
+    cache = task_dataset.__dict__.setdefault('_k_shot_test_tensor_cache', {})
+    if task_id in cache:
+        return cache[task_id]
+
+    live_loader = task_dataset.test_loaders[task_id]
+    cache_dir = Path('data') / 'eval_tensor_cache'
+    cache_file = cache_dir / f'{task_dataset.NAME}_task{task_id}_test.pt'
+
+    try:
+        if cache_file.exists():
+            blob = torch.load(cache_file, weights_only=True)
+            xs, ys = blob['x'], blob['y']
+        else:
+            xs, ys = [], []
+            for batch in live_loader:
+                xs.append(batch[0].cpu())
+                ys.append(batch[1].cpu())
+            xs, ys = torch.cat(xs), torch.cat(ys)
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            tmp = cache_file.with_suffix(f'.tmp{os.getpid()}')
+            torch.save({'x': xs, 'y': ys}, tmp)
+            tmp.replace(cache_file)  # atomic: concurrent writers just overwrite equally
+        loader = DataLoader(torch.utils.data.TensorDataset(xs, ys),
+                            batch_size=batch_size, shuffle=False, num_workers=0)
+    except Exception as e:
+        logging.warning(f"test tensor cache failed for task {task_id} ({e}); using live loader")
+        loader = live_loader
+
+    cache[task_id] = loader
+    return loader
+
+
 def evaluate_adapted_model(model: ContinualModel,
                           dataset: ContinualDataset,
                           task_id: int,
@@ -490,7 +605,16 @@ def evaluate_adapted_model(model: ContinualModel,
     task_dataset = create_k_shot_eval_dataset(dataset, task_id)
 
     original_test_loaders = task_dataset.test_loaders
-    if from_test_split:
+    if from_test_split and hasattr(task_dataset, '_k_shot_heldout_data'):
+        # Support came from the held-out (excluded-from-train) pool, so the test set
+        # contains no support examples and can be used for evaluation in full.
+        # Materialize the transformed test tensors once per task and reuse them across
+        # every k value (and across checkpoint processes, via a disk cache): the test
+        # transform is deterministic, and repeated per-round PIL preprocessing of the
+        # full test set dominates eval wall-time on a CPU-loaded machine.
+        logging.info(f"Task {task_id}: support is held-out train data; evaluating on the full test set")
+        task_dataset.test_loaders = [_cached_test_loader(task_dataset, task_id, batch_size)]
+    elif from_test_split:
         # Evaluate only on the query pool (disjoint from any k-shot support example).
         _, query_pool = get_test_support_query_split(task_dataset, task_id, sampling_seed)
         test_ds = task_dataset.test_loaders[task_id].dataset

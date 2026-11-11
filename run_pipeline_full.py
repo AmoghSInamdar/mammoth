@@ -134,6 +134,9 @@ def run_evaluation(
         args.num_adapt_steps = num_adapt_steps
         args.layer_min = layer_min
         args.max_subprocesses = max_subprocesses
+        # run_all reads this flag; the pipeline always adapts in batches of 32
+        # (use run_k_shot_evaluation.py --kshot_full_batch for single-batch adaptation)
+        args.kshot_full_batch = False
         args.checkpoint_dir = Path('checkpoints')
         args.output_dir = get_output_dir(layer_min)
         args.adapt_settings_file = Path(__file__).resolve().parent / 'k_shot_adapt_settings.json'
@@ -156,19 +159,16 @@ def run_evaluation(
         raise
 
 
-def compute_plasticity(metric: str = 'loss', dataset: Optional[str] = None,
-                       layer_min: int = 0) -> None:
-    """Compute plasticity metrics on evaluation results.
+def compute_plasticity(dataset: Optional[str] = None, layer_min: int = 0) -> None:
+    """Compute plasticity metrics (from both accuracy and loss) on evaluation results.
 
     Args:
-        metric: Metric to use for SAUCE computation ('accuracy' or 'loss')
         dataset: Optional dataset name to filter results
         layer_min: Selects which results directory to read (see get_output_dir)
     """
     try:
         logging.info("Computing plasticity metrics...")
-        add_plasticity_scores_to_all_csvs(results_dir=get_output_dir(layer_min),
-                                          metric_for_sauce=metric, dataset=dataset)
+        add_plasticity_scores_to_all_csvs(results_dir=get_output_dir(layer_min), dataset=dataset)
         logging.info("Plasticity metrics computed successfully")
     except Exception as e:
         logging.error(f"Plasticity computation failed: {e}")
@@ -235,7 +235,6 @@ def run_pipeline(
     max_subprocesses: int = 10,
     # Plotting args
     plot_metric: str = 'accuracy',
-    plasticity_metric: str = 'loss',
     # Additional model args (passed via **kwargs)
     **kwargs
 ) -> None:
@@ -259,7 +258,6 @@ def run_pipeline(
         layer_min: Minimum weight-layer index to adapt (0 = whole network)
         max_subprocesses: Max concurrent GPU evaluations
         plot_metric: Metric to plot
-        plasticity_metric: Metric for plasticity computation
         **kwargs: Additional model-specific arguments
     """
     setup_logging()
@@ -305,7 +303,7 @@ def run_pipeline(
             
             # Compute plasticity
             logger.info(f"Step 2b/3: Computing plasticity metrics")
-            compute_plasticity(metric=plasticity_metric, dataset=dataset, layer_min=layer_min)
+            compute_plasticity(dataset=dataset, layer_min=layer_min)
             logger.info("✓ Plasticity computation completed")
         else:
             logger.info("Step 2/3: Skipping evaluation")
@@ -385,9 +383,6 @@ def main() -> None:
     parser.add_argument('--plot_metric', type=str, default='accuracy',
                         choices=['accuracy', 'loss'],
                         help='Metric to plot')
-    parser.add_argument('--plasticity_metric', type=str, default='loss',
-                        choices=['accuracy', 'loss'],
-                        help='Metric for plasticity computation')
     
     # Parse known args and capture any additional model-specific arguments
     args, unknown_args = parser.parse_known_args()
@@ -440,7 +435,6 @@ def main() -> None:
         layer_min=args.layer_min,
         max_subprocesses=args.max_subprocesses,
         plot_metric=args.plot_metric,
-        plasticity_metric=args.plasticity_metric,
         **kwargs
     )
 

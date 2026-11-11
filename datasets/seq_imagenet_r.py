@@ -77,6 +77,31 @@ class MyImagenetR(Dataset):
         self.data = np.array(data_config['data'])
         self.targets = np.array(data_config['targets'])
 
+        # Optional per-class cap on TRAIN images to speed up training (ImageNet-R
+        # averages 120 imgs/class, range 38-354). Set e.g. IMAGENET_R_TRAIN_CAP=60
+        # to halve the training set; deterministic (seeded) so all methods train on
+        # the same subsample. The EXCLUDED images are kept as `heldout_data`/
+        # `heldout_targets`: they are unseen by any checkpoint and serve as the
+        # k-shot support source (utils/few_shot.py prefers them over the test split,
+        # which then stays fully available for evaluation). Every class reserves at
+        # least HELDOUT_RESERVE images for support, even if it is below the cap.
+        HELDOUT_RESERVE = 10
+        cap = int(os.environ.get('IMAGENET_R_TRAIN_CAP', 0))
+        if self.train and cap > 0:
+            rng = np.random.RandomState(42)
+            keep, heldout = [], []
+            for cls in np.unique(self.targets):
+                idx = rng.permutation(np.where(self.targets == cls)[0])
+                n_keep = min(cap, max(len(idx) - HELDOUT_RESERVE, 1))
+                keep.extend(idx[:n_keep].tolist())
+                heldout.extend(idx[n_keep:].tolist())
+            keep, heldout = np.sort(keep), np.sort(heldout)
+            self.heldout_data = self.data[heldout]
+            self.heldout_targets = self.targets[heldout]
+            self.data, self.targets = self.data[keep], self.targets[keep]
+            logging.info(f"ImageNet-R train capped at {cap}/class: {len(self.targets)} train, "
+                         f"{len(self.heldout_targets)} held-out (k-shot support source)")
+
     def __len__(self):
         return len(self.targets)
 

@@ -133,10 +133,15 @@ def run_checkpoint_evaluation(
     layer_min: Optional[int],
     output_dir: Path,
     gpu_id: str,
+    kshot_full_batch: bool = False,
 ) -> Path:
     """Run eval_checkpoints.py for a single checkpoint on a specific GPU."""
     env = os.environ.copy()
     env['CUDA_VISIBLE_DEVICES'] = gpu_id
+    # Cap CPU threads: many parallel eval processes each defaulting to all cores
+    # oversubscribes the machine and starves the GPUs (image preprocessing bound).
+    for var in ('OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS'):
+        env.setdefault(var, '4')
     output_dir.mkdir(parents=True, exist_ok=True)
 
     command = [
@@ -161,12 +166,14 @@ def run_checkpoint_evaluation(
         '--output_dir',
         str(output_dir),
     ]
+    if kshot_full_batch:
+        command.append('--kshot_full_batch')
 
     checkpoint_name = Path(checkpoint_path).stem
     print(
         f"Evaluating checkpoint={checkpoint_name}, model={model}, dataset={dataset}, "
         f"gpu={gpu_id}, k_values={k_values_csv}, adapt_lr={adapt_lr}, num_adapt_steps={num_adapt_steps}, "
-        f"layer_min={layer_min}"
+        f"layer_min={layer_min}, kshot_full_batch={kshot_full_batch}"
     )
     subprocess.run(command, check=True, env=env)
     return output_dir / f"evaluation_results_{checkpoint_name}.csv"
@@ -202,6 +209,7 @@ def evaluate_checkpoints_for_k(
     adapt_settings: Dict[str, Any],
     output_dir: Path = OUTPUT_DIR,
     max_subprocesses: int = 10,
+    kshot_full_batch: bool = False,
 ) -> None:
     """Evaluate the matching checkpoints for a model/dataset over all requested k values.
 
@@ -221,7 +229,8 @@ def evaluate_checkpoints_for_k(
     tasks = []
     for idx, checkpoint_path in enumerate(checkpoint_paths):
         gpu_id = gpus[idx % len(gpus)]
-        temp_dir = TEMP_OUTPUT_DIR / model / dataset / Path(checkpoint_path).stem
+        # keyed by the output directory so that concurrent runs writing to different directories cannot collide
+        temp_dir = TEMP_OUTPUT_DIR / output_dir.name / model / dataset / Path(checkpoint_path).stem
         tasks.append((checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id))
 
     pool_map = []
@@ -231,7 +240,8 @@ def evaluate_checkpoints_for_k(
             checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id = task
             pool_map.append(pools[gpu_id].apply_async(
                 run_checkpoint_evaluation,
-                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id)
+                args=(checkpoint_path, model, dataset, k_values_csv, adapt_lr, num_adapt_steps, layer_min, temp_dir, gpu_id,
+                      kshot_full_batch)
             ))
 
         for pool in pools.values():
@@ -284,7 +294,18 @@ def parse_args() -> argparse.Namespace:
                              f'(defaults to {OUTPUT_DIR}, suffixed with _<layer_min> when layer_min > 0)')
     parser.add_argument('--adapt_settings_file', type=str, default=str(ADAPT_SETTINGS_FILE),
                         help='Path to the JSON file containing model-specific adaptation settings')
+    parser.add_argument('--kshot_full_batch', action='store_true',
+                        help='Adapt on the whole k-shot support set as one batch (one gradient update per adaptation '
+                             'step for every k) instead of batches of 32; see eval_checkpoints.py')
+    parser.add_argument('--meta_method', type=str, default=None, choices=['no_meta', 'reptile', 'maml'],
+                        help=f'For meta-CL models: evaluate only checkpoints of this meta method (default: {META_CL_METHODS})')
+    parser.add_argument('--meta_strategy', type=str, default=None, choices=['parallel', 'sequential'],
+                        help=f'For meta-CL models: evaluate only checkpoints of this strategy (default: {META_CL_STRATEGIES})')
     args = parser.parse_args()
+    # run_all falls back to the module defaults when these attributes are absent
+    for attr in ['meta_method', 'meta_strategy']:
+        if getattr(args, attr) is None:
+            delattr(args, attr)
 
     if args.models:
         args.models = [model.strip() for model in args.models.split(',') if model.strip()]
@@ -325,6 +346,7 @@ def run_all(args: argparse.Namespace) -> None:
                             model_settings,
                             output_dir=args.output_dir,
                             max_subprocesses=args.max_subprocesses,
+                            kshot_full_batch=args.kshot_full_batch,
                         )
             else:
                 checkpoint_paths = get_checkpoint_names(model, dataset, checkpoint_dir=args.checkpoint_dir)
@@ -336,6 +358,7 @@ def run_all(args: argparse.Namespace) -> None:
                     model_settings,
                     output_dir=args.output_dir,
                     max_subprocesses=args.max_subprocesses,
+                    kshot_full_batch=args.kshot_full_batch,
                 )
 
 

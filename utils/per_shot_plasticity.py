@@ -12,6 +12,16 @@ import torch
 
 RESULTS_DIR = Path('results/k_shot_evaluation')
 
+# Plasticity scores are stored once per metric they are computed from, as <score>_<metric> columns
+# (e.g. 'SAUCE_accuracy', 'SAUCE_loss'), so that a CSV never carries an ambiguous 'SAUCE' column.
+PLASTICITY_METRICS = ('accuracy', 'loss')
+PLASTICITY_SCORES = ('AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE')
+
+
+def plasticity_column(score: str, metric: str) -> str:
+    """Column name of a plasticity score computed from `metric`, e.g. plasticity_column('SAUCE', 'loss') -> 'SAUCE_loss'."""
+    return f'{score}_{metric}'
+
 
 # AUAC, SAUCE, Clipped-(S)AUAC
 def compute_plasticity_score(
@@ -121,47 +131,43 @@ def compute_per_shot_plasticity_all_variants_csv(
     return auac, clipped_auac, sauce, clipped_sauce
 
 
-def add_plasticity_scores_to_csv(csv_path: Path, metric_for_sauce: str = 'accuracy') -> None:
+def add_plasticity_scores_to_csv(csv_path: Path, metrics: Tuple[str, ...] = PLASTICITY_METRICS) -> None:
     """
     Compute per-shot plasticity scores for all groups in a CSV and save the modified file.
 
-    For each unique (checkpoint_id, eval_task_id) group, computes four plasticity
-    variants and adds them as new columns. The same score is repeated for all
-    k values within a group since plasticity is defined per checkpoint/task.
+    For each unique (checkpoint_id, eval_task_id) group, computes the four plasticity
+    variants from each metric in `metrics` and stores them as <score>_<metric> columns
+    (see plasticity_column). The same score is repeated for all k values within a group
+    since plasticity is defined per checkpoint/task. Legacy unsuffixed score columns,
+    whose metric depended on which pipeline wrote them last, are dropped.
 
     Args:
         csv_path: Path to the evaluation results CSV file
-        metric_for_sauce: Metric to compute plasticity scores from
+        metrics: Metrics to compute plasticity scores from (default: accuracy and loss)
     """
     # Load CSV
     df = pd.read_csv(csv_path)
+    df = df.drop(columns=[score for score in PLASTICITY_SCORES if score in df.columns])
 
-    # Initialize new columns for the four plasticity variants
-    df['AUAC'] = 0.0
-    df['Clipped_AUAC'] = 0.0
-    df['SAUCE'] = 0.0
-    df['Clipped_SAUCE'] = 0.0
+    groups = df.groupby(['checkpoint_id', 'eval_task_id']).groups.items()
+    for metric in metrics:
+        columns = [plasticity_column(score, metric) for score in PLASTICITY_SCORES]
+        for column in columns:
+            df[column] = 0.0
 
-    # Compute plasticity for each (checkpoint_id, eval_task_id) group
-    for (ckpt_id, task_id), group_indices in df.groupby(['checkpoint_id', 'eval_task_id']).groups.items():
-        df_group = df.loc[group_indices]
-        auac, clipped_auac, sauce, clipped_sauce = compute_per_shot_plasticity_all_variants_csv(
-            df_group, metric_for_sauce=metric_for_sauce)
-
-        # Set plasticity scores for all rows in this group
-        df.loc[group_indices, 'AUAC'] = auac
-        df.loc[group_indices, 'Clipped_AUAC'] = clipped_auac
-        df.loc[group_indices, 'SAUCE'] = sauce
-        df.loc[group_indices, 'Clipped_SAUCE'] = clipped_sauce
+        # Compute plasticity for each (checkpoint_id, eval_task_id) group
+        for (ckpt_id, task_id), group_indices in groups:
+            scores = compute_per_shot_plasticity_all_variants_csv(df.loc[group_indices], metric_for_sauce=metric)
+            # Set plasticity scores for all rows in this group
+            df.loc[group_indices, columns] = list(scores)
 
     # Save modified CSV
     df.to_csv(csv_path, index=False)
-    print(f"Plasticity scores added to {csv_path}")
+    print(f"Plasticity scores ({', '.join(metrics)}) added to {csv_path}")
 
 
 def add_plasticity_scores_to_all_csvs(
-    results_dir: Path = RESULTS_DIR, 
-    metric_for_sauce: str = 'accuracy',
+    results_dir: Path = RESULTS_DIR,
     dataset: Optional[str] = None
 ) -> None:
     """
@@ -171,7 +177,6 @@ def add_plasticity_scores_to_all_csvs(
 
     Args:
         results_dir: Directory containing evaluation result CSV files
-        metric_for_sauce: Metric to compute plasticity scores from
         dataset: If specified, only process CSV files containing this dataset name
     """
     if not results_dir.exists():
@@ -194,7 +199,7 @@ def add_plasticity_scores_to_all_csvs(
     for csv_path in csv_files:
         try:
             print(f"Processing {csv_path.name}...", end=' ')
-            add_plasticity_scores_to_csv(csv_path, metric_for_sauce=metric_for_sauce)
+            add_plasticity_scores_to_csv(csv_path)
         except Exception as e:
             print(f"SKIPPED ({type(e).__name__}: {e})")
 
@@ -204,21 +209,21 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Add per-shot plasticity scores to evaluation results CSV')
     parser.add_argument('csv_file', type=str, nargs='?', help='Path to evaluation results CSV file')
-    parser.add_argument('--metric', type=str, choices=['accuracy', 'loss'], default='accuracy',
-                        help='Metric to compute plasticity scores from (default: accuracy)')
     parser.add_argument('--process-all', action='store_true',
-                        help='Process all CSV files in RESULTS_DIR instead of a single file')
+                        help='Process all CSV files in --results-dir instead of a single file')
+    parser.add_argument('--results-dir', type=str, default=str(RESULTS_DIR),
+                        help=f'Results directory for --process-all (default: {RESULTS_DIR})')
     parser.add_argument('--dataset', type=str, default=None,
                         help='Dataset name to filter results (e.g., seq-cifar100)')
     args = parser.parse_args()
 
     if args.process_all:
-        add_plasticity_scores_to_all_csvs(metric_for_sauce=args.metric, dataset=args.dataset)
+        add_plasticity_scores_to_all_csvs(results_dir=Path(args.results_dir), dataset=args.dataset)
     elif args.csv_file:
         csv_path = Path(args.csv_file)
         if not csv_path.exists():
             print(f"Error: CSV file {csv_path} does not exist")
             exit(1)
-        add_plasticity_scores_to_csv(csv_path, metric_for_sauce=args.metric)
+        add_plasticity_scores_to_csv(csv_path)
     else:
         parser.error("Either provide a CSV file or use --process-all")

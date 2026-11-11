@@ -18,6 +18,10 @@ import numpy as np
 import pandas as pd
 
 from utils.eval_paths import RESULTS_DIR, PLOTS_DIR, get_output_dir, get_plots_dir  # noqa: F401
+from utils.per_shot_plasticity import PLASTICITY_SCORES, plasticity_column
+
+# The diagnostic plasticity plots show the accuracy-based scores (each score is also stored from loss)
+PLASTICITY_COLUMNS = [plasticity_column(score, 'accuracy') for score in PLASTICITY_SCORES]
 
 
 def load_evaluation_results(csv_path: Path) -> pd.DataFrame:
@@ -124,14 +128,14 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     results['checkpoint_num'] = results['checkpoint_id'].apply(extract_checkpoint_num)
 
     # Overall average
-    avg_plasticity_overall = results.groupby('checkpoint_id')[['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']].mean().reset_index()
+    avg_plasticity_overall = results.groupby('checkpoint_id')[PLASTICITY_COLUMNS].mean().reset_index()
     avg_plasticity_overall['checkpoint_num'] = avg_plasticity_overall['checkpoint_id'].apply(extract_checkpoint_num)
     avg_plasticity_overall = avg_plasticity_overall.sort_values('checkpoint_num')
 
     # Forward plasticity: eval_task_id > checkpoint_num
     forward_results = results[results['eval_task_id'] > results['checkpoint_num']]
     if not forward_results.empty:
-        avg_plasticity_forward = forward_results.groupby('checkpoint_id')[['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']].mean().reset_index()
+        avg_plasticity_forward = forward_results.groupby('checkpoint_id')[PLASTICITY_COLUMNS].mean().reset_index()
         avg_plasticity_forward['checkpoint_num'] = avg_plasticity_forward['checkpoint_id'].apply(extract_checkpoint_num)
         avg_plasticity_forward = avg_plasticity_forward.sort_values('checkpoint_num')
     else:
@@ -140,7 +144,7 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     # Backward plasticity: eval_task_id < checkpoint_num
     backward_results = results[results['eval_task_id'] < results['checkpoint_num']]
     if not backward_results.empty:
-        avg_plasticity_backward = backward_results.groupby('checkpoint_id')[['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']].mean().reset_index()
+        avg_plasticity_backward = backward_results.groupby('checkpoint_id')[PLASTICITY_COLUMNS].mean().reset_index()
         avg_plasticity_backward['checkpoint_num'] = avg_plasticity_backward['checkpoint_id'].apply(extract_checkpoint_num)
         avg_plasticity_backward = avg_plasticity_backward.sort_values('checkpoint_num')
     else:
@@ -152,16 +156,16 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
 
     # Plot overall
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    ax1.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall['AUAC'], marker='o', label='AUAC')
-    ax1.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall['Clipped_AUAC'], marker='s', label='Clipped_AUAC')
+    ax1.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall[plasticity_column('AUAC', 'accuracy')], marker='o', label='AUAC')
+    ax1.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall[plasticity_column('Clipped_AUAC', 'accuracy')], marker='s', label='Clipped_AUAC')
     ax1.set_xlabel('Checkpoint Number')
     ax1.set_ylabel('Average Plasticity Score')
     ax1.set_title(f'AUAC Metrics for {model} (Overall)')
     ax1.set_yscale('log')
     ax1.legend()
     ax1.grid(True)
-    ax2.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall['SAUCE'], marker='o', label='SAUCE')
-    ax2.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall['Clipped_SAUCE'], marker='s', label='Clipped_SAUCE')
+    ax2.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall[plasticity_column('SAUCE', 'accuracy')], marker='o', label='SAUCE')
+    ax2.plot(avg_plasticity_overall['checkpoint_num'], avg_plasticity_overall[plasticity_column('Clipped_SAUCE', 'accuracy')], marker='s', label='Clipped_SAUCE')
     ax2.set_xlabel('Checkpoint Number')
     ax2.set_ylabel('Average Plasticity Score')
     ax2.set_title(f'SAUCE Metrics for {model} (Overall)')
@@ -176,16 +180,16 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     # Plot forward
     if avg_plasticity_forward is not None:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-        ax1.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward['AUAC'], marker='o', label='AUAC')
-        ax1.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward['Clipped_AUAC'], marker='s', label='Clipped_AUAC')
+        ax1.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward[plasticity_column('AUAC', 'accuracy')], marker='o', label='AUAC')
+        ax1.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward[plasticity_column('Clipped_AUAC', 'accuracy')], marker='s', label='Clipped_AUAC')
         ax1.set_xlabel('Checkpoint Number')
         ax1.set_ylabel('Average Plasticity Score')
         ax1.set_title(f'AUAC Metrics for {model} (Forward)')
         ax1.set_yscale('log')
         ax1.legend()
         ax1.grid(True)
-        ax2.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward['SAUCE'], marker='o', label='SAUCE')
-        ax2.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward['Clipped_SAUCE'], marker='s', label='Clipped_SAUCE')
+        ax2.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward[plasticity_column('SAUCE', 'accuracy')], marker='o', label='SAUCE')
+        ax2.plot(avg_plasticity_forward['checkpoint_num'], avg_plasticity_forward[plasticity_column('Clipped_SAUCE', 'accuracy')], marker='s', label='Clipped_SAUCE')
         ax2.set_xlabel('Checkpoint Number')
         ax2.set_ylabel('Average Plasticity Score')
         ax2.set_title(f'SAUCE Metrics for {model} (Forward)')
@@ -202,16 +206,16 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
     # Plot backward
     if avg_plasticity_backward is not None:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-        ax1.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward['AUAC'], marker='o', label='AUAC')
-        ax1.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward['Clipped_AUAC'], marker='s', label='Clipped_AUAC')
+        ax1.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward[plasticity_column('AUAC', 'accuracy')], marker='o', label='AUAC')
+        ax1.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward[plasticity_column('Clipped_AUAC', 'accuracy')], marker='s', label='Clipped_AUAC')
         ax1.set_xlabel('Checkpoint Number')
         ax1.set_ylabel('Average Plasticity Score')
         ax1.set_title(f'AUAC Metrics for {model} (Backward)')
         ax1.set_yscale('log')
         ax1.legend()
         ax1.grid(True)
-        ax2.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward['SAUCE'], marker='o', label='SAUCE')
-        ax2.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward['Clipped_SAUCE'], marker='s', label='Clipped_SAUCE')
+        ax2.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward[plasticity_column('SAUCE', 'accuracy')], marker='o', label='SAUCE')
+        ax2.plot(avg_plasticity_backward['checkpoint_num'], avg_plasticity_backward[plasticity_column('Clipped_SAUCE', 'accuracy')], marker='s', label='Clipped_SAUCE')
         ax2.set_xlabel('Checkpoint Number')
         ax2.set_ylabel('Average Plasticity Score')
         ax2.set_title(f'SAUCE Metrics for {model} (Backward)')
@@ -227,12 +231,14 @@ def plot_plasticity_scores(model: str, results_dir: Path = RESULTS_DIR, metric: 
 
 
 def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Optional[str] = None,
-                                plots_dir: Path = PLOTS_DIR) -> None:
+                                plots_dir: Path = PLOTS_DIR, include_meta: bool = False) -> None:
     """Plot forward/backward plasticity comparisons for each metric across all models.
     
     Args:
         results_dir: Directory containing evaluation result CSVs
         dataset: If specified, only plot results for this dataset
+        plots_dir: Directory to save the plots
+        include_meta: Whether to include meta-learning methods
     """
     if not results_dir.exists():
         print(f"Error: Results directory {results_dir} does not exist.")
@@ -249,7 +255,7 @@ def plot_plasticity_comparisons(results_dir: Path = RESULTS_DIR, dataset: Option
             print(f"No CSV files found in {results_dir}")
         return
 
-    metric_names = ['AUAC', 'Clipped_AUAC', 'SAUCE', 'Clipped_SAUCE']
+    metric_names = PLASTICITY_COLUMNS
     direction_labels = {
         'forward': 'Forward',
         'backward': 'Backward',

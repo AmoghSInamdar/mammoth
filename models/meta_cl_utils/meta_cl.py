@@ -42,6 +42,10 @@ class MetaCL(ContinualModel):
                             help='Number of foresight examples for meta-learning per task.')
         parser.add_argument('--sampling_seed', type=int, default=42,
                             help='Seed for sampling foresight examples.')
+        parser.add_argument('--meta_layer_min', type=int, default=0,
+                            help='Only meta-adapt weight layers with index >= this value, freezing everything '
+                                 'earlier during the meta-update (0 = the whole network). Layer indices are '
+                                 'the same as the evaluation --layer_min.')
         return parser
 
     def __init__(self, backbone, loss, args, transform, dataset=None):
@@ -74,11 +78,12 @@ class MetaCL(ContinualModel):
         logging.info("Initializing meta-learning with Reptile strategy.")
         if self.args.meta_strategy == 'parallel':
             adapted_net_list = [adapt_model(
-                self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr).net for dataloader in meta_learning_dataloaders]
+                self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr, layer_min=self.args.meta_layer_min).net for dataloader in meta_learning_dataloaders]
         elif self.args.meta_strategy == 'sequential':
             adapted_model = copy.deepcopy(self)
             for dataloader in meta_learning_dataloaders:
-                adapted_model = adapt_model(adapted_model, dataloader, self.args.num_adapt_steps, self.args.adapt_lr)
+                adapted_model = adapt_model(adapted_model, dataloader, self.args.num_adapt_steps, self.args.adapt_lr,
+                                             layer_min=self.args.meta_layer_min)
             adapted_net_list = [adapted_model.net]
         else:
             raise ValueError(f"Unknown meta strategy: {self.args.meta_strategy}")
@@ -108,7 +113,7 @@ class MetaCL(ContinualModel):
     def initialize_no_meta(self, train_dataloaders):
         logging.info('Initializing by directly training on lookahead task examples.')
         for dataloader in train_dataloaders:
-            adapted_model = adapt_model(self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr)
+            adapted_model = adapt_model(self, dataloader, self.args.num_adapt_steps, self.args.adapt_lr, layer_min=self.args.meta_layer_min)
             self.net.set_params(adapted_model.net.get_params())
         logging.info("Completed initialization without meta-learning.")
 
